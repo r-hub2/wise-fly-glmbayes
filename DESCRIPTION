@@ -9,7 +9,7 @@ License: GPL-2
 URL: https://github.com/knygren/glmbayes,
         https://knygren.r-universe.dev/glmbayes
 BugReports: https://github.com/knygren/glmbayes/issues
-Imports: stats, coda, Rcpp (>= 1.0.4.6), RcppArmadillo, RcppParallel,
+Imports: stats, coda, Rcpp (>= 1.1.1), RcppArmadillo, RcppParallel,
         Rdpack (>= 0.11-0)
 RdMacros: Rdpack
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
@@ -24,6 +24,6 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2026-04-18 17:29:29 UTC; kjell
+Packaged: 2026-04-18 18:57:08 UTC; kjell
 Author: Kjell Nygren [aut, cre]
 Maintainer: Kjell Nygren <kjell.a.nygren@gmail.com>
