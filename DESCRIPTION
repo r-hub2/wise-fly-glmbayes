@@ -24,6 +24,6 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2026-04-18 21:20:29 UTC; kjell
+Packaged: 2026-04-18 21:52:25 UTC; kjell
 Author: Kjell Nygren [aut, cre]
 Maintainer: Kjell Nygren <kjell.a.nygren@gmail.com>

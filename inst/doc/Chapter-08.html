@@ -644,19 +644,19 @@ Zellner‑type g‑prior aligned with the model matrix.</p>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; Posterior Mean Coefficients:</span></span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; (Intercept)     outcome2     outcome3   treatment2   treatment3  </span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;    3.023292    -0.456454    -0.301770     0.004301     0.005624  </span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;    3.035019    -0.464489    -0.298674     0.004788    -0.000350  </span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 5.011278 </span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 10.21069 </span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; DIC: 56.85415</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 4.901444 </span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 10.05749 </span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; DIC: 56.59111</span></span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>    <span class="fu">summary</span>(glmb.D93)</span>
 <span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; Call</span></span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; glmb(formula = counts ~ outcome + treatment, family = poisson(), </span></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;     pfamily = dNormal(mu = mu, Sigma = V))</span></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; Expected Residuals:</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt;         Min          1Q      Median          3Q         Max </span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; -0.91172197 -0.59826855 -0.07446174  0.89628300  1.13206698 </span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt;        Min         1Q     Median         3Q        Max </span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; -0.9306293 -0.6507463 -0.1338182  0.8726165  1.0701203 </span></span>
 <span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; Prior and Maximum Likelihood Estimates with Standard Deviations</span></span>
 <span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -670,44 +670,44 @@ Zellner‑type g‑prior aligned with the model matrix.</p>
 <span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt; Bayesian Estimates Based on 1000 iid draws</span></span>
 <span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt;              Post.Mode  Post.Mean    Post.Sd   MC Error Pr(Null_tail) SE(tail)</span></span>
-<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; (Intercept)  3.042e+00  3.023e+00  1.692e-01  5.349e-03     1.130e-01    0.010</span></span>
-<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; outcome2    -4.497e-01 -4.565e-01  2.094e-01  6.623e-03     1.700e-02    0.004</span></span>
-<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; outcome3    -2.901e-01 -3.018e-01  1.964e-01  6.210e-03     6.200e-02    0.008</span></span>
-<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt; treatment2  -1.395e-05  4.301e-03  1.981e-01  6.263e-03     4.820e-01    0.016</span></span>
-<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt; treatment3   1.209e-06  5.624e-03  2.062e-01  6.521e-03     4.950e-01    0.016</span></span>
-<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)  </span></span>
-<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.113  </span></span>
-<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co">#&gt; outcome2             0.017 *</span></span>
-<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co">#&gt; outcome3             0.062 .</span></span>
-<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co">#&gt; treatment2           0.482  </span></span>
-<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; treatment3           0.495  </span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; (Intercept)  3.042e+00  3.035e+00  1.699e-01  5.372e-03     9.200e-02    0.009</span></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; outcome2    -4.497e-01 -4.645e-01  2.007e-01  6.345e-03     6.000e-03    0.002</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; outcome3    -2.901e-01 -2.987e-01  1.942e-01  6.142e-03     5.700e-02    0.007</span></span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt; treatment2  -1.395e-05  4.788e-03  1.999e-01  6.321e-03     4.960e-01    0.016</span></span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt; treatment3   1.209e-06 -3.500e-04  2.010e-01  6.355e-03     4.900e-01    0.016</span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)   </span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.092 . </span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co">#&gt; outcome2             0.006 **</span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co">#&gt; outcome3             0.057 . </span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co">#&gt; treatment2           0.496   </span></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; treatment3           0.490   </span></span>
 <span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
 <span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
 <span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt;   Directional Tail Summaries:</span></span>
 <span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a><span class="co">#&gt;                Metric vs Null vs Prior</span></span>
-<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co">#&gt;  Mahalanobis Distance  2.3781   2.3781</span></span>
-<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co">#&gt;      Tail Probability  0.0120   0.0120</span></span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co">#&gt;  Mahalanobis Distance  2.4066   2.4066</span></span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co">#&gt;      Tail Probability  0.0080   0.0080</span></span>
 <span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a><span class="co">#&gt;   [Tail probabilities are P(delta^T * Z &lt;= 0) in whitened space]</span></span>
 <span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a><span class="co">#&gt; Distribution Percentiles</span></span>
 <span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a><span class="co">#&gt;                  1.0%      2.5%      5.0%    Median     95.0%     97.5% 99.0%</span></span>
-<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a><span class="co">#&gt; (Intercept)  2.595154  2.698453  2.739919  3.027727  3.287920  3.350750 3.387</span></span>
-<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a><span class="co">#&gt; outcome2    -0.925805 -0.852125 -0.789967 -0.459797 -0.110760 -0.041711 0.066</span></span>
-<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a><span class="co">#&gt; outcome3    -0.755433 -0.680685 -0.631867 -0.307607  0.018929  0.067495 0.140</span></span>
-<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a><span class="co">#&gt; treatment2  -0.454268 -0.381311 -0.305937  0.007327  0.331955  0.397354 0.501</span></span>
-<span id="cb6-62"><a href="#cb6-62" tabindex="-1"></a><span class="co">#&gt; treatment3  -0.449196 -0.387723 -0.337404  0.002596  0.339058  0.410485 0.482</span></span>
+<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a><span class="co">#&gt;                  1.0%      2.5%      5.0%    Median     95.0%     97.5%  99.0%</span></span>
+<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a><span class="co">#&gt; (Intercept)  2.632767  2.700721  2.772724  3.039655  3.309816  3.359270  3.422</span></span>
+<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a><span class="co">#&gt; outcome2    -0.927096 -0.856607 -0.784597 -0.461544 -0.134035 -0.068746 -0.022</span></span>
+<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a><span class="co">#&gt; outcome3    -0.755305 -0.693392 -0.622563 -0.294943  0.027395  0.091038  0.143</span></span>
+<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a><span class="co">#&gt; treatment2  -0.455890 -0.373396 -0.314500  0.001093  0.341582  0.414615  0.472</span></span>
+<span id="cb6-62"><a href="#cb6-62" tabindex="-1"></a><span class="co">#&gt; treatment3  -0.447690 -0.392842 -0.336277  0.003329  0.330928  0.398374  0.472</span></span>
 <span id="cb6-63"><a href="#cb6-63" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 5.011278 </span></span>
-<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 10.21069 </span></span>
-<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a><span class="co">#&gt; DIC: 56.85415 </span></span>
+<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 4.901444 </span></span>
+<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 10.05749 </span></span>
+<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a><span class="co">#&gt; DIC: 56.59111 </span></span>
 <span id="cb6-67"><a href="#cb6-67" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb6-68"><a href="#cb6-68" tabindex="-1"></a><span class="co">#&gt; Expected Mean dispersion: 1 </span></span>
 <span id="cb6-69"><a href="#cb6-69" tabindex="-1"></a><span class="co">#&gt; Sq.root of Expected Mean dispersion: 1 </span></span>
 <span id="cb6-70"><a href="#cb6-70" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb6-71"><a href="#cb6-71" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 1.849</span></span></code></pre></div>
+<span id="cb6-71"><a href="#cb6-71" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 1.845</span></span></code></pre></div>
 <p>The summary includes:</p>
 <ul>
 <li><strong>Posterior means</strong> and <strong>posterior
