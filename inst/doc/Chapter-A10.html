@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A10: Accelerated EnvelopeBuild Implementation using OpenCL</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A10: Accelerated EnvelopeBuild
+Implementation using OpenCL</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span></code></pre></div>
+<div id="chapter-a10-accelerated-envelopebuild-implementation-using-opencl" class="section level1">
+<h1>Chapter A10: Accelerated EnvelopeBuild Implementation using
+OpenCL</h1>
+<div id="introduction" class="section level2">
+<h2>1. Introduction</h2>
+<p>The <code>glmbayes</code> package constructs envelopes for
+accept–reject sampling by evaluating the negative log posterior (f2) and
+its gradient (f3) at each point of a <strong>tangency grid</strong>. The
+grid size grows with dimension (e.g., <span class="math inline">\(3^\ell\)</span> points for <span class="math inline">\(\ell\)</span> coefficients), and each grid point
+can be evaluated independently. These evaluations are
+<strong>embarrassingly parallel</strong> and are a natural target for
+GPU acceleration.</p>
+<p>The optional <strong>OpenCL</strong> implementation accelerates these
+evaluations by running them on a GPU (or OpenCL-capable CPU). OpenCL is
+vendor-neutral and works across NVIDIA, AMD, and Intel hardware. When
+OpenCL is available and <code>use_opencl = TRUE</code>, the package uses
+GPU-accelerated evaluation inside <code>EnvelopeEval</code>, which is
+called by <code>EnvelopeBuild</code> and
+<code>EnvelopeDispersionBuild</code>. If OpenCL is not available or
+<code>use_opencl = FALSE</code>, the CPU path
+(<code>f2_f3_non_opencl</code>) is used instead. The package runs
+correctly in either case.</p>
+<p>This chapter describes the OpenCL implementation: the two-layer
+design (kernel wrapper and kernel runner), how the OpenCL program is
+assembled from ported nmath/rmath functions, and how the pilot and
+safeguards integrate with the envelope build. For installation and
+availability checks, see Chapter 12.</p>
+</div>
+<div id="architecture-overview" class="section level2">
+<h2>2. Architecture Overview</h2>
+<p>The OpenCL path consists of two layers:</p>
+<table>
+<colgroup>
+<col width="21%" />
+<col width="30%" />
+<col width="30%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Layer</th>
+<th>Function</th>
+<th>Location</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Wrapper</strong></td>
+<td><code>f2_f3_opencl</code></td>
+<td><code>kernel_wrappers.cpp</code></td>
+<td>Flatten R inputs, select kernel, load sources, call runner, reshape
+outputs</td>
+</tr>
+<tr class="even">
+<td><strong>Runner</strong></td>
+<td><code>f2_f3_kernel_runner</code></td>
+<td><code>kernel_runners.cpp</code></td>
+<td>Platform/device setup, buffer creation, kernel launch, readback</td>
+</tr>
+</tbody>
+</table>
+<div id="call-path" class="section level3">
+<h3>2.1 Call Path</h3>
+<pre><code>EnvelopeEval (EnvelopeEval.cpp)
+    |-- if use_opencl &amp;&amp; pilot/check passes:
+    |       f2_f3_opencl() -&gt; f2_f3_kernel_runner()
+    \-- else:
+            f2_f3_non_opencl() -&gt; CPU famfuncs (f2_f3_binomial_logit, etc.)</code></pre>
+<p><code>EnvelopeEval</code> receives the grid <code>G4</code>
+(coefficients at each tangency point), the design matrix, prior
+parameters, and family/link. It chooses the GPU or CPU path based on
+<code>use_opencl</code> and the outcome of the pilot (when applicable).
+The GPU path calls <code>f2_f3_opencl</code>, which assembles the OpenCL
+program and invokes <code>f2_f3_kernel_runner</code>; the CPU path calls
+<code>f2_f3_non_opencl</code>, which dispatches to the appropriate C++
+family function.</p>
+</div>
+</div>
+<div id="program-construction" class="section level2">
+<h2>3. Program Construction</h2>
+<p>OpenCL kernels are not stored as single monolithic files. Instead,
+the package builds the program by <strong>concatenating</strong> several
+source components in a fixed order. This mirrors a C/C++ build where
+headers and libraries are included before the main source.</p>
+<div id="assembly-order" class="section level3">
+<h3>3.1 Assembly Order</h3>
+<p>The full program string is:</p>
+<pre><code>all_src = OPENCL.cl
+        + rmath (load_kernel_library(&quot;rmath&quot;))
+        + dpq   (load_kernel_library(&quot;dpq&quot;))
+        + nmath (load_kernel_library(&quot;nmath&quot;))
+        + kernel file (load_kernel_source, e.g. &quot;src/f2_f3_binomial_logit.cl&quot;)</code></pre>
+<ol style="list-style-type: decimal">
+<li><strong>OPENCL.cl</strong> – Global configuration: extensions
+(<code>cl_khr_fp64</code>, <code>cl_khr_printf</code>), IEEE constants
+(<code>ML_NAN</code>, <code>ML_POSINF</code>), feature detection for
+<code>expm1</code>/<code>log1p</code>, and utility macros.</li>
+<li><strong>rmath</strong> – Mathematical constants (M_E, M_PI, etc.)
+and distribution function declarations.</li>
+<li><strong>dpq</strong> – R-style density/CDF macros
+(<code>R_D__0</code>, <code>R_DT_val</code>, etc.) used in
+give_log/lower_tail logic.</li>
+<li><strong>nmath</strong> – Ported numerical routines (bd0, stirlerr,
+lgamma, dbinom, dpois, pnorm, etc.).</li>
+<li><strong>Kernel file</strong> – The model-specific kernel (e.g.,
+<code>f2_f3_binomial_logit.cl</code>) that computes f2 and f3 for each
+grid point.</li>
+</ol>
+</div>
+<div id="load_kernel_source-and-load_kernel_library" class="section level3">
+<h3>3.2 load_kernel_source and load_kernel_library</h3>
+<ul>
+<li><strong><code>load_kernel_source(relative_path)</code></strong> –
+Loads a single <code>.cl</code> file from <code>inst/cl/</code> via
+<code>system.file(&quot;cl&quot;, relative_path, package = &quot;glmbayes&quot;)</code>.</li>
+<li><strong><code>load_kernel_library(subdir)</code></strong> – Loads
+all <code>.cl</code> files in a subdirectory (e.g.,
+<code>&quot;nmath&quot;</code>, <code>&quot;rmath&quot;</code>, <code>&quot;dpq&quot;</code>), parses
+<code>@provides</code> and <code>@depends</code> annotations, performs a
+<strong>dependency-aware topological sort</strong>, and concatenates the
+files so that dependents appear after their dependencies.</li>
+</ul>
+<p>The <code>@provides</code> and <code>@depends</code> tags allow
+modular, maintainable kernel code: each file declares what it provides
+and what it needs. See <code>?load_kernel_library</code> for
+details.</p>
+</div>
+</div>
+<div id="ported-math-libraries-nmath-rmath-dpq" class="section level2">
+<h2>4. Ported Math Libraries (nmath / rmath / dpq)</h2>
+<p>The likelihood and gradient computations require statistical
+functions that match R’s behavior. Because OpenCL C does not include
+these, the package <strong>ports</strong> a core set from R’s nmath and
+rmath libraries to OpenCL C.</p>
+<div id="nmath" class="section level3">
+<h3>4.1 nmath</h3>
+<table>
+<colgroup>
+<col width="29%" />
+<col width="37%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Module</th>
+<th>Provides</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>nmath.cl</td>
+<td>ML_<em>, ME_</em>, ISNAN, R_FINITE, ML_ERROR, etc.</td>
+<td>Constants, error handling, validation macros</td>
+</tr>
+<tr class="even">
+<td>log1p.cl</td>
+<td>Rlog1p</td>
+<td>Log(1+x) for numerical stability</td>
+</tr>
+<tr class="odd">
+<td>expm1.cl</td>
+<td>expm1</td>
+<td>exp(x)-1 for numerical stability</td>
+</tr>
+<tr class="even">
+<td>bd0.cl</td>
+<td>bd0, ebd0, etc.</td>
+<td>Poisson/binomial deviance terms</td>
+</tr>
+<tr class="odd">
+<td>stirlerr.cl</td>
+<td>stirlerr</td>
+<td>Stirling error for factorial terms</td>
+</tr>
+<tr class="even">
+<td>lgamma.cl</td>
+<td>lgammafn</td>
+<td>Log-gamma</td>
+</tr>
+<tr class="odd">
+<td>gamma.cl</td>
+<td>gammafn</td>
+<td>Gamma function</td>
+</tr>
+<tr class="even">
+<td>dbinom.cl</td>
+<td>dbinom, dbinom_raw</td>
+<td>Binomial density</td>
+</tr>
+<tr class="odd">
+<td>dpois.cl</td>
+<td>dpois, dpois_raw</td>
+<td>Poisson density</td>
+</tr>
+<tr class="even">
+<td>dgamma.cl</td>
+<td>dgamma</td>
+<td>Gamma density</td>
+</tr>
+<tr class="odd">
+<td>dnorm.cl</td>
+<td>dnorm4</td>
+<td>Normal density</td>
+</tr>
+<tr class="even">
+<td>pnorm.cl</td>
+<td>pnorm5, pnorm_both</td>
+<td>Normal CDF (probit)</td>
+</tr>
+<tr class="odd">
+<td>pgamma.cl</td>
+<td>pgamma</td>
+<td>Gamma CDF (inverse link)</td>
+</tr>
+<tr class="even">
+<td>d1mach.cl</td>
+<td>d1mach</td>
+<td>Machine constants</td>
+</tr>
+<tr class="odd">
+<td>chebyshev.cl</td>
+<td>chebyshev_eval</td>
+<td>Polynomial evaluation</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="rmath" class="section level3">
+<h3>4.2 rmath</h3>
+<p><code>Rmath.cl</code> provides additional constants (M_E, M_PI,
+M_LN2, etc.) and distribution functions consistent with R’s
+<code>Rmath</code> library.</p>
+</div>
+<div id="dpq" class="section level3">
+<h3>4.3 dpq</h3>
+<p><code>dpq.cl</code> and <code>dpq_prelude.cl</code> provide macros
+for density and CDF handling with <code>give_log</code> and
+<code>lower_tail</code>, matching R’s DPQ (density, probability,
+quantile) conventions.</p>
+<p>These ports ensure that the OpenCL kernels produce results
+<strong>numerically consistent</strong> with the CPU path and with R
+itself.</p>
+</div>
+</div>
+<div id="familylink-kernels" class="section level2">
+<h2>5. Family/Link Kernels</h2>
+<p>Each supported family/link has a dedicated kernel file that
+implements the f2/f3 logic for that model.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Link</th>
+<th>Kernel file</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>binomial</td>
+<td>logit</td>
+<td><code>f2_f3_binomial_logit.cl</code></td>
+</tr>
+<tr class="even">
+<td>binomial</td>
+<td>probit</td>
+<td><code>f2_f3_binomial_probit.cl</code></td>
+</tr>
+<tr class="odd">
+<td>binomial</td>
+<td>cloglog</td>
+<td><code>f2_f3_binomial_cloglog.cl</code></td>
+</tr>
+<tr class="even">
+<td>poisson</td>
+<td>log</td>
+<td><code>f2_f3_poisson.cl</code></td>
+</tr>
+<tr class="odd">
+<td>Gamma</td>
+<td>inverse</td>
+<td><code>f2_f3_gamma.cl</code></td>
+</tr>
+<tr class="even">
+<td>gaussian</td>
+<td>identity</td>
+<td><code>f2_f3_gaussian.cl</code></td>
+</tr>
+</tbody>
+</table>
+<div id="kernel-structure" class="section level3">
+<h3>5.1 Kernel Structure</h3>
+<p>Each kernel follows the same pattern:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Work-item mapping</strong> –
+<code>int j = get_global_id(0)</code>; one work item per grid point
+<span class="math inline">\(j\)</span>.</li>
+<li><strong>Prior term</strong> – Compute <span class="math inline">\(P(\beta_j - \mu)\)</span> and the quadratic form
+<span class="math inline">\(\tfrac{1}{2}(\beta_j - \mu)&#39; P (\beta_j
+- \mu)\)</span>, accumulate into <code>qf[j]</code>.</li>
+<li><strong>Prior gradient</strong> – Initialize local gradient with
+<span class="math inline">\(P(\beta_j - \mu)\)</span>.</li>
+<li><strong>Data loop</strong> – For each observation <span class="math inline">\(i\)</span>, compute linear predictor, link,
+likelihood contribution, and gradient contribution. Use ported functions
+(<code>dbinom_raw</code>, <code>dpois_raw</code>, <code>lgamma</code>,
+<code>pnorm5</code>, etc.) as needed.</li>
+<li><strong>Write outputs</strong> – <code>qf[j]</code> = negative log
+posterior; <code>grad[k*m1 + j]</code> = gradient (column-major
+layout).</li>
+</ol>
+<p>The kernels use a fixed <code>MAX_L2</code> for local arrays (e.g.,
+64); this limits the number of coefficients when using OpenCL. See the
+source for current limits.</p>
+</div>
+</div>
+<div id="f2_f3_opencl-flow" class="section level2">
+<h2>6. f2_f3_opencl Flow</h2>
+<p>The wrapper <code>f2_f3_opencl</code> in
+<code>kernel_wrappers.cpp</code> performs:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Input flattening</strong> – Convert R matrices/vectors (x,
+b, mu, P, alpha, y, wt) to contiguous C++ vectors in the layout expected
+by the runner.</li>
+<li><strong>Kernel selection</strong> – Map <code>(family, link)</code>
+to <code>kernel_name</code> and <code>kernel_file</code> (e.g., binomial
++ logit → <code>f2_f3_binomial_logit</code>,
+<code>src/f2_f3_binomial_logit.cl</code>).</li>
+<li><strong>Program assembly</strong> – Load OPENCL.cl, rmath, nmath,
+dpq, and the kernel file; concatenate into <code>all_src</code>.</li>
+<li><strong>Runner call</strong> – Invoke
+<code>f2_f3_kernel_runner(all_src, kernel_name, l1, l2, m1, ...)</code>
+with flattened inputs and output buffers.</li>
+<li><strong>Output reshaping</strong> – Copy <code>qf_flat</code> into
+an R vector; wrap <code>grad_flat</code> as an Armadillo matrix (m1 ×
+l2) for return.</li>
+</ol>
+<p>The returned list has components <code>qf</code> (negative log
+posterior per grid point) and <code>grad</code> (gradient matrix).</p>
+</div>
+<div id="f2_f3_kernel_runner" class="section level2">
+<h2>7. f2_f3_kernel_runner</h2>
+<p>The runner in <code>kernel_runners.cpp</code> handles the low-level
+OpenCL API:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Platform and device</strong> –
+<code>clGetPlatformIDs</code>, <code>clGetDeviceIDs</code>
+(CL_DEVICE_TYPE_DEFAULT).</li>
+<li><strong>Context and queue</strong> – <code>clCreateContext</code>,
+<code>clCreateCommandQueueWithProperties</code>.</li>
+<li><strong>Program</strong> – <code>clCreateProgramWithSource</code>
+with the concatenated string, <code>clBuildProgram</code>.</li>
+<li><strong>Kernel</strong> – <code>clCreateKernel</code> with the
+kernel name.</li>
+<li><strong>Buffers</strong> – Create read-only buffers for X, B, mu, P,
+alpha, y, wt; write-only for qf and grad. Copy host data for
+inputs.</li>
+<li><strong>Launch</strong> – <code>clEnqueueNDRangeKernel</code> with
+<code>global = m1</code> (one work item per grid point).</li>
+<li><strong>Readback</strong> – <code>clEnqueueReadBuffer</code> for qf
+and grad.</li>
+<li><strong>Sanity check</strong> – If both outputs are all zeros, throw
+(likely kernel failure).</li>
+<li><strong>Cleanup</strong> – Release buffers, kernel, program, queue,
+context.</li>
+</ol>
+<p>The runner is GLM-specific and lives in the
+<code>glmbayes::opencl</code> namespace; the general OpenCL utilities
+(kernel loading, device enumeration) are in <code>openclPort</code>.</p>
+</div>
+<div id="pilot-and-safeguards" class="section level2">
+<h2>8. Pilot and Safeguards</h2>
+<p>For large grids (e.g., <span class="math inline">\(m_1 &gt;
+50{,}000\)</span>), <code>EnvelopeEval</code> runs
+<code>f2_f3_opencl_pilot</code> before the full evaluation to estimate
+runtime.</p>
+<div id="pilot-logic" class="section level3">
+<h3>8.1 Pilot Logic</h3>
+<ul>
+<li><strong>Warm-up</strong> – Run <code>f2_f3_opencl</code> on a small
+grid slice.</li>
+<li><strong>Calibration</strong> – Run on slices of ~1% and ~2% of the
+grid to estimate fixed cost and per-grid cost.</li>
+<li><strong>Refined estimate</strong> – Compute
+<code>refined_est_total_sec = per_grid_sec × m1</code>.</li>
+<li><strong>5-minute safeguard</strong> – If
+<code>refined_est_total_sec &gt; 300</code>:
+<ul>
+<li><strong>Interactive session</strong>: Prompt
+<code>&quot;Do you want to continue? [y/N]: &quot;</code>.</li>
+<li><strong>Non-interactive session</strong>: Proceed automatically
+(e.g., CI, batch).</li>
+</ul></li>
+</ul>
+<p>This mirrors the parallel sampling pilots in Chapter A09. The
+envelope build phase cannot be interrupted once the full OpenCL run
+starts, so the pilot gives users a chance to decline long runs.</p>
+</div>
+<div id="when-the-pilot-runs" class="section level3">
+<h3>8.2 When the Pilot Runs</h3>
+<p>The pilot runs when <code>m1_total &gt; 50000</code> and
+<code>use_opencl</code> is true. For smaller grids, the full evaluation
+runs without a pilot.</p>
+</div>
+</div>
+<div id="installation-and-availability" class="section level2">
+<h2>9. Installation and Availability</h2>
+<p>OpenCL support is <strong>optional</strong>. The package compiles and
+runs without it; in that case, <code>use_opencl</code> is ignored and
+the CPU path is always used.</p>
+<p>To enable OpenCL:</p>
+<ul>
+<li>Install OpenCL headers and development libraries (see Chapter
+12).</li>
+<li>Build the package from source with OpenCL enabled (configure script
+detects OpenCL).</li>
+<li>Ensure an OpenCL runtime (ICD loader, vendor driver) is available at
+runtime.</li>
+</ul>
+<p>Use <code>has_opencl()</code> to check availability and
+<code>diagnose_glmbayes()</code> for a full diagnostic report. See
+Chapter 12 for platform-specific installation instructions (Windows,
+Linux, macOS) and AMD ROCm notes.</p>
+</div>
+<div id="cross-references" class="section level2">
+<h2>10. Cross-References</h2>
+<ul>
+<li><strong>Chapter A05</strong> – Simulation pipeline (optimization,
+standardization, envelope build, sampling)</li>
+<li><strong>Chapter A08</strong> – Envelope-related functions</li>
+<li><strong>Chapter A09</strong> – Parallel sampling (pilot pattern,
+5-minute safeguard)</li>
+<li><strong>Chapter 12</strong> – GPU acceleration: installation,
+<code>has_opencl</code>, <code>diagnose_glmbayes</code></li>
+<li><strong><code>?EnvelopeBuild</code></strong>,
+<strong><code>?EnvelopeEval</code></strong> – use_opencl argument</li>
+<li><strong><code>?load_kernel_library</code></strong>,
+<strong><code>?load_kernel_source</code></strong> – Program
+assembly</li>
+<li><strong><code>?glmb</code></strong>,
+<strong><code>?rglmb</code></strong> – use_opencl argument</li>
+</ul>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

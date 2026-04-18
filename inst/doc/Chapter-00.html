@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Chapter 00: Introduction</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter 00: Introduction</h1>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#chapter-00-introduction" id="toc-chapter-00-introduction"><span class="toc-section-number">1</span> Chapter 00: Introduction</a>
+<ul>
+<li><a href="#part-1-an-introduction" id="toc-part-1-an-introduction"><span class="toc-section-number">1.1</span> Part 1: An Introduction</a></li>
+<li><a href="#part-2-estimating-bayesian-linear-models" id="toc-part-2-estimating-bayesian-linear-models"><span class="toc-section-number">1.2</span> Part 2: Estimating Bayesian Linear
+Models</a></li>
+<li><a href="#part-3-generalized-linear-models" id="toc-part-3-generalized-linear-models"><span class="toc-section-number">1.3</span> Part 3: Generalized Linear
+Models</a></li>
+<li><a href="#part-4-advanced-topics" id="toc-part-4-advanced-topics"><span class="toc-section-number">1.4</span> Part 4: Advanced Topics</a></li>
+<li><a href="#part-5-simulation-methods-and-technical-implementation" id="toc-part-5-simulation-methods-and-technical-implementation"><span class="toc-section-number">1.5</span> Part 5: Simulation Methods and
+Technical Implementation</a></li>
+</ul></li>
+<li><a href="#bibliography" id="toc-bibliography">References</a></li>
+</ul>
+</div>
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; Loading required package: MASS</span></span></code></pre></div>
+<div id="chapter-00-introduction" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Chapter 00:
+Introduction</h1>
+<p>This vignette introduces <strong>glmbayes</strong>, a package for
+fitting Bayesian generalized linear models via efficient envelope-based
+sampling. The vignette series is organized into five main parts and a
+set of technical appendices. You will move from basic installation and
+first models, through linear and generalized linear models, to advanced
+prior structures, dispersion modeling, and GPU-accelerated computation.
+The appendices document the underlying simulation methods and
+implementation details. The envelope sampling methodology builds on the
+likelihood subgradient framework of <span class="citation">(Nygren and
+Nygren 2006)</span>.</p>
+<div id="part-1-an-introduction" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> Part 1: An
+Introduction</h2>
+<p>These chapters provide a high-level overview of the package, its
+design philosophy, and the basic workflow for fitting Bayesian linear
+and generalized linear models.</p>
+<ul>
+<li><p><strong>Chapter 00 - Introduction</strong><br />
+Overview of the vignette structure, major modeling capabilities, and how
+the different parts fit together.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-00.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-00.html</a></p></li>
+<li><p><strong>Chapter 01 - Getting Started with glmbayes</strong><br />
+Install and load <code>glmbayes</code>, fit your first Bayesian GLM
+using <code>glmb()</code>, and interpret posterior summaries (means,
+credible intervals) via an interface that mirrors base
+<code>glm()</code>.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-01.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-01.html</a></p></li>
+</ul>
+</div>
+<div id="part-2-estimating-bayesian-linear-models" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Part 2: Estimating
+Bayesian Linear Models</h2>
+<p>This part focuses on Bayesian linear regression under the Gaussian
+family and identity link. It establishes the foundational ideas in a
+setting where exact multivariate normal posteriors are available.</p>
+<ul>
+<li><p><strong>Chapter 02 - Estimating Bayesian Linear
+Models</strong><br />
+Work with the Gaussian identity-link case using <code>lmb()</code>. Draw
+from the multivariate normal posterior, compare Bayesian estimates to
+classical least squares, and explore shrinkage behavior.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-02.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-02.html</a></p></li>
+<li><p><strong>Chapter 03 - Tailoring Priors - Leveraging the
+Prior_Setup Function</strong><br />
+Construct multivariate normal priors via <code>Prior_Setup()</code>.
+Specify prior mean vectors and covariance matrices, and study how these
+hyperparameters influence posterior inference and regularization.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-03.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-03.html</a></p></li>
+<li><p><strong>Chapter 04 - Reviewing Model Predictions, Deviance
+Residuals and Model Statistics</strong><br />
+Generate fitted values and posterior predictive draws, compute deviance
+residuals, and review model-fit summaries such as deviance-based
+measures and related diagnostics.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-04.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-04.html</a></p></li>
+</ul>
+</div>
+<div id="part-3-generalized-linear-models" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> Part 3: Generalized
+Linear Models</h2>
+<p>This part presents Bayesian GLMs across the major likelihood
+families, including Binomial, quasi-Binomial, Poisson, quasi-Poisson,
+and Gamma models. It emphasizes link functions, log-concavity, and
+practical posterior interpretation.</p>
+<ul>
+<li><p><strong>Chapter 05 - Foundations of GLMs - Families, Links, and
+Log-Concave Likelihoods</strong><br />
+Review exponential-family GLMs, canonical and non-canonical link
+functions, and the log-concave likelihood property that enables
+envelope-based accept-reject sampling.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-05.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-05.html</a></p></li>
+<li><p><strong>Chapter 06 - Estimating Bayesian Generalized Linear
+Models</strong><br />
+Move beyond Gaussian models and fit Binomial, Poisson, and Gamma GLMs
+with <code>glmb()</code>. See how the envelope engine adapts to each
+family and compare posterior summaries under different links.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-06.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-06.html</a></p></li>
+<li><p><strong>Chapter 07 - Models for the Binomial
+Family</strong><br />
+Work with logistic and probit regressions. Handle binomial outcomes,
+specify informative priors, and interpret posterior distributions for
+classification and proportion-type data.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-07.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-07.html</a></p></li>
+<li><p><strong>Chapter 08 - Models for the Poisson Family</strong><br />
+Fit count models with a log link. Explore overdispersion diagnostics,
+zero-inflation checks, and the impact of prior choice on rate
+parameters.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-08.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-08.html</a></p></li>
+<li><p><strong>Chapter 09 - Models for the Gamma Family</strong><br />
+Model positive continuous outcomes using Gamma regression. Combine
+regression and dispersion modeling, and interpret overdispersion in
+applications such as insurance claims or reaction-time data.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-09.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-09.html</a></p></li>
+</ul>
+</div>
+<div id="part-4-advanced-topics" class="section level2" number="1.4">
+<h2><span class="header-section-number">1.4</span> Part 4: Advanced
+Topics</h2>
+<p>These chapters explore more complex modeling scenarios and
+computational strategies, including informative priors, unknown
+dispersion parameters, hierarchical (random effects) models, and
+GPU-accelerated envelope construction.</p>
+<ul>
+<li><p><strong>Chapter 10 - Informative Priors: Centering and priors
+with differential prior weights</strong><br />
+Construct more flexible priors by centering on domain-specific values
+and assigning variable-specific scales. Examine how differentiated prior
+weights influence shrinkage and interpretability.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-10.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-10.html</a></p></li>
+<li><p><strong>Chapter 11 - Estimating Models with Unknown Dispersion
+Parameters</strong><br />
+Extend envelope-based methods to models with unknown dispersion (e.g.,
+Gamma and quasi-families). Use dedicated dispersion samplers to obtain
+joint posterior draws and quantify overdispersion uncertainty.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-11.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-11.html</a></p></li>
+<li><p><strong>Chapter 12 - Large Models: GPU Acceleration using
+OpenCL</strong><br />
+Scale Bayesian GLMs to higher-dimensional settings by offloading key
+computations to the GPU. Configure OpenCL, tune envelope construction
+for large models, and benchmark performance gains.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-12.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-12.html</a></p></li>
+<li><p><strong>Chapter 13 - Hierarchical Linear Models</strong><br />
+Fit hierarchical (random effects) linear models using block Gibbs
+sampling with <code>rlmb</code>. Covers dispersion-and-coefficients
+sampling (e.g., Dobson plant weight) and the Eight Schools example with
+conjugate and non-conjugate priors.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-13.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-13.html</a></p></li>
+<li><p><strong>Chapter 14 - Hierarchical Generalized Linear
+Models</strong><br />
+Extend hierarchical modeling to non-Gaussian families. Implements a
+two-block Gibbs sampler for Poisson regression with observation-level
+random effects using the BikeSharing dataset and
+<code>rglmb</code>.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-14.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-14.html</a></p></li>
+</ul>
+</div>
+<div id="part-5-simulation-methods-and-technical-implementation" class="section level2" number="1.5">
+<h2><span class="header-section-number">1.5</span> Part 5: Simulation
+Methods and Technical Implementation</h2>
+<p>The appendices document the mathematical and algorithmic foundations
+of the samplers used in <strong>glmbayes</strong>, including likelihood
+subgradient methods, envelope construction, and accept-reject schemes
+for both regression and dispersion parameters.</p>
+<ul>
+<li><p><strong>Chapter A01: A detailed overview of the glmbayes
+package</strong><br />
+Present the mathematical foundations behind each sampler, including
+derivations of the posterior, the structure of enveloping functions, and
+bounds on expected draws per acceptance.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A01.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A01.html</a></p></li>
+<li><p><strong>Chapter A02: Overview of Estimation
+Procedures</strong><br />
+Present the mathematical foundations behind each sampler, including
+derivations of the posterior, the structure of enveloping functions, and
+bounds on expected draws per acceptance. <a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A02.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A02.html</a></p></li>
+<li><p><strong>Chapter A03 - Methods Available in
+glmbayes</strong><br />
+Summarize the key functions, samplers, and diagnostics implemented in
+the package, with a focus on how they relate to the underlying
+estimation framework.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A03.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A03.html</a></p></li>
+<li><p><strong>Chapter A04 - Directional Tail Diagnostics for
+Prior-Posterior Disagreement</strong><br />
+Document the directional tail diagnostic, its theoretical interpretation
+as a Bayesian analogue to t- and F-style evidence, scalar and
+multivariate decompositions, and its use in summary output.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A04.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A04.html</a></p></li>
+<li><p><strong>Chapter A05: Simulation Methods - Likelihood Subgradient
+Densities</strong><br />
+Detail the likelihood-subgradient approach for non-Gaussian families.
+Show how subgradients define tangent envelopes and explain why this
+yields valid accept-reject sampling for log-concave likelihoods.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A05.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A05.html</a></p></li>
+<li><p><strong>Chapter A06 - Accept-Reject Sampling for Dispersion in
+Gamma Regression</strong><br />
+Describe the specialized accept-reject scheme for dispersion parameters
+in Gamma regression, including envelope design, proposal choices, and
+efficiency considerations.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A06.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A06.html</a></p></li>
+<li><p><strong>Chapter A07 - Accept-Reject Sampling for Gaussian
+Regression Models with Independent Normal-Gamma Priors</strong><br />
+Detail the accept-reject-based approach for Gaussian regression with
+independent normal-gamma priors, including the structure of the joint
+prior, conditional distributions, and sampler efficiency.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A07.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A07.html</a></p></li>
+<li><p><strong>Chapter A08 - Overview of Envelope Related
+Functions</strong><br />
+Provide a central overview of the envelope-related functions.
+Consolidate the theoretical foundations, function map, and workflow for
+users and developers.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A08.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A08.html</a></p></li>
+<li><p><strong>Chapter A09 - Parallel Sampling Implementation using
+RcppParallel</strong><br />
+Describe the parallel sampling implementation, pilot logic, and
+interactive safeguards.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A09.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A09.html</a></p></li>
+<li><p><strong>Chapter A10 - Accelerated EnvelopeBuild Implementation
+using OpenCL</strong><br />
+Document the OpenCL implementation for accelerating envelope
+construction on the GPU.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A10.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A10.html</a></p></li>
+<li><p><strong>Chapter A11 - Implementation Companion for Independent
+Normal-Gamma</strong><br />
+Document the implementation workflow for independent Normal-Gamma
+sampling, with a deep dive into <code>rIndepNormalGammaReg</code>,
+<code>EnvelopeOrchestrator</code>, <code>EnvelopeDispersionBuild</code>,
+and the standardized accept-reject sampler.<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A11.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A11.html</a></p></li>
+<li><p><strong>Chapter A12 - Technical Derivations for Priors Returned
+by <code>Prior_Setup()</code></strong><br />
+Full mathematical derivations for Gaussian calibration, Normal–Gamma and
+independent Normal–Gamma prior pieces, and the objects returned by
+<code>Prior_Setup()</code> (including
+<code>compute_gaussian_prior</code>).<br />
+<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A12.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A12.html</a></p></li>
+</ul>
+<hr />
+<p>Together, these chapters and appendices form a coherent progression:
+from basic usage and model specification, through applied Bayesian GLMs,
+to the mathematical and computational details that underlie the
+envelope-based samplers and GPU-accelerated implementations in
+<strong>glmbayes</strong>.</p>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

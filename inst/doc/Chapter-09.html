@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Chapter 09: Models for the Gamma Family</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter 09: Models for the Gamma
+Family</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span></code></pre></div>
+<div id="introductory-discussion" class="section level2">
+<h2>1. Introductory Discussion</h2>
+<p>Gamma regression models are used when the response variable is
+strictly positive and right‑skewed.<br />
+Typical applications include:</p>
+<ul>
+<li>insurance claim severities<br />
+</li>
+<li>cost or expenditure data<br />
+</li>
+<li>reaction times and waiting times<br />
+</li>
+<li>positive continuous measurements with heteroskedasticity</li>
+</ul>
+<p>Gamma regression is a standard GLM for positive, right‑skewed
+responses <span class="citation">(Nelder and Wedderburn 1972; McCullagh
+and Nelder 1989; Agresti 2015)</span>.</p>
+<p>In classical statistics, these models are fit using</p>
+<p>glm(…, family = Gamma(link = …)).</p>
+<p>In glmbayes, the Bayesian analogue is</p>
+<p>glmb(…, family = Gamma(link = …), pfamily = dNormal(…))</p>
+<p>or, when dispersion is unknown and modeled,</p>
+<p>glmb(…, family = Gamma(link = …), pfamily = dNormal_Gamma(…))</p>
+<p>or related pfamilies.</p>
+<p>This chapter:</p>
+<ol style="list-style-type: decimal">
+<li>reviews the Gamma GLM structure and link functions<br />
+</li>
+<li>shows how to fit classical and Bayesian Gamma regression
+models<br />
+</li>
+<li>uses a realistic insurance example (carinsca)<br />
+</li>
+<li>demonstrates how to estimate dispersion using
+gamma.dispersion()<br />
+</li>
+<li>compares classical and Bayesian summaries, including DIC</li>
+</ol>
+</div>
+<div id="gamma-likelihood-and-model-structure-log-link-fixed-dispersion" class="section level2">
+<h2>2. Gamma Likelihood and Model Structure (Log Link, Fixed
+Dispersion)</h2>
+<p>Gamma regression models strictly positive, right-skewed
+responses.<br />
+In a Gamma GLM with fixed dispersion, the response satisfies</p>
+<p><span class="math display">\[
+Y_i &gt; 0,
+\qquad
+Y_i \sim \text{Gamma}(\text{mean}=\mu_i,\ \text{dispersion}=\phi),
+\]</span></p>
+<p>where the variance is</p>
+<p><span class="math display">\[
+\mathrm{Var}(Y_i) = \phi\,\mu_i^2.
+\]</span></p>
+<p>The mean is linked to a linear predictor through</p>
+<p><span class="math display">\[
+\eta_i = x_i^\top \beta,
+\qquad
+\mu_i = g^{-1}(\eta_i).
+\]</span></p>
+<p>In this chapter we focus exclusively on the <strong>log
+link</strong>, which is the standard choice for Gamma GLMs and the only
+link supported by <code>glmb()</code> when dispersion is fixed.</p>
+<div id="weighted-gamma-log-likelihood-log-link" class="section level3">
+<h3>2.1 Weighted Gamma Log-Likelihood (Log Link)</h3>
+<p>Let <span class="math inline">\(w_i\)</span> denote observation
+weights (e.g., claim counts or exposures).<br />
+Under the log link,</p>
+<p><span class="math display">\[
+\mu_i = e^{\eta_i},
+\]</span></p>
+<p>and the Gamma log-likelihood (up to constants) is</p>
+<p><span class="math display">\[
+\ell(\beta)
+=
+\sum_{i=1}^n
+w_i\left[
+-\frac{1}{\phi}\,\eta_i
+-
+\frac{1}{\phi}\,y_i e^{-\eta_i}
+\right].
+\]</span></p>
+<p>Terms not involving <span class="math inline">\(\beta\)</span> have
+been absorbed into the constant.<br />
+This form is used by both <code>glm()</code> and the Bayesian functions
+<code>glmb()</code> and <code>rglmb()</code> when dispersion is
+fixed.</p>
+</div>
+<div id="exponential-family-representation" class="section level3">
+<h3>2.2 Exponential-Family Representation</h3>
+<p>The Gamma distribution belongs to the exponential family <span class="citation">(McCullagh and Nelder 1989; Agresti 2015)</span> with
+canonical parameter</p>
+<p><span class="math display">\[
+\theta_i = -\frac{1}{\mu_i},
+\]</span></p>
+<p>and cumulant function</p>
+<p><span class="math display">\[
+b(\theta_i) = -\log(-\theta_i).
+\]</span></p>
+<p>The variance is</p>
+<p><span class="math display">\[
+\mathrm{Var}(Y_i) = \phi\,\mu_i^2.
+\]</span></p>
+<p>Under the <strong>log link</strong>, the canonical parameter is a
+monotone transformation of the linear predictor, and the resulting
+log-likelihood is <strong>log-concave in <span class="math inline">\(\eta_i\)</span></strong>.<br />
+This property is essential for stable envelope construction and
+accept–reject sampling in <em>glmbayes</em>.</p>
+</div>
+<div id="log-link-and-its-properties" class="section level3">
+<h3>2.3 Log Link and Its Properties</h3>
+<p>The log link is defined by</p>
+<p><span class="math display">\[
+g(\mu_i) = \log(\mu_i),
+\qquad
+\mu_i = e^{\eta_i}.
+\]</span></p>
+<p>It is the preferred link for Gamma GLMs because:</p>
+<ul>
+<li>it automatically enforces <span class="math inline">\(\mu_i &gt;
+0\)</span>,</li>
+<li>it yields multiplicative interpretations for coefficients,</li>
+<li>it produces a log-concave likelihood in <span class="math inline">\(\eta_i\)</span>,</li>
+<li>it is numerically stable for skewed data,</li>
+<li>it is the only link supported by <code>glmb()</code> when dispersion
+is fixed.</li>
+</ul>
+<p>Other links (inverse, identity) do not preserve log-concavity and are
+therefore not used in this chapter.<br />
+Models with <strong>estimated dispersion</strong> or <strong>non-log
+links</strong> are covered in Chapter 11.</p>
+</div>
+<div id="likelihood-prior-and-posterior-normal-prior-on-beta" class="section level3">
+<h3>2.4 Likelihood, Prior, and Posterior (Normal Prior on <span class="math inline">\(\beta\)</span>)</h3>
+<p>With the log link, the weighted log-likelihood is</p>
+<p><span class="math display">\[
+\ell(\beta)
+=
+\sum_{i=1}^n
+w_i\left[
+-\frac{1}{\phi}\,\eta_i
+-
+\frac{1}{\phi}\,y_i e^{-\eta_i}
+\right].
+\]</span></p>
+<p>A multivariate normal prior is specified as</p>
+<p><span class="math display">\[
+\log p(\beta)
+=
+-\tfrac{1}{2}(\beta - \mu_0)^\top \Sigma_0^{-1}(\beta - \mu_0)
++ \text{const}.
+\]</span></p>
+<p>Combining likelihood and prior yields the log-posterior:</p>
+<p><span class="math display">\[
+\log p(\beta \mid y)
+=
+\sum_{i=1}^n
+w_i\left[
+-\frac{1}{\phi}\,\eta_i
+-
+\frac{1}{\phi}\,y_i e^{-\eta_i}
+\right]
+-
+\tfrac{1}{2}(\beta - \mu_0)^\top \Sigma_0^{-1}(\beta - \mu_0)
++ \text{const}.
+\]</span></p>
+<p>Because both terms are concave in <span class="math inline">\(\beta\)</span>, the posterior is
+<strong>log-concave</strong>, enabling efficient iid sampling via the
+envelope-based accept–reject sampler implemented in <em>glmbayes</em>.
+## 3. Link Functions for Gamma GLMs</p>
+<p>The link function relates the mean <span class="math inline">\(\mu\)</span> to the linear predictor <span class="math inline">\(\eta = X\beta\)</span>:</p>
+<p><span class="math display">\[
+g(\mu) = \eta.
+\]</span></p>
+<p>The Gamma family in base R supports:</p>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="29%" />
+<col width="55%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Link</th>
+<th>Formula</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>inverse</td>
+<td><span class="math inline">\(\eta = 1/\mu\)</span></td>
+<td>canonical link</td>
+</tr>
+<tr class="even">
+<td>identity</td>
+<td><span class="math inline">\(\eta = \mu\)</span></td>
+<td>must ensure <span class="math inline">\(\mu &gt; 0\)</span></td>
+</tr>
+<tr class="odd">
+<td>log</td>
+<td><span class="math inline">\(\eta = \log(\mu)\)</span></td>
+<td>most common; ensures <span class="math inline">\(\mu &gt;
+0\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>In practice, the log link is usually preferred because:</p>
+<ul>
+<li>it enforces <span class="math inline">\(\mu &gt; 0\)</span>
+automatically<br />
+</li>
+<li>it gives multiplicative interpretations for coefficients<br />
+</li>
+<li>it tends to be numerically stable<br />
+</li>
+<li>it preserves log‑concavity of the likelihood</li>
+</ul>
+<p>At present (due to the need for log-concavity), only the log link is
+implemented in the <strong>glmb</strong> function.</p>
+</div>
+</div>
+<div id="gamma-regression-example-insurance-claims" class="section level2">
+<h2>4. Gamma Regression Example: Insurance Claims</h2>
+<p>We now consider a Gamma regression example based on the carinsca
+dataset.<br />
+The goal is to model average claim cost as a function of rating
+variables Merit and Class, using claim counts as weights.</p>
+<div id="data-setup" class="section level3">
+<h3>4.1 Data Setup</h3>
+<p>We begin by preparing the data and setting appropriate factor levels
+and contrasts.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    <span class="fu">data</span>(carinsca)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    carinsca<span class="sc">$</span>Merit <span class="ot">&lt;-</span> <span class="fu">ordered</span>(carinsca<span class="sc">$</span>Merit)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    carinsca<span class="sc">$</span>Class <span class="ot">&lt;-</span> <span class="fu">factor</span>(carinsca<span class="sc">$</span>Class)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>    <span class="fu">options</span>(<span class="at">contrasts =</span> <span class="fu">c</span>(<span class="st">&quot;contr.treatment&quot;</span>, <span class="st">&quot;contr.treatment&quot;</span>))</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>    Claims  <span class="ot">&lt;-</span> carinsca<span class="sc">$</span>Claims</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    Insured <span class="ot">&lt;-</span> carinsca<span class="sc">$</span>Insured</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    Merit   <span class="ot">&lt;-</span> carinsca<span class="sc">$</span>Merit</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    Class   <span class="ot">&lt;-</span> carinsca<span class="sc">$</span>Class</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    Cost    <span class="ot">&lt;-</span> carinsca<span class="sc">$</span>Cost</span></code></pre></div>
+<p>The response Cost/Claims represents the <strong>average claim
+cost</strong> (severity) per claim.<br />
+The weights Claims reflect the number of claims on which each average is
+based, improving efficiency and aligning with standard GLM practice for
+rate or average models.</p>
+</div>
+<div id="classical-gamma-regression-using-glm" class="section level3">
+<h3>4.2 Classical Gamma Regression Using glm()</h3>
+<p>We fit a classical Gamma GLM with a log link. As <code>glm()</code>
+only crudely estimates the dispersion, we use
+<code>MASS::gamma.dispersion()</code> <span class="citation">(Venables
+and Ripley 2002)</span> and pass the estimate to
+<code>summary()</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>    out <span class="ot">&lt;-</span> <span class="fu">glm</span>(Cost<span class="sc">/</span>Claims <span class="sc">~</span> Merit <span class="sc">+</span> Class,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>               <span class="at">family  =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">&quot;log&quot;</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>               <span class="at">weights =</span> Claims,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>               <span class="at">x       =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>    <span class="do">## Estimate the dispersion using MLE</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>    disp <span class="ot">&lt;-</span> <span class="fu">gamma.dispersion</span>(out)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    </span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    <span class="fu">summary</span>(out,<span class="at">dispersion=</span>disp)</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; glm(formula = Cost/Claims ~ Merit + Class, family = Gamma(link = &quot;log&quot;), </span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt;     weights = Claims, x = TRUE)</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; (Intercept) -1.17456    0.01195 -98.286  &lt; 2e-16 ***</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; Merit1      -0.06867    0.02008  -3.420 0.000626 ***</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; Merit2      -0.07025    0.02238  -3.138 0.001700 ** </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; Merit3      -0.05673    0.01254  -4.523 6.08e-06 ***</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; Class2       0.08274    0.02031   4.073 4.64e-05 ***</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; Class3       0.01583    0.01410   1.123 0.261529    </span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; Class4       0.15981    0.01494  10.698  &lt; 2e-16 ***</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; Class5      -0.08142    0.03005  -2.709 0.006744 ** </span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; (Dispersion parameter for Gamma family taken to be 7.840919)</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt;     Null deviance: 1556.0  on 19  degrees of freedom</span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt; Residual deviance:  156.9  on 12  degrees of freedom</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; AIC: -2999165</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; Number of Fisher Scoring iterations: 4</span></span></code></pre></div>
+<p>The summary shows:</p>
+<ul>
+<li>regression coefficients on the log mean‑cost scale<br />
+</li>
+<li>standard errors and z‑statistics<br />
+</li>
+<li>deviance and AIC<br />
+</li>
+<li>an estimated dispersion parameter (phi)</li>
+</ul>
+<p>Under the log link, exp(<span class="math inline">\(\beta_{j}\)</span>) can be interpreted as a
+multiplicative factor on the expected cost ratio for a one‑unit change
+in the corresponding covariate (or a change in factor level).</p>
+</div>
+</div>
+<div id="bayesian-gamma-regression-fixed-dispersion-with-glmb" class="section level2">
+<h2>5. Bayesian Gamma Regression (fixed dispersion) with glmb()</h2>
+<p>To fit the Bayesian analogue, we proceed in two steps:</p>
+<ol style="list-style-type: decimal">
+<li>estimate the dispersion parameter <span class="math inline">\(\phi\)</span> from the classical Gamma GLM,<br />
+</li>
+<li>construct a prior for the regression coefficients using ,<br />
+</li>
+<li>call with a prior that incorporates the fixed dispersion <span class="math inline">\(\phi\)</span>.</li>
+</ol>
+<div id="estimating-dispersion-via-gamma.dispersion" class="section level3">
+<h3>5.1 Estimating Dispersion via gamma.dispersion()</h3>
+<p>The gamma.dispersion() helper estimates the dispersion parameter from
+a fitted classical Gamma GLM:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="do">## better than the crude estimate from the summary function</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    disp <span class="ot">&lt;-</span> <span class="fu">gamma.dispersion</span>(out)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    disp</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; [1] 7.840919</span></span></code></pre></div>
+<p>This value will be treated as known in our Bayesian model, so that
+the Bayesian and classical fits are directly comparable in terms of how
+they treat phi.</p>
+</div>
+<div id="prior-setup-using-prior_setup" class="section level3">
+<h3>5.2 Prior Setup Using Prior_Setup()</h3>
+<p>Next we use <code>Prior_Setup()</code> to construct a Zellner‑type
+g‑prior <span class="citation">(Griffin and Brown 2010)</span> for the
+coefficients, aligned with the Gamma log‑link model and weighting
+structure:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>    ps <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(Cost<span class="sc">/</span>Claims <span class="sc">~</span> Merit <span class="sc">+</span> Class,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                      <span class="at">family  =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">&quot;log&quot;</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                      <span class="at">weights =</span> Claims)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.01 (low-d default).</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>    mu <span class="ot">&lt;-</span> ps<span class="sc">$</span>mu</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    V  <span class="ot">&lt;-</span> ps<span class="sc">$</span>Sigma</span></code></pre></div>
+<p>The output from ps (if printed) will include:</p>
+<ul>
+<li>prior means (intercept from a null model, effects centered at zero
+by default)<br />
+</li>
+<li>prior standard deviations (scaled using the pwt argument and the
+Fisher information)<br />
+</li>
+<li>any additional hyperparameters relevant for dispersion modeling</li>
+</ul>
+<p>With the default pwt = 0.01, the prior is weakly informative, and the
+posterior estimates typically remain close to the MLEs.</p>
+</div>
+<div id="fitting-the-bayesian-gamma-model" class="section level3">
+<h3>5.3 Fitting the Bayesian Gamma Model</h3>
+<p>We now call glmb(), specifying the same model and likelihood as in
+the classical fit, but adding a dNormal prior family that fixes
+dispersion at the value estimated above:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>    out_glmb <span class="ot">&lt;-</span> <span class="fu">glmb</span>(Cost<span class="sc">/</span>Claims <span class="sc">~</span> Merit <span class="sc">+</span> Class,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                 <span class="at">family  =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">&quot;log&quot;</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>                 <span class="at">pfamily =</span> <span class="fu">dNormal</span>(<span class="at">mu =</span> mu, <span class="at">Sigma =</span> V, <span class="at">dispersion =</span> disp),</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                 <span class="at">weights =</span> Claims)</span></code></pre></div>
+<p>The arguments mirror the glm() call, with pfamily providing the
+prior:</p>
+<ul>
+<li>family = Gamma(link = “log”) specifies the likelihood and link<br />
+</li>
+<li>pfamily = dNormal(…) specifies a multivariate normal prior for beta
+with known dispersion<br />
+</li>
+<li>weights = Claims carries over the claim counts</li>
+</ul>
+</div>
+<div id="summarizing-the-bayesian-model" class="section level3">
+<h3>5.4 Summarizing the Bayesian Model</h3>
+<p>Bayesian summary:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>    <span class="fu">summary</span>(out_glmb)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; Call</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; glmb(formula = Cost/Claims ~ Merit + Class, family = Gamma(link = &quot;log&quot;), </span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt;     pfamily = dNormal(mu = mu, Sigma = V, dispersion = disp), </span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;     weights = Claims)</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; Expected Residuals:</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt;        Min         1Q     Median         3Q        Max </span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; -6.0140325 -2.1360286 -0.2889102  2.2793107  6.3264533 </span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Prior and Maximum Likelihood Estimates with Standard Deviations</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;             Null Mode Prior Mean Prior.sd Max Like. Like.sd</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; (Intercept)  -1.18283   -1.20215  0.15462  -1.17456   0.016</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; Merit1        0.00000    0.00000  0.25980  -0.06867   0.026</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; Merit2        0.00000    0.00000  0.28961  -0.07025   0.029</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Merit3        0.00000    0.00000  0.16226  -0.05673   0.016</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; Class2        0.00000    0.00000  0.26281   0.08274   0.026</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; Class3        0.00000    0.00000  0.18245   0.01583   0.018</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; Class4        0.00000    0.00000  0.19328   0.15981   0.019</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt; Class5        0.00000    0.00000  0.38885  -0.08142   0.039</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; Bayesian Estimates Based on 1000 iid draws</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt;              Post.Mode  Post.Mean    Post.Sd   MC Error Pr(Null_tail) SE(tail)</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; (Intercept) -1.1747274 -1.1738697  0.0119331  0.0003774     0.2210000    0.003</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt; Merit1      -0.0682525 -0.0685481  0.0201798  0.0006381     0.0010000    0.001</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; Merit2      -0.0698241 -0.0702304  0.0208775  0.0006602     0.0000000    0.000</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; Merit3      -0.0563841 -0.0573030  0.0124573  0.0003939     0.0000000    0.000</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt; Class2       0.0822404  0.0821244  0.0208649  0.0006598     0.0000000    0.000</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt; Class3       0.0157394  0.0156651  0.0144747  0.0004577     0.1340000    0.011</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt; Class4       0.1588636  0.1581664  0.0143434  0.0004536     0.0000000    0.000</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt; Class5      -0.0809389 -0.0815137  0.0294474  0.0009312     0.0030000    0.002</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)    </span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.012 *  </span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; Merit1               0.001 ** </span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt; Merit2              &lt;2e-16 ***</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt; Merit3              &lt;2e-16 ***</span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt; Class2              &lt;2e-16 ***</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt; Class3               0.134    </span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt; Class4              &lt;2e-16 ***</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt; Class5               0.003 ** </span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt;   Directional Tail Summaries:</span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt;                Metric vs Null vs Prior</span></span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt;  Mahalanobis Distance 16.6938  15.8770</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt;      Tail Probability  0.0000   0.0000</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt;   [Tail probabilities are P(delta^T * Z &lt;= 0) in whitened space]</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#&gt; Distribution Percentiles</span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#&gt;                  1.0%      2.5%      5.0%    Median     95.0%     97.5%  99.0%</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#&gt; (Intercept) -1.202565 -1.198029 -1.193315 -1.173917 -1.155014 -1.151220 -1.146</span></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a><span class="co">#&gt; Merit1      -0.117366 -0.105856 -0.101261 -0.067825 -0.035904 -0.030622 -0.022</span></span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a><span class="co">#&gt; Merit2      -0.116391 -0.111265 -0.105450 -0.070513 -0.034887 -0.029020 -0.022</span></span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a><span class="co">#&gt; Merit3      -0.087163 -0.082535 -0.077460 -0.056654 -0.036638 -0.033445 -0.028</span></span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a><span class="co">#&gt; Class2       0.033734  0.039833  0.046852  0.081554  0.117172  0.122794  0.130</span></span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a><span class="co">#&gt; Class3      -0.017521 -0.012884 -0.009165  0.015391  0.039579  0.043870  0.050</span></span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a><span class="co">#&gt; Class4       0.122265  0.127910  0.134226  0.158684  0.182156  0.186352  0.191</span></span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a><span class="co">#&gt; Class5      -0.147046 -0.139408 -0.128465 -0.082977 -0.034050 -0.020309 -0.011</span></span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 7.881749 </span></span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 218.8239 </span></span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a><span class="co">#&gt; DIC: -107.4591 </span></span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a><span class="co">#&gt; Expected Mean dispersion: 7.840919 </span></span>
+<span id="cb7-71"><a href="#cb7-71" tabindex="-1"></a><span class="co">#&gt; Sq.root of Expected Mean dispersion: 2.800164 </span></span>
+<span id="cb7-72"><a href="#cb7-72" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-73"><a href="#cb7-73" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 2.6</span></span></code></pre></div>
+<p>The Bayesian summary will report:</p>
+<ul>
+<li>posterior modes and posterior means for each coefficient<br />
+</li>
+<li>posterior standard deviations and Monte Carlo errors<br />
+</li>
+<li>tail probabilities relative to the prior mean<br />
+</li>
+<li>posterior percentiles (credible intervals)<br />
+</li>
+<li>effective number of parameters pD<br />
+</li>
+<li>expected residual deviance D<br />
+</li>
+<li>DIC</li>
+</ul>
+<p>Because dispersion is fixed at the same value in both models,
+differences between out and out_glmb reflect primarily the influence of
+the prior on <span class="math inline">\(\beta\)</span>, not differences
+in <span class="math inline">\(\phi\)</span>.</p>
+</div>
+</div>
+<div id="interpretation-and-model-diagnostics" class="section level2">
+<h2>6. Interpretation and Model Diagnostics</h2>
+<div id="coefficients" class="section level3">
+<h3>6.1 Coefficients</h3>
+<p>Under the log link, coefficient interpretations are
+multiplicative:</p>
+<ul>
+<li>exp(<span class="math inline">\(\beta_{j}\)</span>) is the
+multiplicative change in expected cost for a one‑unit change in the
+covariate (or for a change from baseline to a given factor level).</li>
+</ul>
+<p>With a weak prior, posterior means in out_glmb will be close to the
+MLEs in out, but with slightly more regularization and smaller posterior
+standard deviations.</p>
+</div>
+<div id="dispersion" class="section level3">
+<h3>6.2 Dispersion</h3>
+<p>By fixing dispersion at disp from the classical model, the Bayesian
+and classical fits share the same assumed level of variability.</p>
+<p>This allows:</p>
+<ul>
+<li>direct comparison of log‑likelihood based quantities,<br />
+</li>
+<li>a clean assessment of how the prior affects coefficient
+estimates.</li>
+</ul>
+<p>If desired, a more advanced model can estimate dispersion by
+switching to a pfamily such as dNormal_Gamma, but that is covered in
+more detail in the dispersion‑focused vignettes.</p>
+</div>
+<div id="dic-and-model-fit" class="section level3">
+<h3>6.3 DIC and Model Fit</h3>
+<p>The Bayesian summary of out_glmb reports:</p>
+<ul>
+<li>the effective number of parameters pD,<br />
+</li>
+<li>the expected residual deviance D,<br />
+</li>
+<li>the DIC value <span class="citation">(Spiegelhalter et al.
+2002)</span>.</li>
+</ul>
+<p>These can be compared to AIC and deviance from the classical model,
+especially when considering alternative specifications (for example,
+reduced models, different covariate sets, or alternative link
+functions).</p>
+</div>
+</div>
+<div id="concluding-discussion" class="section level2">
+<h2>7. Concluding Discussion</h2>
+<p>Gamma regression provides a flexible framework for modeling positive,
+skewed response variables <span class="citation">(McCullagh and Nelder
+1989; Gelman et al. 2013)</span>.<br />
+In this chapter, we have:</p>
+<ul>
+<li>introduced the Gamma GLM and its link functions,<br />
+</li>
+<li>shown how to fit a classical Gamma regression using glm(),<br />
+</li>
+<li>demonstrated how to estimate dispersion with
+gamma.dispersion(),<br />
+</li>
+<li>used Prior_Setup() to construct a default Zellner‑type prior,<br />
+</li>
+<li>fit a Bayesian Gamma regression with glmb() using a dNormal prior
+with fixed dispersion,<br />
+</li>
+<li>and compared classical and Bayesian summaries in a realistic
+insurance setting.</li>
+</ul>
+<p>In later vignettes, we extend these ideas to:</p>
+<ul>
+<li>Gamma models with unknown dispersion and hierarchical priors,<br />
+</li>
+<li>Gamma regression combined with other components in larger GLM
+systems,<br />
+</li>
+<li>and specialized accept‑reject schemes for dispersion
+parameters.</li>
+</ul>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Agresti2015" class="csl-entry">
+Agresti, Alan. 2015. <em>Foundations of Linear and Generalized Linear
+Models</em>. New York: Cambridge University Press.
+</div>
+<div id="ref-Gelman2013" class="csl-entry">
+Gelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki
+Vehtari, and Donald B. Rubin. 2013. <em>Bayesian Data Analysis</em>. 3rd
+ed. CRC Press.
+</div>
+<div id="ref-GriffinBrown2010" class="csl-entry">
+Griffin, Jim E., and Philip J. Brown. 2010. <span>“Inference with
+Normal-Gamma Prior Distributions in Regression Problems.”</span>
+<em>Bayesian Analysis</em> 5 (1): 171–88. <a href="https://doi.org/10.1214/10-BA507">https://doi.org/10.1214/10-BA507</a>.
+</div>
+<div id="ref-McCullagh1989" class="csl-entry">
+McCullagh, P., and J. A. Nelder. 1989. <em><span>Generalized Linear
+Models</span></em>. London: Chapman; Hall.
+</div>
+<div id="ref-NelderWedderburn1972" class="csl-entry">
+Nelder, J. A., and R. W. M. Wedderburn. 1972. <span>“Generalized Linear
+Models.”</span> <em>Journal of the Royal Statistical Society. Series A
+(General)</em> 135 (3): 370–84. <a href="https://doi.org/10.2307/2344614">https://doi.org/10.2307/2344614</a>.
+</div>
+<div id="ref-Spiegelhalter2002" class="csl-entry">
+Spiegelhalter, David J., Nicky G. Best, Bradley P. Carlin, and Angelika
+van der Linde. 2002. <span>“Bayesian Measures of Model Complexity and
+Fit.”</span> <em>Journal of the Royal Statistical Society: Series B
+(Statistical Methodology)</em> 64 (4): 583–639. <a href="https://doi.org/10.1111/1467-9868.00353">https://doi.org/10.1111/1467-9868.00353</a>.
+</div>
+<div id="ref-VenablesRipley2002" class="csl-entry">
+Venables, W. N., and B. D. Ripley. 2002. <em><span class="nocase">Modern
+Applied Statistics with S</span></em>. New York: Springer.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter 06: Estimating Bayesian Generalized Linear Models</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter 06: Estimating Bayesian Generalized
+Linear Models</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div id="general-discussion" class="section level1">
+<h1>General Discussion</h1>
+<p>As we saw in the previous chapter, using the Bayesian version
+<em>glmb</em> of the classical function <em>glm</em> requires the
+specification of an additional prior distribution (a pfamily).
+Envelope-based sampling for these models builds on <span class="citation">(Nygren and Nygren 2006)</span>. For Poisson and
+Binomial families, the most appropriate of the currently implemented
+priors would be the dNormal pfamily which requires specifying a prior
+mean and a prior variance-covariance matrix for the regression
+coefficients. Some models (covered more in a later Vignette) also
+requires providing either a constant or a prior for the dispersion
+(variance) parameter associated with the model. Here we focus on the
+case where only the regression coefficients require a prior and walk
+through an example where we specify a multivariate prior for a model
+with two coeffcients related to the Age of menarche (i.e., the age at
+which girls experience their first period). As part of the setup, we
+discuss the approach taken and give some general advice in regards to
+setting of prior distributions.</p>
+</div>
+<div id="the-age-of-menarche-data" class="section level1">
+<h1>The Age of Menarche Data</h1>
+<p>The data we will be using here is the <em>menarche</em> data covering
+the <em>Age of Menarche</em> for girls in Warsaw. This data appears in
+<span class="citation">(Venables and Ripley 2002)</span> and in their
+supporting <em>MASS</em> package. It is provided (and renamed) here so
+as to allow examples to run during build without loading of the
+<em>MASS</em> package.</p>
+<p>In the data, there are observations related to 25 cohorts of girls at
+ages ranging from an average age of 9.21 to an average age of 17.58. The
+average age for each cohort is captured in a column named <em>Age</em>.
+For each of the cohorts, there is also a column (<em>Total</em>) giving
+the total number of girls in the cohort and a column <em>Menarche</em>
+giving the number of girls out of the cohort who had experienced
+Menarche at that age.</p>
+<p>The first 5 observations are printed below. It is important to note
+that in Bayesian analyses (at least those that seek to incorporate
+prior/external information), the priors should ideally be based on
+information outside of the data being studied, so we will hold off on a
+more complete view of the data until we have mapped out our prior. The
+analysis we will be exploring here is a model of the relationship
+between age and the percentage of girls who have had their first period
+using various formulations of binomial regression.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="do">## Load menarche data</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(menarche,<span class="at">package=</span><span class="st">&quot;MASS&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">head</span>(menarche, <span class="dv">5</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt;     Age Total Menarche</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; 1  9.21   376        0</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; 2 10.21   200        0</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; 3 10.58    93        0</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 4 10.83   120        2</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 5 11.08    90        2</span></span></code></pre></div>
+</div>
+<div id="variable-transformation-and-preliminary-setup" class="section level1">
+<h1>Variable Transformation and Preliminary Setup</h1>
+<p>Because of the need for a prior distribution, it is important that
+coefficients in Bayesian models can be interpreted so that analysts can
+set reasonable priors. This is true regardless of whether analysts are
+looking to give a model a <em>weak</em> prior (that will limit any move
+of the estimates away from those driven purely by the data for that
+specific model) or if the analyst is looking to give the model a
+<em>strong</em> prior that incorporates meaningful external information
+and/or prior knowledge. If the analysts can’t interpret the
+coefficients, then is is difficult to know whether a prior distribution
+is <em>weak</em> or <em>strong</em> and whether it is likely to move
+estimates meaningfully away from classical estimates.</p>
+<p>A useful approach to making coefficients more interpretable involves
+centering variables closer to the center (or at least within the support
+of) the data. To facilitate the interpretation of the coefficients in
+our model, we will therefore pick a reference age <em>ref_age1</em>
+within the support of the data (we pick 13 but you can feel free to pick
+a different reference age or to use the mean across the observations)
+and define a new variable <em>Age2=Age-ref_age1</em>. This will allow
+our prior for the intercept to represent a point estimate (on the chosen
+link function scale) for the percentage of girls who have had their
+first period by age 13. It also happens to be an age close to the
+average age of menarche in other sources <span class="citation">(Hamilton-Fairley 2004, 29)</span> which reported the
+UK average age of menarche in the UK as 12.9.</p>
+<p>In addition to the intercept, our model will contain a slope
+coefficient for the modified age variable that will capture the change
+in the percentage of girls who have had their first period (on the
+relevant link scale). To be able to formulate a prior for this, we will
+set up a second reference age <em>ref_age2</em> (our choice will be 15)
+at which we also will formulate a point estimate for the percentage who
+have had their first period. A point estimate for the slope on the link
+scale will then be derived as the difference between the two estimates
+(on the link scale) divided by the Age gap between the two reference
+ages. Below is code doing the variable transformation and a preliminary
+setup to prepare for the prior specification.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="do">## Number of variables in model</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>Age<span class="ot">=</span>menarche<span class="sc">$</span>Age</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>nvars<span class="ot">=</span><span class="dv">2</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">333</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="do">## Reference Ages for setting of priors and Age_Difference</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>ref_age1<span class="ot">=</span><span class="dv">13</span>  <span class="co"># user can modify this</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>ref_age2<span class="ot">=</span><span class="dv">15</span>  <span class="do">## user can modify this</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="do">## Define variables used later in analysis</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>Age2<span class="ot">=</span>Age<span class="sc">-</span>ref_age1</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>Age_Diff<span class="ot">=</span>ref_age2<span class="sc">-</span>ref_age1</span></code></pre></div>
+</div>
+<div id="setting-prior-point-estimates-associated-credible-intervals-and-correlation" class="section level1">
+<h1>Setting prior point estimates, associated credible intervals, and
+correlation</h1>
+<p>We are now ready to specify our two point estimates with associated
+prior credible intervals and an assumed correlation (on the link scale).
+For the first reference age (13), we will provide a point estimate of
+0.5 (50%) for the percentage of girls who have had their first period by
+age 13. To account for the possibility that this percentage was a bit
+lower in Warsaw at the time data was collected, we will assume that the
+lower end of a 90% credible interval is at 0.3 (30%).</p>
+<p>For the second reference age (15), we have not accessed as much
+meaningful data from other sources to inform the prior estimate, but we
+have a general sense that <em>“most”</em> girls likely have had their
+period by that age. Based on this, we select 0.9 (90%) as a prior point
+estimate and select 0.7 (70%) as the lower end of our associated
+credible interval.</p>
+<p>To complete the information needed to map this information to both
+prior means and a fully populated Variance-Covariance matrix, we account
+for the likely correlation between the percentage at the two ages. If
+one of our two point estimates turn out to be either too high (or low)
+for the Warsaw data, it is likely that the other estimate also could be
+too high (or low) for the data as well. To that end, we assume a prior
+0.4 correlation between the two estimates on the relevant link
+scale.</p>
+<p>Here is code setting these assumptions up.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="do">## Point estimates at reference ages</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>m1<span class="ot">=</span><span class="fl">0.5</span>  </span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>m2<span class="ot">=</span><span class="fl">0.9</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="do">## Lower bound of prior credible intervals for point estimates</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>m1_lower<span class="ot">=</span><span class="fl">0.3</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>m2_lower<span class="ot">=</span><span class="fl">0.7</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="do">## Assumed correlation between the two (on link scale)</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>m_corr<span class="ot">=</span><span class="fl">0.4</span></span></code></pre></div>
+</div>
+<div id="mapping-the-prior-to-the-link-scale" class="section level1">
+<h1>Mapping the prior to the link scale</h1>
+<p>To be able to use the prior information in our model, the information
+has to be mapped to the link scale and the point estimates (with
+associated credible intervals) have to be mapped to a point estimate and
+uncertainty for the slope. In order to do this, we first get the
+required link function and set up the matrices into which we will store
+the prior information (<em>mu1</em> and <em>V1</em>).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="do">## Set up link function and initialize prior mean and Variance-Covariance matrices</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>bi_logit <span class="ot">&lt;-</span> <span class="fu">binomial</span>(<span class="at">link=</span><span class="st">&quot;logit&quot;</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>mu1<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="dv">0</span>,<span class="at">nrow=</span>nvars,<span class="at">ncol=</span><span class="dv">1</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">rownames</span>(mu1)<span class="ot">=</span><span class="fu">c</span>(<span class="st">&quot;Intercept&quot;</span>,<span class="st">&quot;Age2&quot;</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">colnames</span>(mu1)<span class="ot">=</span><span class="fu">c</span>(<span class="st">&quot;Prior Mean&quot;</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>V1<span class="ot">&lt;-</span><span class="dv">1</span><span class="sc">*</span><span class="fu">diag</span>(nvars)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">rownames</span>(V1)<span class="ot">=</span><span class="fu">c</span>(<span class="st">&quot;Intercept&quot;</span>,<span class="st">&quot;Age2&quot;</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">colnames</span>(V1)<span class="ot">=</span><span class="fu">c</span>(<span class="st">&quot;Intercept&quot;</span>,<span class="st">&quot;Age2&quot;</span>)</span></code></pre></div>
+<p><strong>Setting the prior mean</strong></p>
+<p>This piece of code now maps the prior assumptions to the logit scale
+and sets the prior mean vector. The mean for the intercept is just the
+logit transformation of the prior point estimate while the mean for the
+slope uses the difference between the logit transformed point estimates
+divided by the Age_Difference.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="do">## Prior mean for intercept is set to point estimate </span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="do">## at reference age1 (on logit scale)</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>mu1[<span class="dv">1</span>,<span class="dv">1</span>]<span class="ot">=</span>bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m1)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="do">## Prior mean for slope is set to difference in point estimates</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="do">## on logit scale divided by Age_Diff</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>mu1[<span class="dv">2</span>,<span class="dv">1</span>]<span class="ot">=</span>(bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m2) <span class="sc">-</span>bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m1))<span class="sc">/</span>Age_Diff </span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">print</span>(mu1)</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;           Prior Mean</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; Intercept   0.000000</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; Age2        1.098612</span></span></code></pre></div>
+<p><strong>Setting the prior Variance-Covariance Matrix</strong></p>
+<p>The piece of code setting the prior variance-covariance matrix for
+this prior specification is a bit more complex. It proceeds as
+follows:</p>
+<ul>
+<li>Calculate the prior standard deviation for each of the point
+estimates by leveraging the lower bounds</li>
+<li>Calculate the implied standard deviation for the slope using the
+formula for the variance of differences</li>
+<li>Calculate the implied covariance between the intercept and the
+slope</li>
+<li>Populate the Prior Variance-Covariance matrix using the derived
+information</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="do">## Implied standard deviations for point estimates on logit scale</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>sd_m1<span class="ot">=</span> (bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m1) <span class="sc">-</span>bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m1_lower))<span class="sc">/</span><span class="fl">1.96</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>sd_m2<span class="ot">=</span> (bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m2) <span class="sc">-</span>bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m2_lower))<span class="sc">/</span><span class="fl">1.96</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## Also compute implied estimate for upper bound of confidence intervals</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>m1_upper<span class="ot">=</span>bi_logit<span class="sc">$</span><span class="fu">linkinv</span>(bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m1)<span class="sc">+</span>sd_m1<span class="sc">*</span><span class="fl">1.96</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>m2_upper<span class="ot">=</span>bi_logit<span class="sc">$</span><span class="fu">linkinv</span>(bi_logit<span class="sc">$</span><span class="fu">linkfun</span>(m2)<span class="sc">+</span>sd_m2<span class="sc">*</span><span class="fl">1.96</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;m1_upper is:&quot;</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; [1] &quot;m1_upper is:&quot;</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>m1_upper</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; [1] 0.7</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;m2_upper is:&quot;</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;m2_upper is:&quot;</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>m2_upper</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; [1] 0.972</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="do">## Implied Standard deviation for slope (using variance formula for difference between two variables)</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>a<span class="ot">=</span>(<span class="dv">1</span><span class="sc">/</span>Age_Diff)</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>sd_slope<span class="ot">=</span><span class="fu">sqrt</span>((a<span class="sc">*</span>sd_m1)<span class="sc">^</span><span class="dv">2</span><span class="sc">+</span>(a<span class="sc">*</span>sd_m2)<span class="sc">^</span><span class="dv">2-2</span><span class="sc">*</span>a<span class="sc">*</span>a<span class="sc">*</span>(sd_m1<span class="sc">*</span>sd_m2<span class="sc">*</span>m_corr))</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#Cov(m1,slope)=cov(m1, a*(m2-m1)) =a*E[(m1-E[m1])((m2-m1)-E[m2-m1])]</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#   =a*E[(m1-E[m1])(m2-E[m2])]- a* E[(m1-E[m1])(m1-E[m1])]</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="do">##   =a*Cov[m1,m2] - a*Var[m1]</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="do">##  =a*sd_m1*sd_m2*m_corr-a* sd_m1*sd_m1</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>cov_V1<span class="ot">=</span>a<span class="sc">*</span>sd_m1<span class="sc">*</span>sd_m2<span class="sc">*</span>m_corr<span class="sc">-</span>a<span class="sc">*</span> sd_m1<span class="sc">*</span>sd_m1</span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co"># Set covariance matrix</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>V1[<span class="dv">1</span>,<span class="dv">1</span>]<span class="ot">=</span>sd_m1<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>V1[<span class="dv">2</span>,<span class="dv">2</span>]<span class="ot">=</span>sd_slope<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>V1[<span class="dv">1</span>,<span class="dv">2</span>]<span class="ot">=</span>cov_V1</span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>V1[<span class="dv">2</span>,<span class="dv">1</span>]<span class="ot">=</span>V1[<span class="dv">1</span>,<span class="dv">2</span>]</span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="fu">print</span>(<span class="st">&quot;V1 is:&quot;</span>)</span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; [1] &quot;V1 is:&quot;</span></span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="fu">print</span>(V1)</span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt;             Intercept        Age2</span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co">#&gt; Intercept  0.18687882 -0.03389182</span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt; Age2      -0.03389182  0.10576217</span></span></code></pre></div>
+</div>
+<div id="running-the-model" class="section level1">
+<h1>Running the Model</h1>
+<p>We are now ready to run a Logit model using the above specification.
+As a best practice, we recommend creating a data frame holding all the
+variables used in the model formula and to use it as the “data” for the
+model. We will show how this data can be used an an input to the
+prediction function in the next Chapter.</p>
+<p>The below code performs the step creating the Model data frame and
+then submits the model.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>Menarche_Model_Data<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Age=</span>menarche<span class="sc">$</span>Age,<span class="at">Total=</span><span class="fu">as.integer</span>(menarche<span class="sc">$</span>Total),</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="at">Menarche=</span><span class="fu">as.integer</span>(menarche<span class="sc">$</span>Menarche),Age2)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>glmb.out1<span class="ot">&lt;-</span><span class="fu">glmb</span>(<span class="at">n=</span><span class="dv">1000</span>,<span class="fu">cbind</span>(Menarche, <span class="fu">as.integer</span>(Total<span class="sc">-</span>Menarche)) <span class="sc">~</span>Age2,<span class="at">family=</span><span class="fu">binomial</span>(logit),</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>mu1,<span class="at">Sigma=</span>V1),<span class="at">data=</span>Menarche_Model_Data)</span></code></pre></div>
+<p><strong>Reviewing the printed output</strong></p>
+<p>To get a first read of the results, we now print the results of the
+model and re-print the prior mean specification so that we can do an
+initial comparison of the prior to the estimated posterior means.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co"># Print model output</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">print</span>(glmb.out1)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; Call:  glmb(formula = cbind(Menarche, as.integer(Total - Menarche)) ~ </span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;     Age2, family = binomial(logit), pfamily = dNormal(mu = mu1, </span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt;     Sigma = V1), n = 1000, data = Menarche_Model_Data)</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; Posterior Mean Coefficients:</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; (Intercept)         Age2  </span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;    -0.01249      1.61922  </span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 1.93343 </span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 28.68506 </span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; DIC: 114.6703</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co"># Print prior mean as comparison</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">t</span>(mu1))</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt;            Intercept     Age2</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt; Prior Mean         0 1.098612</span></span></code></pre></div>
+<p>In reviewing the coefficients, we see that the intercepts look quite
+close, so our prior estimate at age 13 does not seem to have been a bad
+estimate for what the Warsaw data suggests. Our prior estimate for the
+slope parameter seems to be a bit lower than the posterior mean estimate
+but without information on the standard error or credible intervals
+connected to the posterior mean, we can’t tell how off it might have
+been. We ignore the other printed output for now (it will be discussed
+in the next chapter) and instead turn to a more extensive model
+summary.</p>
+<p><strong>Summarizing the model</strong></p>
+<p>To get a more detailed view of the model output, we simply use the
+summary function and its print method much like you would to generate a
+summary for output from the <em>glm</em> function. This results in a
+printed view with several sections of outputs</p>
+<ul>
+<li>Expected Deviance Residuals (Discussed more in the next
+Chapter)</li>
+<li>Prior and Maximum Likelihood Estimates with Standard Deviations</li>
+<li>Bayesian Estimates Based on iid draws from the posterior (in this
+case 1000 draws)</li>
+<li>Distribution Percentiles (Credible Interval type information)</li>
+<li>DIC related information (Discussed more in the next chapter)</li>
+<li>Information related to the number of candidates per iid draw
+(discussed more in one of our Appendix chapters)</li>
+</ul>
+<p>We discuss several of these after the print view of the output from
+the call to the summary function.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">summary</span>(glmb.out1)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; Call</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; glmb(formula = cbind(Menarche, as.integer(Total - Menarche)) ~ </span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;     Age2, family = binomial(logit), pfamily = dNormal(mu = mu1, </span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt;     Sigma = V1), n = 1000, data = Menarche_Model_Data)</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; Expected Residuals:</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt;        Min         1Q     Median         3Q        Max </span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; -2.0788037 -1.0120812 -0.4416710  0.7264524  1.3364477 </span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Prior and Maximum Likelihood Estimates with Standard Deviations</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;             Null Mode Prior Mean Prior.sd Max Like. Like.sd</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.36015    0.00000  0.43229  -0.01081   0.063</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; Age2          0.00000    1.09861  0.32521   1.63197   0.059</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; Bayesian Estimates Based on 1000 iid draws</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt;             Post.Mode Post.Mean   Post.Sd  MC Error Pr(Null_tail) SE(tail)</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; (Intercept) -0.013688 -0.012487  0.060212  0.001904      0.000000    0.016</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; Age2         1.614377  1.619218  0.058862  0.001861      0.000000    0.000</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)    </span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.431    </span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; Age2                &lt;2e-16 ***</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt;   Directional Tail Summaries:</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt;                Metric vs Null vs Prior</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt;  Mahalanobis Distance 28.7829   9.1125</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt;      Tail Probability  0.0000   0.0000</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt;   [Tail probabilities are P(delta^T * Z &lt;= 0) in whitened space]</span></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co">#&gt; Distribution Percentiles</span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="co">#&gt;                 1.0%     2.5%     5.0%   Median    95.0%    97.5% 99.0%</span></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co">#&gt; (Intercept) -0.14554 -0.12903 -0.11295 -0.01126  0.08377  0.10566 0.124</span></span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt; Age2         1.48839  1.50702  1.52377  1.61628  1.71656  1.73588 1.756</span></span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 1.93343 </span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 28.68506 </span></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co">#&gt; DIC: 114.6703 </span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="co">#&gt; Expected Mean dispersion: 1 </span></span>
+<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="co">#&gt; Sq.root of Expected Mean dispersion: 1 </span></span>
+<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 1.293</span></span></code></pre></div>
+<p><em>Interpreting the “Prior and Maximum Likelihood Estimates with
+Standard Deviations” table</em></p>
+<p>This table gives a side-by-side comparison of the prior and the data
+driven maximum likelihood estimates (that should match the ouput from
+the glm function for the same model). In addition to revealing any
+differences in the estimates themselves, the relative magnitude of the
+standard deviations give insight into how “strong” the prior
+specification is relative to the information contained in the data. The
+unstandardized weights on the prior and data respectively are in most
+cases likely to be close to <em>(1/sd_prior)^2</em> and
+<em>(1/sd_data)^2</em> respectively. The fact that the prior standard
+deviations are much larger in this case tells us that the posterior mean
+estimates are likely to be much closer to the maximum likelihood
+estimates than to the prior estimates.</p>
+<p><em>Interpreting the “Bayesian Estimates Based on 1000 iid draws
+table</em></p>
+<p>This table gives more information related to the estimates seen in
+the print output. We now have a view of both the posterior mode and
+posterior mean. If these were substantially different, it would indicate
+that the posterior density had substantial asymmetry. The posterior
+standard deviation will generally be smaller than both the prior and the
+likelihood standard deviations. In this case, the posterior standard
+deviation for the <em>intercept</em> appears to be nearly the same as
+the likelihood standard deviation while the posterior standard deviation
+for <em>Age2</em> is substantially smaller (suggesting some weight on
+the prior).</p>
+<p>The tail probability gives the probability (under the posterior
+density) of the true coefficient being at least as far away from the
+center as the prior point estimate. In this case, there is ~44%
+probability of the intercept being greater than 0 but only a ~0.01%
+chance that the Age2 coefficient is smaller than the prior point
+estimate of 1.098. The latter is flagged as highly significant
+suggesting that the true slope coefficient is substantially larger than
+the prior point estimate.</p>
+<p>The MC error column gives a sense of any error in the estimates
+driven by the fact that we are using monte carlo simulation to generate
+our estimates. In this case, we used 1000 draws which appears to have
+been enough to make this error small. The user can experiment with this
+to see how the errors increase if we base the estimates on a smaller
+number of draws. In general, it is not recommended to interpret model
+output based on small number of draws. On the other hand, the fact that
+estimates are iid draws as opposed to Markov Chain Monte Carlo outputs
+eliminates any need for convergence diagnostics and burn-in phases.</p>
+<p><em>Interpreting the “Distribution Percentile” table</em></p>
+<p>This table providence credible interval information at several
+significance levels for the model. It gives the user insight into the
+range of most of the support for the posterior density and how it
+compares to both the prior and maximum likelihood point estimates. In
+this case, we can see that the prior point estimate for the intercept is
+close to the center of the density while the prior point estimate is far
+away from it.</p>
+<p><em>Brief discussion of Findings from model</em></p>
+<p>As we noted above, the posterior estimates for the intercept appear
+broadly consistent with the prior specification, so in a sense our prior
+beliefs are “validated” for the 13 year old girls. As the slope is
+substantially larger than in our prior specification, however, it seems
+like we underestimated the % of girls at age 15 who had already had
+their first period. The percentage is apparently substantially higher
+than the 90% we specificed using our prior and if we are Bayesians we
+should hence update our beliefs substantially based on the data. To
+understand exactly how much requires us to look at the model
+predictions(in particular predictions on the inverse link scale). We
+will do so in a later chapter.</p>
+</div>
+<div id="concluding-discussion" class="section level1">
+<h1>Concluding Discussion</h1>
+<p>In this note, we walked through an example illustrating a process for
+setting of the prior in the case of the <em>Age of Menarche</em> model
+based on the data in <span class="citation">(Venables and Ripley
+2002)</span>. There are several approaches taken here the we believe
+analysts can find useful in setting reasonable priors. These
+include:</p>
+<ul>
+<li>Centering variables so that the intercept can be given a meaningful
+prior and so that meaningful priors for the other variables can be
+formulated based on sensitivity in the support of data</li>
+<li>Incorporating external information if available (like our
+information regarding the average age of Menarche in the UK)</li>
+<li>Making reasonable assumptions based on other knowledge/insight
+(e.g., our prior point estimate at age 15)</li>
+</ul>
+<p>In the next section, we will take a take a look at how the analysts
+can check whether the data seems consistent with the specified
+prior.</p>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-HamiltonFairley2004" class="csl-entry">
+Hamilton-Fairley, Diana. 2004. <em>Lecture Notes: Obstetrics and
+Gynaecology</em>. Oxford: Blackwell Publishing.
+</div>
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+<div id="ref-VenablesRipley2002" class="csl-entry">
+Venables, W. N., and B. D. Ripley. 2002. <em><span class="nocase">Modern
+Applied Statistics with S</span></em>. New York: Springer.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

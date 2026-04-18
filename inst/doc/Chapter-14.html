@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter 14: Hierarchical Generalized Linear Models</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter 14: Hierarchical Generalized Linear
+Models</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(coda)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Warning: package &#39;coda&#39; was built under R version 4.5.2</span></span></code></pre></div>
+<div id="chapter-14-hierarchical-generalized-linear-models" class="section level1">
+<h1>Chapter 14: Hierarchical Generalized Linear Models</h1>
+<p>Chapter 13 focused on <strong>hierarchical linear models</strong>:
+the Eight Schools example with normally distributed group-level effects
+and known sampling variances. This chapter extends to
+<strong>hierarchical generalized linear models</strong> <span class="citation">(Gelman and Hill 2007; Gelman et al. 2013)</span>,
+specifically Poisson regression with observation-level random
+effects.</p>
+<p>We use the <strong>BikeSharing</strong> dataset and
+<strong><code>rglmb</code></strong> to implement a two-block Gibbs
+sampler. The Poisson likelihood is non-conjugate with the normal prior
+on the linear predictor, so each observation-level update requires an
+accept–reject step <span class="citation">(Robert and Casella
+2004)</span> via <strong><code>rglmb</code></strong>. For a full demo,
+see <strong><code>demo(&quot;Ex_09_BikeSharingPoisson&quot;)</code></strong>.</p>
+<div id="model-structure" class="section level2">
+<h2>1. Model Structure</h2>
+<p>Let <span class="math inline">\(y_i\)</span> denote the count (hourly
+bike rentals) for observation <span class="math inline">\(i\)</span>,
+and <span class="math inline">\(x_i\)</span> the covariate vector. The
+hierarchical model is:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Observation level:</strong> <span class="math inline">\(y_i
+\sim \text{Poisson}(\exp(\theta_i))\)</span>, with <span class="math inline">\(\theta_i\)</span> a latent log-rate.</li>
+<li><strong>Population level:</strong> <span class="math inline">\(\theta_i \sim N(x_i^\top \beta,
+\sigma_\theta^2)\)</span>, so covariates predict the random
+effects.</li>
+</ol>
+<p>The two-block Gibbs sampler alternates:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Block 1 (population):</strong> Draw <span class="math inline">\((\beta, \sigma_\theta^2) \mid \theta\)</span> —
+conjugate Normal-Gamma given <span class="math inline">\(\theta\)</span>, implemented with
+<strong><code>rglmb</code></strong> (family
+<code>gaussian()</code>).</li>
+<li><strong>Block 2 (observations):</strong> For each <span class="math inline">\(i\)</span>, draw <span class="math inline">\(\theta_i \mid \beta, \sigma_\theta^2, y_i\)</span>
+— Poisson likelihood with normal prior, implemented with
+<strong><code>rglmb</code></strong> (family
+<code>poisson()</code>).</li>
+</ol>
+<p>With <span class="math inline">\(n\)</span> observations, Block 2
+requires <span class="math inline">\(n\)</span> calls to
+<strong><code>rglmb</code></strong> per iteration. To keep run time
+manageable for the vignette, we use a 1% random subset of the data for
+training and reserve the rest for out-of-sample prediction. The chain
+used in Sections 4–5 is <strong>precomputed</strong> with the same
+settings as
+<strong><code>demo(&quot;Ex_09_BikeSharingPoisson&quot;)</code></strong>
+(<code>n_burn = 200</code>, <code>n_sim = 1000</code>) and stored as
+<strong><code>inst/extdata/BikeSharing_ch14_gibbs.rds</code></strong>.
+Section 3 still shows the full Gibbs code for reference; it is not
+re-run when this vignette is built.</p>
+</div>
+<div id="data-and-setup" class="section level2">
+<h2>2. Data and Setup</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;BikeSharing&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># Center continuous predictors</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>cont_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;temp&quot;</span>, <span class="st">&quot;atemp&quot;</span>, <span class="st">&quot;hum&quot;</span>, <span class="st">&quot;windspeed&quot;</span>, <span class="st">&quot;hr_sin&quot;</span>, <span class="st">&quot;hr_cos&quot;</span>, <span class="st">&quot;mon_sin&quot;</span>, <span class="st">&quot;mon_cos&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>BikeSharing_c <span class="ot">&lt;-</span> BikeSharing</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>BikeSharing_c[cont_vars] <span class="ot">&lt;-</span> <span class="fu">scale</span>(BikeSharing[cont_vars], <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># Formula (all variable model)</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>form <span class="ot">&lt;-</span> cnt <span class="sc">~</span> part_of_day <span class="sc">+</span> quarter <span class="sc">+</span> holiday <span class="sc">+</span> workingday <span class="sc">+</span> weathersit <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  hr_sin <span class="sc">+</span> hr_cos <span class="sc">+</span> mon_sin <span class="sc">+</span> mon_cos <span class="sc">+</span> temp <span class="sc">+</span> atemp <span class="sc">+</span> hum <span class="sc">+</span> windspeed</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Formula (Limited variable model)</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>form2 <span class="ot">&lt;-</span> cnt <span class="sc">~</span> part_of_day <span class="sc">+</span> quarter <span class="sc">+</span> holiday <span class="sc">+</span> workingday <span class="sc">+</span> weathersit <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>  hr_sin <span class="sc">+</span> hr_cos <span class="sc">+</span> mon_sin <span class="sc">+</span> mon_cos</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co"># Train/test split: indices bundled with precomputed Gibbs output (matches demo, set.seed(42))</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>pct_train <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(BikeSharing_c)</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>ch14_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;BikeSharing_ch14_gibbs.rds&quot;</span>, <span class="at">package =</span> <span class="st">&quot;glmbayes&quot;</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nzchar</span>(ch14_path), <span class="fu">file.exists</span>(ch14_path))</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>ch14_saved <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(ch14_path)</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">length</span>(ch14_saved<span class="sc">$</span>idx_train) <span class="sc">==</span> <span class="fu">round</span>(pct_train <span class="sc">*</span> n))</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>idx_train <span class="ot">&lt;-</span> ch14_saved<span class="sc">$</span>idx_train</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>idx_test  <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(<span class="fu">seq_len</span>(n), idx_train)</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>Bike_train <span class="ot">&lt;-</span> BikeSharing_c[idx_train, ]</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>Bike_test  <span class="ot">&lt;-</span> BikeSharing_c[idx_test, ]</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>X_train <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(form2, <span class="at">data =</span> Bike_train)</span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>X_test  <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(form2, <span class="at">data =</span> Bike_test)</span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> Bike_train<span class="sc">$</span>cnt</span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>y_test  <span class="ot">&lt;-</span> Bike_test<span class="sc">$</span>cnt</span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a>n_train <span class="ot">&lt;-</span> <span class="fu">length</span>(y_train)</span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a>n_test  <span class="ot">&lt;-</span> <span class="fu">length</span>(y_test)</span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a>p       <span class="ot">&lt;-</span> <span class="fu">ncol</span>(X_train)</span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="co"># Initial theta and prior for population block</span></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">log</span>(y_train <span class="sc">+</span> <span class="fl">0.5</span>)</span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>data_pop <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">theta =</span> theta, Bike_train)</span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a>form_pop <span class="ot">&lt;-</span> theta <span class="sc">~</span> part_of_day <span class="sc">+</span> quarter <span class="sc">+</span> holiday <span class="sc">+</span> workingday <span class="sc">+</span> weathersit <span class="sc">+</span></span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a>  hr_sin <span class="sc">+</span> hr_cos <span class="sc">+</span> mon_sin <span class="sc">+</span> mon_cos</span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a>ps_pop <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(form_pop, <span class="at">family =</span> <span class="fu">gaussian</span>(), <span class="at">data =</span> data_pop)</span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.05 (high-d default).</span></span></code></pre></div>
+</div>
+<div id="two-block-gibbs-sampler" class="section level2">
+<h2>3. Two-Block Gibbs Sampler</h2>
+<p>The following chunk is <strong>not evaluated</strong> when the
+vignette is built (<code>eval = FALSE</code>). For a live run, execute
+it in your session or use
+<strong><code>demo(&quot;Ex_09_BikeSharingPoisson&quot;)</code></strong> (expect a
+long runtime).</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>n_burn <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>n_sim  <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>beta_out   <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> p)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>sigma_out  <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_sim)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>theta_out  <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> n_train)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Burn-in</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>burn_time <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(n_burn)) {</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    out_pop <span class="ot">&lt;-</span> <span class="fu">rglmb</span>(<span class="dv">1</span>, theta, X_train, <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>      <span class="at">pfamily =</span> <span class="fu">dNormal_Gamma</span>(ps_pop<span class="sc">$</span>mu, <span class="at">Sigma_0 =</span> ps_pop<span class="sc">$</span>Sigma_0,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>        ps_pop<span class="sc">$</span>shape, ps_pop<span class="sc">$</span>rate))</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    beta   <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(out_pop<span class="sc">$</span>coefficients[<span class="dv">1</span>, ])</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    sigma_theta_sq <span class="ot">&lt;-</span> out_pop<span class="sc">$</span>dispersion[<span class="dv">1</span>]</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    mu_all <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(X_train <span class="sc">%*%</span> beta)</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(n_train)) {</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>      theta[i] <span class="ot">&lt;-</span> <span class="fu">rglmb</span>(<span class="dv">1</span>, y_train[i], <span class="fu">matrix</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">family =</span> <span class="fu">poisson</span>(),</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>        <span class="at">pfamily =</span> <span class="fu">dNormal</span>(<span class="at">mu =</span> mu_all[i], <span class="at">Sigma =</span> sigma_theta_sq))<span class="sc">$</span>coefficients[<span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    }</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>  }</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>})</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>burn_time</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co"># Main simulation</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>sim_time <span class="ot">&lt;-</span> <span class="fu">system.time</span>({</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_len</span>(n_sim)) {</span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a>    out_pop <span class="ot">&lt;-</span> <span class="fu">rglmb</span>(<span class="dv">1</span>, theta, X_train, <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a>      <span class="at">pfamily =</span> <span class="fu">dNormal_Gamma</span>(ps_pop<span class="sc">$</span>mu, <span class="at">Sigma_0 =</span> ps_pop<span class="sc">$</span>Sigma_0,</span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a>        ps_pop<span class="sc">$</span>shape, ps_pop<span class="sc">$</span>rate))</span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a>    beta   <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(out_pop<span class="sc">$</span>coefficients[<span class="dv">1</span>, ])</span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a>    sigma_theta_sq <span class="ot">&lt;-</span> out_pop<span class="sc">$</span>dispersion[<span class="dv">1</span>]</span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a>    mu_all <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(X_train <span class="sc">%*%</span> beta)</span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(n_train)) {</span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a>      theta[i] <span class="ot">&lt;-</span> <span class="fu">rglmb</span>(<span class="dv">1</span>, y_train[i], <span class="fu">matrix</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">family =</span> <span class="fu">poisson</span>(),</span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a>        <span class="at">pfamily =</span> <span class="fu">dNormal</span>(<span class="at">mu =</span> mu_all[i], <span class="at">Sigma =</span> sigma_theta_sq))<span class="sc">$</span>coefficients[<span class="dv">1</span>, <span class="dv">1</span>]</span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a>    }</span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a>    beta_out[k, ]  <span class="ot">&lt;-</span> beta</span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a>    sigma_out[k]   <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(sigma_theta_sq)</span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a>    theta_out[k, ] <span class="ot">&lt;-</span> theta</span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a>  }</span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a>})</span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a>sim_time</span></code></pre></div>
+<p>Load the precomputed draws (regenerate with
+<strong><code>demo(&quot;Ex_09_BikeSharingPoisson&quot;)</code></strong> and save
+with <code>saveRDS</code> to
+<code>inst/extdata/BikeSharing_ch14_gibbs.rds</code>).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>beta_out  <span class="ot">&lt;-</span> ch14_saved<span class="sc">$</span>beta_out</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>sigma_out <span class="ot">&lt;-</span> ch14_saved<span class="sc">$</span>sigma_out</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>n_burn    <span class="ot">&lt;-</span> ch14_saved<span class="sc">$</span>n_burn</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>n_sim     <span class="ot">&lt;-</span> ch14_saved<span class="sc">$</span>n_sim</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>mcmc_main <span class="ot">&lt;-</span> ch14_saved<span class="sc">$</span>mcmc_main</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">nrow</span>(beta_out) <span class="sc">==</span> n_sim, <span class="fu">length</span>(sigma_out) <span class="sc">==</span> n_sim, <span class="fu">ncol</span>(beta_out) <span class="sc">==</span> p)</span></code></pre></div>
+</div>
+<div id="coda-diagnostics" class="section level2">
+<h2>4. CODA Diagnostics</h2>
+<p>We summarize the main parameters (<span class="math inline">\(\beta\)</span> and <span class="math inline">\(\sigma_\theta\)</span>) using the
+<strong>coda</strong> package <span class="citation">(Plummer et al.
+2006)</span>. Random effects <span class="math inline">\(\theta\)</span>
+are excluded from the summary. Object <code>mcmc_main</code> comes from
+the saved chain (coefficient columns match <code>X_train</code>, plus
+<code>sigma_theta</code>).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">summary</span>(mcmc_main)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; Iterations = 1:1000</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; Thinning interval = 1 </span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; Number of chains = 1 </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; Sample size per chain = 1000 </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; 1. Empirical mean and standard deviation for each variable,</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt;    plus standard error of the mean:</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;                          Mean      SD Naive SE Time-series SE</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; (Intercept)           3.51912 0.26805 0.008477       0.008445</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; part_of_dayMorning    2.32069 0.27789 0.008788       0.009502</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; part_of_dayAfternoon  1.79354 0.36705 0.011607       0.012202</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; part_of_dayEvening    1.38643 0.28336 0.008961       0.009674</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; quarterQ2            -0.10774 0.30643 0.009690       0.010874</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; quarterQ3            -0.07867 0.36867 0.011658       0.012734</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; quarterQ4             0.45117 0.26950 0.008522       0.009739</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; holiday              -0.05947 0.40337 0.012756       0.012170</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; workingday           -0.10572 0.11632 0.003678       0.003678</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; weathersit           -0.16806 0.08173 0.002584       0.002923</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; hr_sin               -0.71063 0.18303 0.005788       0.006263</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; hr_cos               -0.06914 0.18005 0.005694       0.005848</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; mon_sin              -0.18727 0.18224 0.005763       0.006030</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; mon_cos              -0.51362 0.19698 0.006229       0.006721</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; sigma_theta           0.67173 0.03751 0.001186       0.001338</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; 2. Quantiles for each variable:</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt;                          2.5%     25%      50%      75%     97.5%</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; (Intercept)           2.98100  3.3490  3.51721  3.69824  4.048539</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; part_of_dayMorning    1.79388  2.1413  2.31747  2.50564  2.864538</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt; part_of_dayAfternoon  1.09263  1.5512  1.79171  2.03654  2.535714</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt; part_of_dayEvening    0.83131  1.1894  1.38755  1.57537  1.920033</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="co">#&gt; quarterQ2            -0.68878 -0.3203 -0.10473  0.11176  0.474540</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co">#&gt; quarterQ3            -0.86117 -0.3138 -0.07295  0.15504  0.646679</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a><span class="co">#&gt; quarterQ4            -0.06511  0.2687  0.45146  0.62428  0.979505</span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="co">#&gt; holiday              -0.87759 -0.3393 -0.07459  0.22403  0.729777</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="co">#&gt; workingday           -0.34146 -0.1813 -0.10715 -0.02728  0.120492</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt; weathersit           -0.31819 -0.2261 -0.16709 -0.11521 -0.005618</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co">#&gt; hr_sin               -1.06890 -0.8303 -0.71183 -0.58576 -0.364450</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt; hr_cos               -0.43660 -0.1952 -0.06709  0.05361  0.274436</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt; mon_sin              -0.55833 -0.3092 -0.17928 -0.06931  0.167212</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co">#&gt; mon_cos              -0.88295 -0.6536 -0.51927 -0.38338 -0.126460</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt; sigma_theta           0.60361  0.6465  0.66966  0.69657  0.748600</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a>es <span class="ot">&lt;-</span> coda<span class="sc">::</span><span class="fu">effectiveSize</span>(mcmc_main)</span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">parameter =</span> <span class="fu">names</span>(es), <span class="at">effective_size =</span> <span class="fu">as.numeric</span>(es)),</span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Effective sample size (coda::effectiveSize)&quot;</span></span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Effective sample size (coda::effectiveSize)</caption>
+<thead>
+<tr class="header">
+<th align="left">parameter</th>
+<th align="right">effective_size</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">1007.6068</td>
+</tr>
+<tr class="even">
+<td align="left">part_of_dayMorning</td>
+<td align="right">855.2566</td>
+</tr>
+<tr class="odd">
+<td align="left">part_of_dayAfternoon</td>
+<td align="right">904.8935</td>
+</tr>
+<tr class="even">
+<td align="left">part_of_dayEvening</td>
+<td align="right">857.9380</td>
+</tr>
+<tr class="odd">
+<td align="left">quarterQ2</td>
+<td align="right">794.0825</td>
+</tr>
+<tr class="even">
+<td align="left">quarterQ3</td>
+<td align="right">838.1824</td>
+</tr>
+<tr class="odd">
+<td align="left">quarterQ4</td>
+<td align="right">765.8225</td>
+</tr>
+<tr class="even">
+<td align="left">holiday</td>
+<td align="right">1098.5595</td>
+</tr>
+<tr class="odd">
+<td align="left">workingday</td>
+<td align="right">1000.0000</td>
+</tr>
+<tr class="even">
+<td align="left">weathersit</td>
+<td align="right">781.9330</td>
+</tr>
+<tr class="odd">
+<td align="left">hr_sin</td>
+<td align="right">854.0864</td>
+</tr>
+<tr class="even">
+<td align="left">hr_cos</td>
+<td align="right">947.7249</td>
+</tr>
+<tr class="odd">
+<td align="left">mon_sin</td>
+<td align="right">913.3215</td>
+</tr>
+<tr class="even">
+<td align="left">mon_cos</td>
+<td align="right">859.0090</td>
+</tr>
+<tr class="odd">
+<td align="left">sigma_theta</td>
+<td align="right">785.7880</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>ac1 <span class="ot">&lt;-</span> coda<span class="sc">::</span><span class="fu">autocorr</span>(mcmc_main, <span class="at">lag =</span> <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>ac1_mat <span class="ot">&lt;-</span> <span class="fu">drop</span>(ac1)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>own_ac1 <span class="ot">&lt;-</span> <span class="fu">diag</span>(ac1_mat)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">names</span>(own_ac1) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(mcmc_main)</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">parameter =</span> <span class="fu">names</span>(own_ac1), <span class="at">lag_1_autocorr =</span> <span class="fu">as.numeric</span>(own_ac1)),</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">4</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">&quot;Lag-1 autocorrelation (diagonal of coda::autocorr, lag = 1)&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>)</span></code></pre></div>
+<table>
+<caption>Lag-1 autocorrelation (diagonal of coda::autocorr, lag =
+1)</caption>
+<thead>
+<tr class="header">
+<th align="left">parameter</th>
+<th align="right">lag_1_autocorr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">0.0697</td>
+</tr>
+<tr class="even">
+<td align="left">part_of_dayMorning</td>
+<td align="right">0.0775</td>
+</tr>
+<tr class="odd">
+<td align="left">part_of_dayAfternoon</td>
+<td align="right">0.0494</td>
+</tr>
+<tr class="even">
+<td align="left">part_of_dayEvening</td>
+<td align="right">0.0760</td>
+</tr>
+<tr class="odd">
+<td align="left">quarterQ2</td>
+<td align="right">0.1143</td>
+</tr>
+<tr class="even">
+<td align="left">quarterQ3</td>
+<td align="right">0.0875</td>
+</tr>
+<tr class="odd">
+<td align="left">quarterQ4</td>
+<td align="right">0.0491</td>
+</tr>
+<tr class="even">
+<td align="left">holiday</td>
+<td align="right">0.0590</td>
+</tr>
+<tr class="odd">
+<td align="left">workingday</td>
+<td align="right">0.0134</td>
+</tr>
+<tr class="even">
+<td align="left">weathersit</td>
+<td align="right">0.0754</td>
+</tr>
+<tr class="odd">
+<td align="left">hr_sin</td>
+<td align="right">0.0782</td>
+</tr>
+<tr class="even">
+<td align="left">hr_cos</td>
+<td align="right">0.0872</td>
+</tr>
+<tr class="odd">
+<td align="left">mon_sin</td>
+<td align="right">0.0448</td>
+</tr>
+<tr class="even">
+<td align="left">mon_cos</td>
+<td align="right">0.0753</td>
+</tr>
+<tr class="odd">
+<td align="left">sigma_theta</td>
+<td align="right">0.1195</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="out-of-sample-prediction" class="section level2">
+<h2>5. Out-of-Sample Prediction</h2>
+<p>We compare two prediction strategies on the held-out test set:</p>
+<ul>
+<li><strong>Option A (conditional):</strong> <span class="math inline">\(\hat{y}_i = \exp(x_i^\top \bar{\beta})\)</span>,
+where <span class="math inline">\(\bar{\beta}\)</span> is the posterior
+mean. No random-effect uncertainty.</li>
+<li><strong>Option B (posterior predictive):</strong> Draw <span class="math inline">\(\theta_{\text{test}} \sim N(X_{\text{test}}
+\beta^{(s)}, \sigma^{(s)2})\)</span>, then <span class="math inline">\(y
+\sim \text{Poisson}(\exp(\theta_{\text{test}}))\)</span> for each
+posterior sample <span class="math inline">\(s\)</span>; report the mean
+over samples.</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>beta_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(beta_out)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>sigma_mean <span class="ot">&lt;-</span> <span class="fu">mean</span>(sigma_out)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># Option A: conditional mean</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>y_pred_cond <span class="ot">&lt;-</span> <span class="fu">exp</span>(X_test <span class="sc">%*%</span> beta_mean)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>mae_cond  <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(y_test <span class="sc">-</span> y_pred_cond))</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>rmse_cond <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((y_test <span class="sc">-</span> y_pred_cond)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co"># Option B: posterior predictive mean</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>n_pred <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>y_pred_samples <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n_pred, <span class="at">ncol =</span> n_test)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="fu">seq_len</span>(n_pred)) {</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  idx_s <span class="ot">&lt;-</span> <span class="fu">sample</span>(n_sim, <span class="dv">1</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  beta_s  <span class="ot">&lt;-</span> beta_out[idx_s, ]</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>  sigma_s <span class="ot">&lt;-</span> sigma_out[idx_s]</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>  theta_test <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_test, <span class="at">mean =</span> X_test <span class="sc">%*%</span> beta_s, <span class="at">sd =</span> sigma_s)</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  y_pred_samples[s, ] <span class="ot">&lt;-</span> <span class="fu">rpois</span>(n_test, <span class="at">lambda =</span> <span class="fu">exp</span>(theta_test))</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>}</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>y_pred_mean <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(y_pred_samples)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>mae_pp  <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">abs</span>(y_test <span class="sc">-</span> y_pred_mean))</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>rmse_pp <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((y_test <span class="sc">-</span> y_pred_mean)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Option A (conditional): MAE =&quot;</span>, <span class="fu">round</span>(mae_cond, <span class="dv">2</span>), <span class="st">&quot; RMSE =&quot;</span>, <span class="fu">round</span>(rmse_cond, <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt; Option A (conditional): MAE = 87.27  RMSE = 136.55</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Option B (post. pred.): MAE =&quot;</span>, <span class="fu">round</span>(mae_pp, <span class="dv">2</span>), <span class="st">&quot; RMSE =&quot;</span>, <span class="fu">round</span>(rmse_pp, <span class="dv">2</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; Option B (post. pred.): MAE = 96.16  RMSE = 137.24</span></span></code></pre></div>
+</div>
+<div id="summary" class="section level2">
+<h2>6. Summary</h2>
+<table>
+<colgroup>
+<col width="40%" />
+<col width="59%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Implementation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Block 1 (population)</strong></td>
+<td><code>rglmb(1, theta, X, family = gaussian(), pfamily = dNormal_Gamma(...))</code></td>
+</tr>
+<tr class="even">
+<td><strong>Block 2 (observations)</strong></td>
+<td>For each <span class="math inline">\(i\)</span>:
+<code>rglmb(1, y[i], matrix(1,1,1), family = poisson(), pfamily = dNormal(mu_i, sigma^2))</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Prior for <span class="math inline">\(\beta,
+\sigma^2\)</span></strong></td>
+<td>From <code>Prior_Setup</code> on <span class="math inline">\(\theta
+\sim X\beta\)</span> (Gaussian)</td>
+</tr>
+<tr class="even">
+<td><strong>Data</strong></td>
+<td>BikeSharing (1% train, 99% test for vignette)</td>
+</tr>
+<tr class="odd">
+<td><strong>Vignette chain</strong></td>
+<td>Precomputed <code>BikeSharing_ch14_gibbs.rds</code> (200 burn-in,
+1000 stored iterations)</td>
+</tr>
+</tbody>
+</table>
+<p>For longer runs and full diagnostics, see
+<strong><code>demo(&quot;Ex_09_BikeSharingPoisson&quot;)</code></strong>. For
+hierarchical linear models, see Chapter 13.</p>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Gelman2013" class="csl-entry">
+Gelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki
+Vehtari, and Donald B. Rubin. 2013. <em>Bayesian Data Analysis</em>. 3rd
+ed. CRC Press.
+</div>
+<div id="ref-GelmanHill2007" class="csl-entry">
+Gelman, Andrew, and Jennifer Hill. 2007. <em>Data Analysis Using
+Regression and Multilevel/Hierarchical Models</em>. Cambridge, UK:
+Cambridge University Press.
+</div>
+<div id="ref-PlummerEtAl2006" class="csl-entry">
+Plummer, Martyn, Nicky Best, Kate Cowles, and Karen Vines. 2006.
+<span>“<span>CODA</span>: Convergence Diagnosis and Output Analysis for
+<span>MCMC</span>.”</span> <em>R News</em> 6 (1): 7–11. <a href="https://CRAN.R-project.org/doc/Rnews/">https://CRAN.R-project.org/doc/Rnews/</a>.
+</div>
+<div id="ref-RobertCasella2004" class="csl-entry">
+Robert, Christian P., and George Casella. 2004. <em>Monte Carlo
+Statistical Methods</em>. 2nd ed. New York: Springer.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

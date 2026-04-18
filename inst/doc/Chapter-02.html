@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter 02: Estimating Bayesian Linear Models</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter 02: Estimating Bayesian Linear
+Models</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span></code></pre></div>
+<div id="introductory-discussion" class="section level1">
+<h1>1. Introductory discussion</h1>
+<p>The lmb function brings the familiar interface of R’s lm into a
+Bayesian framework. It preserves the core outputs and methods you know
+from lm—such as coefficient tables, fitted values, and residual
+summaries—while adding Bayesian priors and posterior summaries. In this
+chapter, we fit the classical linear model side-by-side with its
+Bayesian counterpart, demonstrating how their results align when using
+common default settings. Standard GLM references include <span class="citation">(McCullagh and Nelder 1989)</span> and <span class="citation">(Venables and Ripley 2002)</span>; Bayesian
+linear-model material aligns with <span class="citation">(Gelman et al.
+2013)</span> and <span class="citation">(Agresti 2015)</span>.</p>
+<p>For consistency with our Binomial and Count vignettes, we use the
+default priors generated by Prior_Setup() and fix the dispersion at its
+maximum-likelihood estimate. Holding dispersion constant ensures that
+the Bayesian point estimates closely match the classical ones, isolating
+the effect of the prior. We defer a deeper dive into alternative prior
+choices—including priors on dispersion parameters—to a later
+chapter.</p>
+<div id="linear-model-structure-and-gaussian-likelihood-fixed-dispersion" class="section level2">
+<h2>2. Linear Model Structure and Gaussian Likelihood (Fixed
+Dispersion)</h2>
+<p>In a standard linear regression model, the response is modeled as</p>
+<p><span class="math display">\[
+Y_i = x_i^\top \beta + \varepsilon_i,
+\qquad
+\varepsilon_i \sim N(0,\ \sigma^2),
+\]</span></p>
+<p>where: - <span class="math inline">\(x_i\)</span> is the vector of
+predictors for observation <span class="math inline">\(i\)</span>, -
+<span class="math inline">\(\beta\)</span> is the vector of regression
+coefficients, - <span class="math inline">\(\sigma^2\)</span> is the
+error variance (dispersion), treated as <strong>fixed</strong> in this
+chapter.</p>
+<p>The fitted values are</p>
+<p><span class="math display">\[
+\hat{\mu}_i = x_i^\top \beta.
+\]</span></p>
+<div id="gaussian-loglikelihood-fixed-dispersion" class="section level3">
+<h3>2.1 Gaussian Log‑Likelihood (Fixed Dispersion)</h3>
+<p>Up to an additive constant, the log‑likelihood for <span class="math inline">\(\beta\)</span> is</p>
+<p><span class="math display">\[
+\ell(\beta)
+=
+-\frac{1}{2\sigma^2}
+\sum_{i=1}^n (y_i - x_i^\top \beta)^2.
+\]</span></p>
+<p>In matrix notation:</p>
+<p><span class="math display">\[
+\ell(\beta)
+=
+-\frac{1}{2\sigma^2}
+(y - X\beta)^\top (y - X\beta).
+\]</span></p>
+<p>This is the same criterion minimized by ordinary least squares, so
+the classical estimate of <span class="math inline">\(\beta\)</span> is
+the familiar OLS solution.</p>
+</div>
+<div id="normal-prior-on-beta" class="section level3">
+<h3>2.2 Normal Prior on <span class="math inline">\(\beta\)</span></h3>
+<p>To form a Bayesian linear model, we place a multivariate Normal prior
+on the coefficients:</p>
+<p><span class="math display">\[
+\beta \sim N(\mu_0,\ \Sigma_0).
+\]</span></p>
+<p>The default prior from <code>Prior_Setup()</code> is a Zellner‑type
+<span class="math inline">\(g\)</span>-prior, which scales <span class="math inline">\(\Sigma_0\)</span> relative to the information in
+the design matrix.<br />
+With the default setting <span class="math inline">\(\mathrm{pwt} =
+0.01\)</span>, the prior is weakly informative and exerts only mild
+shrinkage toward <span class="math inline">\(\mu_0\)</span>.</p>
+</div>
+<div id="logposterior-and-conjugate-updating" class="section level3">
+<h3>2.3 Log‑Posterior and Conjugate Updating</h3>
+<p>Combining the likelihood and the Normal prior yields a Normal
+posterior distribution:</p>
+<p><span class="math display">\[
+\beta \mid y \sim N(\mu_{\text{post}},\ \Sigma_{\text{post}}),
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+\Sigma_{\text{post}}
+=
+\left(
+\frac{1}{\sigma^2} X^\top X
++
+\Sigma_0^{-1}
+\right)^{-1},
+\]</span></p>
+<p><span class="math display">\[
+\mu_{\text{post}}
+=
+\Sigma_{\text{post}}
+\left(
+\frac{1}{\sigma^2} X^\top y
++
+\Sigma_0^{-1} \mu_0
+\right).
+\]</span></p>
+<p>Because both the likelihood and prior are quadratic in <span class="math inline">\(\beta\)</span>, the posterior is available in
+closed form.<br />
+This conjugate structure explains why the Bayesian estimates closely
+track the classical OLS estimates when the prior is weak and <span class="math inline">\(\sigma^2\)</span> is fixed at the classical
+estimate.</p>
+</div>
+<div id="why-fixing-dispersion-matters" class="section level3">
+<h3>2.4 Why Fixing Dispersion Matters</h3>
+<p>In this chapter, we treat <span class="math inline">\(\sigma^2\)</span> as known.<br />
+This ensures:</p>
+<ul>
+<li>the Bayesian and classical fits are directly comparable,<br />
+</li>
+<li>the prior affects only the regression coefficients,<br />
+</li>
+<li>the posterior remains exactly Normal.</li>
+</ul>
+<p>Models that <strong>estimate</strong> <span class="math inline">\(\sigma^2\)</span> or place a prior on it are
+covered in Chapter 11.</p>
+</div>
+</div>
+</div>
+<div id="sample-data---dobsons-plant-weight-data" class="section level1">
+<h1>3. Sample Data - Dobson’s Plant weight data</h1>
+<p>We illustrate our models using the Plant Weight dataset from Dobson
+(1990), which measures the dry weight of plants grown under control
+(“Ctl”) and treatment (“Trt”) conditions. We combine the two groups into
+a single response vector and create a factor variable for group
+membership.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="do">## Annette Dobson (1990) &quot;An Introduction to Generalized Linear Models&quot;.</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## Page 9: Plant Weight Data.</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>ctl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">4.17</span>,<span class="fl">5.58</span>,<span class="fl">5.18</span>,<span class="fl">6.11</span>,<span class="fl">4.50</span>,<span class="fl">4.61</span>,<span class="fl">5.17</span>,<span class="fl">4.53</span>,<span class="fl">5.33</span>,<span class="fl">5.14</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">4.81</span>,<span class="fl">4.17</span>,<span class="fl">4.41</span>,<span class="fl">3.59</span>,<span class="fl">5.87</span>,<span class="fl">3.83</span>,<span class="fl">6.03</span>,<span class="fl">4.89</span>,<span class="fl">4.32</span>,<span class="fl">4.69</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>group <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Ctl&quot;</span>,<span class="st">&quot;Trt&quot;</span>))</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>weight <span class="ot">&lt;-</span> <span class="fu">c</span>(ctl, trt)</span></code></pre></div>
+</div>
+<div id="calling-the-two-functions" class="section level1">
+<h1>4. Calling the two functions</h1>
+<p>In this section, we fit both the classical and Bayesian linear models
+to the plant data. First, we run lm() to establish a baseline. Then, we
+use Prior_Setup() to define our Bayesian priors and call lmb() with
+those settings.</p>
+<div id="using-the-classical-lm-function" class="section level2">
+<h2>4.1 Using the classical lm function</h2>
+<p>This simple ordinary least squares regression of plant weight on
+group membership will serve as our point of comparison.</p>
+</div>
+<div id="calling-the-classical-lm-function" class="section level2">
+<h2>4.1.1 Calling the classical lm function</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>lm.D9 <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> group)</span></code></pre></div>
+</div>
+<div id="setting-the-prior-and-calling-the-lmb-function" class="section level2">
+<h2>4.2 Setting the prior and calling the lmb function</h2>
+<p>Here we generate default Gaussian priors and plug them into the
+Bayesian model.</p>
+<div id="setting-the-prior" class="section level3">
+<h3>4.2.1 Setting the prior</h3>
+<p>Prior_Setup() returns the prior mean vector (mu), covariance matrix
+(V), and the maximum-likelihood estimate of dispersion (disp_ML) for a
+fixed-dispersion Gaussian model.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>ps<span class="ot">=</span><span class="fu">Prior_Setup</span>(weight <span class="sc">~</span> group,<span class="at">family=</span><span class="fu">gaussian</span>())</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.01 (low-d default).</span></span></code></pre></div>
+<p>We now utilize the print function for <strong>Prior_Setup</strong> to
+understand the default prior specification.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>ps</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = weight ~ group, family = gaussian())</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; Setting up a Zellner g-type prior: </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;   pwt = 0.01 </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;   g   = (1 - pwt)/pwt = 99 </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was computed as (pwt / (1 - pwt)) * n_likelihood: </span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 0.202 </span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 20 </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper  pwt</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; (Intercept)     4.8465 2.192002  0.550255 9.142745 0.01</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; groupTrt        0.0000 3.099959 -6.075808 6.075808 0.01</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt;             (Intercept) groupTrt</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; (Intercept)      1.0000  -0.7071</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; groupTrt        -0.7071   1.0000</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  0.4853 </span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt;   shape = 0.601</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt;   rate = 0.2917</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 2.06041e+00 which implies 1/Expected precision  = 4.85341e-01 </span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<p>The printed output begins by echoing the original function call,
+confirming the model formula and the specified likelihood family. Next,
+the setup of a Zellner g-type prior is displayed, where pwt = 0.01
+indicates that the prior contributes just 1% of the total information,
+while the likelihood contributes the remaining 99%. This reflects a
+weakly informative prior, allowing the data to dominate the posterior.
+The derived value of g = 99 quantifies the relative weight of the
+likelihood to the prior (or more precisely how much the Prior
+Variance-Covariance matrix is scaled up relative to the Likelihood
+Variance-Covariance matrix).</p>
+<p>The note on n_prior shows how this pseudo-sample size was computed
+from pwt and the effective sample size of the likelihood (n_likelihood =
+20). The summary section includes prior means, standard deviations, and
+confidence intervals for each coefficient. The prior correlation matrix
+reveals the structure of dependencies induced by the design matrix—here,
+a strong negative correlation between the intercept and treatment
+effect. In addition, the conditional dispersion (0.485) reflects the
+residual variance under the Gaussian model, consistent with the
+classical GLM fit.</p>
+<p>Finally, the printout also contains information related to shape and
+rate parameters that are used to specify priors for the dispersion. We
+discuss these extensively in a separate vignette and will not cover
+here.</p>
+<p>In our next vignette, we discuss the default prior in more details.
+We also discuss how users can utilize the options in the Prior_Setup
+function to get different <strong>g-prior</strong> specifications that
+rescale the Prior-Variance covariance matrix as well as options for
+using alternative prior mean specifications. In a later vignette, we dig
+deeper into the use of differential <strong>pwt</strong> specifications
+for different dimensions and the use of more informative priors.</p>
+</div>
+<div id="calling-the-lmb-function" class="section level3">
+<h3>4.2.2 Calling the lmb function</h3>
+<p>We show how to call the lmb function under three different prior
+specification. The first (a dNormal Prior) treats the dispersion as a
+fixed and known constant (and that specification is the focus of most of
+this vignette). The other two are alternative priors that also provide a
+prior specification for the dispersion. Those priors will be covered in
+greater details in later chapters but are introduced so that users are
+aware of the potential need to estimate the dispersion. Many glm models
+(like the binomial and poisson models) don’t have dispersion parameters.
+For that reason, we focus most of our discussion in this chapter on
+models with fixed dispersion parameter.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>lmb.D9<span class="ot">=</span><span class="fu">lmb</span>(weight <span class="sc">~</span> group,<span class="fu">dNormal</span>(<span class="at">mu=</span>ps<span class="sc">$</span>mu,<span class="at">Sigma  =</span>ps<span class="sc">$</span>Sigma,<span class="at">dispersion=</span>ps<span class="sc">$</span>dispersion))</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="do">##lmb.D9_v2=lmb(weight ~ group,dNormal_Gamma(mu=ps$mu,Sigma_0=ps$Sigma_0,shape=ps$shape,rate=ps$rate))</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="do">## lmb.D9_v3=lmb(weight ~ group,dIndependent_Normal_Gamma(mu=ps$mu,Sigma = ps$Sigma,shape=ps$shape_ING,rate=ps$rate))</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">summary</span>(lmb.D9)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; Call</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; lmb(formula = weight ~ group, pfamily = dNormal(mu = ps$mu, Sigma = ps$Sigma, </span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt;     dispersion = ps$dispersion))</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; Expected Residuals:</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;         Min          1Q      Median          3Q         Max </span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; -1.07443097 -0.49702006  0.06797994  0.26297994  1.36556903 </span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; Prior and Maximum Likelihood Estimates with Standard Deviations</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;             Null Mode Prior Mean Prior.sd Max Like. Like.sd</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; (Intercept)     4.846      4.846    2.192     5.032   0.220</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; groupTrt        0.000      0.000    3.100    -0.371   0.311</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; Bayesian Estimates Based on 1000 iid draws</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt;             Post.Mode Post.Mean   Post.Sd  MC Error Pr(Null_tail) SE(tail)</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co">#&gt; (Intercept)  5.030145  5.029609  0.221355  0.007000      0.219000    0.013</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co">#&gt; groupTrt    -0.367290 -0.365178  0.314103  0.009933      0.116000    0.010</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.219</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; groupTrt             0.116</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co">#&gt;   Directional Tail Summaries:</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co">#&gt;                Metric vs Null vs Prior</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co">#&gt;  Mahalanobis Distance  1.1785   1.1785</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt;      Tail Probability  0.1160   0.1160</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt;   [Tail probabilities are P(delta^T * Z &lt;= 0) in whitened space]</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; Distribution Percentiles</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt;                1.0%    2.5%    5.0%  Median   95.0%   97.5% 99.0%</span></span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.5277  4.6131  4.6756  5.0267  5.3996  5.4811 5.566</span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co">#&gt; groupTrt    -1.1095 -0.9893 -0.8807 -0.3505  0.1445  0.2372 0.343</span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 1.988645 </span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 19.97483 </span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co">#&gt; DIC: 44.26293 </span></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt; Expected Mean dispersion: 0.4853407 </span></span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt; Sq.root of Expected Mean dispersion: 0.696664 </span></span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 1</span></span></code></pre></div>
+<p>With both models fitted, we’re ready to explore their summaries and
+compare classical versus Bayesian outputs in the next section.</p>
+</div>
+</div>
+</div>
+<div id="summarizing-the-output" class="section level1">
+<h1>5. Summarizing the output</h1>
+<p>Before we dive into each summary, it’s helpful to see the big
+picture. In the classical lm summary, you get three blocks—residual
+diagnostics, coefficient tests, and global fit measures—that tell you
+how well an OLS model is behaving. In the Bayesian lmb summary, you see
+additional blocks that compare your specified priors to the data (via ML
+estimates), then deliver full posterior summaries, effective‐parameter
+counts, and information criteria. In Sections 4.1 and 4.2 we walk
+through each of these blocks side by side, highlighting where the
+Bayesian output enriches or mirrors the classical view.</p>
+<div id="summarizing-the-lm-output" class="section level2">
+<h2>5.1 Summarizing the lm output</h2>
+<p>The built-in summary() method for an lm object organizes its output
+into three clear pieces: - A quick look at the residuals - A coefficient
+table with t-tests - Overall fit statistics (RSE, R^2, F-test) We’ll
+step through each of these in turn, starting with the residual
+summary.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">summary</span>(lm.D9)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; lm(formula = weight ~ group)</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt;     Min      1Q  Median      3Q     Max </span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; -1.0710 -0.4938  0.0685  0.2462  1.3690 </span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; (Intercept)   5.0320     0.2202  22.850 9.55e-15 ***</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; groupTrt     -0.3710     0.3114  -1.191    0.249    </span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 0.6964 on 18 degrees of freedom</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.07308,    Adjusted R-squared:  0.02158 </span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; F-statistic: 1.419 on 1 and 18 DF,  p-value: 0.249</span></span></code></pre></div>
+<div id="residual-summary" class="section level3">
+<h3>5.1.1 Residual summary</h3>
+<p><code>summary(lm.D9)</code> begins with a five‐number summary of the
+residuals (Min, 1Q, Median, 3Q, Max). This display highlights skew,
+spread, and potential outliers in the model’s error distribution.</p>
+</div>
+<div id="coefficient-estimates-and-hypothesis-tests" class="section level3">
+<h3>5.1.2 Coefficient Estimates and Hypothesis Tests</h3>
+<p>Coefficients:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">Estimate</th>
+<th align="right">Std. Error</th>
+<th align="right">t value</th>
+<th align="right">Pr(&gt;</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>(Intercept)</td>
+<td align="right">5.0320</td>
+<td align="right">0.2202</td>
+<td align="right">22.850</td>
+<td align="right">9.55e-15***</td>
+</tr>
+<tr class="even">
+<td>groupTrt</td>
+<td align="right">–0.3710</td>
+<td align="right">0.3114</td>
+<td align="right">–1.191</td>
+<td align="right">0.249</td>
+</tr>
+</tbody>
+</table>
+<p>The columns report:</p>
+<ul>
+<li>Estimate: the ordinary least squares estimate of each regression
+coefficient.<br />
+</li>
+<li>Std. Error: the estimated standard deviation of the sampling
+distribution, derived from the residual mean square.<br />
+</li>
+<li>t value: <span class="math inline">\(\frac{\text{Estimate} -
+0}{\text{Std. Error}}\)</span>; this is the test statistic for <span class="math inline">\(H_{0}:\beta=0\)</span>.<br />
+</li>
+<li>Pr(&gt;|t|): the two-sided p-value, i.e. the probability of
+observing a <span class="math inline">\(|t|\)</span> at least as large
+as the one computed, assuming <span class="math inline">\(H_{0}\)</span>
+is true. Significance codes (***) denote <span class="math inline">\(p&lt;0.001\)</span>.</li>
+</ul>
+<p>The t-test assesses whether each predictor’s effect differs from zero
+after accounting for sampling variability. A small p-value indicates
+that the null hypothesis <span class="math inline">\(\beta = 0\)</span>
+is unlikely given the data.</p>
+<p>In this example, the intercept is highly significant (<span class="math inline">\(p&lt;10^{-14}\)</span>), whereas the treatment
+effect (groupTrt) yields <span class="math inline">\(p=0.249\)</span>,
+so there is insufficient evidence to reject <span class="math inline">\(H_{0}:\beta_{\text{groupTrt}}=0\)</span> at
+conventional levels.</p>
+</div>
+<div id="model-fit-statistics" class="section level3">
+<h3>5.1.3 Model fit statistics</h3>
+<p>Below the coefficient table, <code>summary(lm.D9)</code> prints four
+key measures of fit:</p>
+<pre><code>Residual standard error: 0.7047 on 18 DF
+Multiple R-squared:    0.00285
+Adjusted R-squared:   -0.04863
+F-statistic: 0.3094 on 1 and 18 DF,  p-value: 0.5839</code></pre>
+<p>These metrics gauge how well the model captures variation in the data
+and whether the added predictor meaningfully improves over an
+intercept-only model.</p>
+<hr />
+<p><strong>Residual standard error (RSE)</strong></p>
+<p>This is the estimated standard deviation of the residuals.</p>
+<hr />
+<p><strong>Multiple R-squared (<span class="math inline">\(R^2\)</span>)</strong></p>
+<p>This measures the fraction of total variability in <span class="math inline">\(y\)</span> explained by the model.</p>
+<hr />
+<p><strong>Adjusted R-squared (<span class="math inline">\(\text{adj}R^2\)</span>)</strong></p>
+<p>Adjusts for the number of predictors, penalizing model
+complexity.</p>
+<hr />
+<p><strong>F-statistic</strong></p>
+<p>Tests the null hypothesis that all slopes are zero.</p>
+</div>
+</div>
+<div id="summarizing-the-lmb-output" class="section level2">
+<h2>5.2 Summarizing the lmb output</h2>
+<p>When you call summary() on an lmb object, the first thing you see is
+how your prior specification lines up against a classical fit under
+fixed dispersion. This side-by-side display makes it easy to gauge how
+much your prior is pulling the estimates. Only after that does the
+function report full posterior summaries (moments, quantiles, Monte
+Carlo errors) and Bayesian diagnostics (pD, DIC, etc.). We begin by
+examining the prior vs. ML block.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">summary</span>(lmb.D9)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; Call</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; lmb(formula = weight ~ group, pfamily = dNormal(mu = ps$mu, Sigma = ps$Sigma, </span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;     dispersion = ps$dispersion))</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; Expected Residuals:</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt;         Min          1Q      Median          3Q         Max </span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; -1.07443097 -0.49702006  0.06797994  0.26297994  1.36556903 </span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; Prior and Maximum Likelihood Estimates with Standard Deviations</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt;             Null Mode Prior Mean Prior.sd Max Like. Like.sd</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; (Intercept)     4.846      4.846    2.192     5.032   0.220</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; groupTrt        0.000      0.000    3.100    -0.371   0.311</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; Bayesian Estimates Based on 1000 iid draws</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;             Post.Mode Post.Mean   Post.Sd  MC Error Pr(Null_tail) SE(tail)</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; (Intercept)  5.030145  5.029609  0.221355  0.007000      0.219000    0.013</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; groupTrt    -0.367290 -0.365178  0.314103  0.009933      0.116000    0.010</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.219</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; groupTrt             0.116</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt;   Directional Tail Summaries:</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt;                Metric vs Null vs Prior</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt;  Mahalanobis Distance  1.1785   1.1785</span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt;      Tail Probability  0.1160   0.1160</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt;   [Tail probabilities are P(delta^T * Z &lt;= 0) in whitened space]</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; Distribution Percentiles</span></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co">#&gt;                1.0%    2.5%    5.0%  Median   95.0%   97.5% 99.0%</span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.5277  4.6131  4.6756  5.0267  5.3996  5.4811 5.566</span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="co">#&gt; groupTrt    -1.1095 -0.9893 -0.8807 -0.3505  0.1445  0.2372 0.343</span></span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 1.988645 </span></span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 19.97483 </span></span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="co">#&gt; DIC: 44.26293 </span></span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="co">#&gt; Expected Mean dispersion: 0.4853407 </span></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co">#&gt; Sq.root of Expected Mean dispersion: 0.696664 </span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 1</span></span></code></pre></div>
+<div id="prior-and-maximumlikelihood-estimates" class="section level3">
+<h3>5.2.1 Prior and maximum‐likelihood estimates</h3>
+<p>Before diving into the posterior, <code>summary(lmb.D9)</code>
+reports the prior means (and variances) you supplied alongside the
+maximum-likelihood estimates under a fixed‐dispersion Gaussian model.
+Seeing these side by side helps you gauge how much influence your prior
+exerts relative to the data.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>sumlmb<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb.D9)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>sumlmb<span class="sc">$</span>coefficients1</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt;             Null Mode Prior Mean Prior.sd Max Like.   Like.sd</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; (Intercept)    4.8465     4.8465 2.192002     5.032 0.2202177</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; groupTrt       0.0000     0.0000 3.099959    -0.371 0.3114349</span></span></code></pre></div>
+<p>The default prior specification from <code>Prior_Setup()</code> is
+designed to align closely with the classical fit while still imposing
+mild regularization:</p>
+<ul>
+<li>The intercept prior mean is set equal to the maximum‐likelihood
+estimate from a “Null” intercept only model.</li>
+<li>All other “effects” (here, the groupTrt slope) default to zero,
+expressing no a priori directional pull.</li>
+<li>The prior variance–covariance matrix is inflated by a factor<br />
+<span class="math display">\[
+  g \;=\;\frac{1 - \mathrm{pwt}}{\mathrm{pwt}}
+  \quad\text{with}\quad \mathrm{pwt}=0.01,
+\]</span> giving <span class="math inline">\(g=99\)</span>. This is
+exactly Zellner’s g-prior:<br />
+<span class="math display">\[
+  V_{\text{prior}} \;=\; g \times V_{\text{likelihood}},
+\]</span> so each prior standard deviation (2.191 and 3.099) is <span class="math inline">\(\sqrt{g}\)</span> times the corresponding
+classical standard error (0.2200 and 0.3110). This choice delivers
+minimal shrinkage towards the prior.</li>
+</ul>
+</div>
+<div id="posterior-estimates" class="section level3">
+<h3>5.2.2 Posterior estimates</h3>
+<p>The main table lists posterior mode and mean for each coefficient,
+plus the posterior standard deviation, Monte Carlo standard error, and
+the tail probability for a zero‐effect test. These values integrate your
+prior and the likelihood to give a full distributional summary.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>sumlmb<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb.D9)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>sumlmb<span class="sc">$</span>coefficients</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt;             Post.Mode  Post.Mean   Post.Sd   MC Error Pr(Null_tail)   SE(tail)</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; (Intercept)  5.030145  5.0296091 0.2213553 0.00699987         0.219 0.01307819</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; groupTrt    -0.367290 -0.3651782 0.3141030 0.00993281         0.116 0.01012640</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.219</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; groupTrt             0.116</span></span></code></pre></div>
+<p>When a g prior is used, the posterior means simplify and becomes a
+weighted average of the prior mean and the Maximum likelihood
+estimates.</p>
+<p><span class="math display">\[
+  \text{Post.Mean}
+    = \mathrm{pwt}\times\text{Prior Mean}
+    + (1-\mathrm{pwt})\times\text{MLE}.
+\]</span></p>
+<p>In other words, <code>pwt</code> directly tunes how much “pull” your
+prior has versus the data in each dimension.</p>
+<p>The <code>Pr(tail)</code> column gives the posterior “reverse‐tail”
+probability relative to the prior mean: if the posterior mean is below
+the prior mean, it’s<br />
+<span class="math display">\[
+  P(\beta &gt; \text{prior mean}\mid\text{data})
+\]</span><br />
+and if the posterior mean is above the prior mean, it’s<br />
+<span class="math display">\[
+  P(\beta &lt; \text{prior mean}\mid\text{data}).
+\]</span><br />
+For models with a zero prior mean and roughly symmetric posteriors,
+<code>Pr(tail)</code> will be close to one-half of the classical
+two-sided p-value—and thus roughly equal to the one-sided
+p-value—offering a Bayesian analogue to hypothesis testing. In essence,
+a small <code>Pr(tail)</code> value signifies strong evidence against
+the prior mean, functioning as a form of “rejection” of the prior
+hypothesis.</p>
+</div>
+<div id="directional-prior-posterior-summaries" class="section level3">
+<h3>5.2.3 Directional Prior-Posterior Summaries</h3>
+<p>The Standardized Mahalanobis Distance quantifies how far the prior
+point estimate lies from the posterior mean, accounting for posterior
+covariance. Building on this, the Directional Tail Probability assesses
+how likely it is—under the posterior distribution—to observe coefficient
+values that fall opposite the prior, relative to the posterior mean.
+This directional measure generalizes the concept of reverse-tail
+probabilities from univariate to multivariate settings. Small values
+suggest that the posterior density places little mass in the direction
+of the prior, and can thus be interpreted as a form of prior
+rejection.</p>
+</div>
+<div id="distribution-percentiles" class="section level3">
+<h3>5.2.4 Distribution percentiles</h3>
+<p>Below the moments, you get a grid of key quantiles (1%, 2.5%, 5%,
+median, 95%, 97.5%, 99%) for each parameter. Percentiles let you quickly
+read off credible‐interval bounds and assess skew or heavy tails in the
+posterior.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>sumlmb<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb.D9)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>sumlmb<span class="sc">$</span>Percentiles</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt;                  1.0%       2.5%       5.0%    Median     95.0%     97.5%</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; (Intercept)  4.527737  4.6131002  4.6756194  5.026689 5.3996364 5.4810789</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; groupTrt    -1.109512 -0.9892841 -0.8807499 -0.350467 0.1445449 0.2372216</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt;                99.0%</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 5.565690</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; groupTrt    0.342521</span></span></code></pre></div>
+<p><strong>Interpretation for <code>groupTrt</code>:</strong><br />
+- The 95% credible interval (2.5%–97.5%) is approximately
+<strong>[–0.9315, 0.2334]</strong>, which spans zero and indicates
+uncertainty about the direction of the treatment effect.<br />
+- The 90% credible interval (5%–95%) is approxinately <strong>[–0.8722,
+0.1557]</strong>, also including zero and reinforcing that a null or
+small positive effect remains plausible.<br />
+- The posterior distribution is slightly negatively skewed: the lower
+tail (1.0% = –1.0553) extends farther below the median (–0.3337) than
+the upper tail (99.0% = 0.3380) extends above it.<br />
+- Although the median effect is –0.3337 (suggesting a small negative
+treatment effect), the credible intervals remind us that the data do not
+provide strong evidence to rule out no effect or even a slight positive
+effect. ```</p>
+</div>
+<div id="dic-and-related-measures" class="section level3">
+<h3>5.2.5 DIC and Related Measures</h3>
+<p>-The effective number of parameters (pD) quantifies how much your
+posterior has “moved” from the prior. A pD near the number of
+coefficients signals a relatively data‐driven fit; a smaller pD
+indicates stronger shrinkage toward the prior.</p>
+<ul>
+<li><p>The expected residual deviance (<span class="math inline">\(\bar{D}\)</span>) is the posterior mean of the
+deviance statistic. It is analogous to the classical deviance but
+averaged over your posterior draws, giving a Bayesian measure of overall
+fit.</p></li>
+<li><p>The Deviance Information Criterion (DIC) combines <span class="math inline">\(\bar{D}\)</span> and <span class="math inline">\(p_D\)</span> into a single metric for model
+comparison: <span class="math display">\[
+\text{DIC} = \bar{D} + p_D
+\]</span> Lower values signal better trade-offs between fit and
+complexity under your chosen prior.</p></li>
+</ul>
+</div>
+<div id="expected-mean-dispersion" class="section level3">
+<h3>5.2.6 Expected mean dispersion</h3>
+<p>For Gaussian models, <code>summary(lmb.D9)</code> also prints the
+posterior mean of the dispersion parameter. This aligns with the
+classical residual variance estimate but incorporates prior
+uncertainty.</p>
+</div>
+<div id="squareroot-of-expected-mean-dispersion" class="section level3">
+<h3>5.2.7 Square‐root of expected mean dispersion</h3>
+<p>Finally, taking the square root of the expected mean dispersion
+yields a Bayesian estimate of the residual standard deviation. This
+makes it directly comparable to the classical residual standard
+error.</p>
+</div>
+</div>
+</div>
+<div id="textbook-content-mappings" class="section level1">
+<h1>6. Textbook Content Mappings</h1>
+<p>The tables below map vignette sections to chapters in <span class="citation">Agresti (2015)</span>.</p>
+<div id="agresti---foundations-of-linear-and-generalized-linear-models" class="section level2">
+<h2>6.1 Agresti - Foundations of Linear and Generalized Linear
+Models</h2>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="15%" />
+<col width="69%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Vignette Section</th>
+<th>Textbook Chapter &amp; Section</th>
+<th>Notes (provisional)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3.1.1 Calling the classical lm function</td>
+<td>3.4 Example Normal Linear Model Inference</td>
+<td>Formal definition of <span class="math inline">\(y = X\beta +
+\varepsilon\)</span>; shows OLS as the MLE under Normal errors (see
+derivation in Example 3.1).</td>
+</tr>
+<tr class="even">
+<td>3.2.1 Setting the prior</td>
+<td>10.2 Bayesian Linear Models</td>
+<td>Construction of conjugate Normal priors and Zellner’s g-prior <span class="math inline">\(V = g (X^{T} X)^{-1}\)</span>, with <span class="math inline">\(g = (1 - \mathrm{pwt})/\mathrm{pwt}\)</span>; see
+Example 10.2.</td>
+</tr>
+<tr class="odd">
+<td>3.2.2 Calling the lmb function</td>
+<td>10.2 Bayesian Linear Models</td>
+<td>Shows closed-form posterior updates under conjugate Normal priors:
+derivation of the posterior mean and variance for <span class="math inline">\(\beta\)</span> in the linear model.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col width="22%" />
+<col width="28%" />
+<col width="48%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Vignette Section</th>
+<th>Textbook Chapter &amp; Section</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4.1.1 Residual summary</td>
+<td>3.4 Example Normal Linear Model Inference</td>
+<td>Discussion of raw, standardized, and studentized residuals;
+graphical diagnostics (residual vs fitted, Q-Q plots); measures of
+leverage and influence.</td>
+</tr>
+<tr class="even">
+<td>4.1.2 Coefficient Estimates and Hypothesis Tests</td>
+<td>3.2 Significance Tests for Normal Linear Models</td>
+<td>Formal derivation of t-tests and confidence intervals for slopes;
+interpretation of estimates, standard errors, t-statistics, two-sided
+p-values, and significance codes.</td>
+</tr>
+<tr class="odd">
+<td>4.1.3 Model fit statistics</td>
+<td>3.2 Significance Tests for Normal Linear Models</td>
+<td>Definition and interpretation of residual standard error; <span class="math inline">\(R^2\)</span> and adjusted <span class="math inline">\(R^2\)</span>; ANOVA F-test for overall model
+significance.</td>
+</tr>
+<tr class="even">
+<td>4.2.1 Prior and maximum-likelihood estimates</td>
+<td>10.1 The Bayesian Approach to Statistical Inference</td>
+<td>Presentation of conjugate Normal priors and Zellner’s g-prior;
+overlay of prior and sampling distributions (MLEs); role of <span class="math inline">\(g\)</span> in shrinkage.</td>
+</tr>
+<tr class="odd">
+<td>4.2.2 Posterior estimates</td>
+<td>10.2 Bayesian Linear Models</td>
+<td>Closed-form posterior mode, mean, and variance under conjugacy;
+Monte Carlo approximation for non-conjugate settings; interpretation of
+“Pr(tail)” statements.</td>
+</tr>
+<tr class="even">
+<td>4.2.3 Distribution percentiles</td>
+<td>10.2 Bayesian Linear Models</td>
+<td>Definition of equal-tailed and HPD intervals; extraction of key
+posterior quantiles (2.5%, 97.5%, etc.); assessing skew and tail
+behavior.</td>
+</tr>
+<tr class="odd">
+<td>4.2.4 Effective number of parameters (pD)</td>
+<td>10.3 Bayesian Generalized Linear Models</td>
+<td>Introduction of deviance-based effective number of parameters (<span class="math inline">\(p_D\)</span>); interpretation of <span class="math inline">\(p_D\)</span> as a penalty/shrinkage measure in
+model comparison.</td>
+</tr>
+<tr class="even">
+<td>4.2.5 Expected residual deviance (<span class="math inline">\(\bar{D}\)</span>)</td>
+<td>10.3 Bayesian Generalized Linear Models</td>
+<td>Definition of deviance for GLMs; calculation of posterior mean
+deviance; use of <span class="math inline">\(\bar{D}\)</span> as a
+Bayesian fit statistic.</td>
+</tr>
+<tr class="odd">
+<td>4.2.6 Deviance Information Criterion (DIC)</td>
+<td>10.3 Bayesian Generalized Linear Models</td>
+<td>Derivation of <span class="math inline">\(\text{DIC} = \bar{D} +
+p_D\)</span>; guidelines for using DIC to compare Bayesian models under
+a common prior.</td>
+</tr>
+<tr class="even">
+<td>4.2.7 Expected mean dispersion</td>
+<td>10.2 Bayesian Linear Models</td>
+<td>Bayesian estimation of the Gaussian error variance <span class="math inline">\((\sigma^2)\)</span> via conjugate priors;
+posterior mean of <span class="math inline">\(\sigma^2\)</span>.</td>
+</tr>
+<tr class="odd">
+<td>4.2.8 Square-root of expected mean dispersion</td>
+<td>10.2 Bayesian Linear Models</td>
+<td>Transformation of posterior <span class="math inline">\(\sigma^2\)</span> into <span class="math inline">\(\sigma\)</span> (residual standard-error
+analogue); direct comparison to classical RSE.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Agresti2015" class="csl-entry">
+Agresti, Alan. 2015. <em>Foundations of Linear and Generalized Linear
+Models</em>. New York: Cambridge University Press.
+</div>
+<div id="ref-Gelman2013" class="csl-entry">
+Gelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki
+Vehtari, and Donald B. Rubin. 2013. <em>Bayesian Data Analysis</em>. 3rd
+ed. CRC Press.
+</div>
+<div id="ref-McCullagh1989" class="csl-entry">
+McCullagh, P., and J. A. Nelder. 1989. <em><span>Generalized Linear
+Models</span></em>. London: Chapman; Hall.
+</div>
+<div id="ref-VenablesRipley2002" class="csl-entry">
+Venables, W. N., and B. D. Ripley. 2002. <em><span class="nocase">Modern
+Applied Statistics with S</span></em>. New York: Springer.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A06: Accept–Reject Sampling for Dispersion in Gamma Regression</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A06: Accept–Reject Sampling for
+Dispersion in Gamma Regression</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div id="introduction" class="section level1">
+<h1>1. Introduction</h1>
+<p>This vignette explains the derivation of the posterior for the
+dispersion parameter in a Gamma GLM with log link, and the construction
+of a proposal distribution and bounding function used for rejection
+sampling <span class="citation">(Robert and Casella 2004; Devroye
+1986)</span> in <code>rGamma_reg</code>.</p>
+<p>We consider a Gamma GLM with log link, where the mean is</p>
+<p><span class="math display">\[
+\mu_i = \exp(x_i^\top \beta + \alpha_i),
+\]</span></p>
+<p>and the dispersion parameter is <span class="math inline">\(\phi &gt;
+0\)</span>.<br />
+It is convenient to work with the <strong>precision</strong></p>
+<p><span class="math display">\[
+v = \frac{1}{\phi}.
+\]</span></p>
+<p>Throughout this chapter, we treat the regression coefficients <span class="math inline">\(\beta\)</span> and offsets <span class="math inline">\(\alpha_i\)</span> as fixed and known.</p>
+<div id="likelihood" class="section level2">
+<h2>1.2 Likelihood</h2>
+<p>We use the standard Gamma parameterization <span class="citation">(McCullagh and Nelder 1989; Agresti 2015)</span>.</p>
+<p><span class="math display">\[
+Y_i \mid v \sim \mathrm{Gamma}(\text{shape}=v,\ \text{rate}=v/\mu_i),
+\]</span></p>
+<p>so that</p>
+<p><span class="math display">\[
+\mathbb{E}(Y_i)=\mu_i,
+\qquad
+\mathrm{Var}(Y_i)=\frac{\mu_i^2}{v}.
+\]</span></p>
+<p>The log‑likelihood contribution of observation <span class="math inline">\(i\)</span> is</p>
+<p><span class="math display">\[
+\ell_i(v)
+=
+v\log v
+-
+v\log \mu_i
++
+(v-1)\log y_i
+-
+\log\Gamma(v)
+-
+\frac{v}{\mu_i} y_i.
+\]</span></p>
+<p>With weights <span class="math inline">\(w_i\)</span>, the total
+log‑likelihood is</p>
+<p><span class="math display">\[
+\ell(v)
+=
+\sum_{i=1}^n
+w_i
+\left[
+v\log v
+-
+v\log \mu_i
++
+(v-1)\log y_i
+-
+\log\Gamma(v)
+-
+\frac{v}{\mu_i} y_i
+\right].
+\]</span></p>
+</div>
+<div id="prior" class="section level2">
+<h2>1.3 Prior</h2>
+<p>We place a Gamma prior on the precision:</p>
+<p><span class="math display">\[
+v \sim \mathrm{Gamma}(a_0, b_0),
+\qquad
+\log p(v)
+= a_0 \log b_0 \;-\; \log\Gamma(a_0)
+\;+\; (a_0 - 1)\log v \;-\; b_0 v.
+\]</span></p>
+</div>
+<div id="posterior-logdensity" class="section level2">
+<h2>1.4. Posterior Log‑Density</h2>
+<p>The posterior log‑density is</p>
+<p><span class="math display">\[
+f(v)
+=
+\ell(v)
++
+\log p(v)
+\;-\; \log (C_{1})
+\]</span></p>
+<p>where <span class="math inline">\(C_{1}\)</span> is a normalizing
+constant for the posterior density.</p>
+</div>
+</div>
+<div id="the-sampler" class="section level1">
+<h1>2. The sampler</h1>
+<p>To build effective envelopes for the Gamma family with a Gamma prior
+for the precision, it is important to be able to center the proposal
+close to the center of the posterior. To enable this, we introduce the
+following proposal distribution and associated bounding function and
+establish key claims <span class="citation">(Robert and Casella
+2004)</span>.</p>
+<div id="proposal-distribution" class="section level2">
+<h2>2.1 Proposal Distribution</h2>
+<p>Let <span class="math inline">\(\bar{c}(v_{\text{tangent}})\)</span>
+denote the gradient of <span class="math inline">\(-\ell(v)\)</span>
+evaluated at the tangency point: <span class="math display">\[
+\bar{c}(v_{\text{tangent}}) = -\ell&#39;(v_{\text{tangent}}).
+\]</span></p>
+<p>We then define a gamma proposal distribution by:</p>
+<p><span class="math display">\[
+v \sim \mathrm{Gamma}_{\text{prop}}\!\left(a_0 + \tfrac{1}{2}\sum_i
+w_i,\; b_0 - \bar{c}(v_{\text{tangent}})\right).
+\]</span></p>
+<p>where the log of the proposal distribution specifically takes the
+form</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log p_{prop}(v) &amp; = (a_0+  \frac{1}{2}\sum_i w_i )\log [ b_0 -
+\bar{c}(v_{\text{tangent}})] \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i
+w_i ) \\[4pt]
+&amp;  \;+\; ((a_0+  \frac{1}{2}\sum_i w_i ) - 1)\log v \;-\; [ b_0 -
+\bar{c}(v_{\text{tangent}})] v.
+\end{aligned}
+\]</span> —</p>
+<p>In the implementation, this proposal is used in truncated form on the
+interval <span class="math inline">\([v_{\min}, v_{\max}]\)</span>, with
+<span class="math inline">\(v_{\min}, v_{\max}\)</span> derived from a
+curvature-based Gamma surrogate and optional dispersion bounds.</p>
+</div>
+<div id="bounding-function" class="section level2">
+<h2>2.2 Bounding function</h2>
+<p>Let <span class="math inline">\(v_{\min}\)</span> be lower bound for
+the precision <span class="math inline">\(v\)</span>. We can then define
+a bounding function <span class="math inline">\(\log h(\cdot)\)</span>
+by</p>
+<p><span class="math display">\[
+\log h(v)
+=
+\ell(v)
+-
+\bigl[\ell(v_{\text{tangent}})
+-
+\bar{c}(v_{\text{tangent}})(v - v_{\text{tangent}})\bigr]
+-
+\frac{1}{2}\Bigl(\sum_i w_i\Bigr)\log\!\left(\frac{v}{v_{\min}}\right).
+\]</span></p>
+<p>It follows from the concavity of <span class="math inline">\(\ell(\cdot)\)</span> and the fact that <span class="math inline">\(\log(v/v_{\min}) \ge 0\)</span> for <span class="math inline">\(v \ge v_{\min}\)</span> that <span class="math inline">\(\log h(v) \le 0\)</span> for all <span class="math inline">\(v \ge v_{\min}\)</span>.</p>
+</div>
+<div id="equivalence-claim" class="section level2">
+<h2>2.3 Equivalence Claim</h2>
+<p>Throughout this section, all densities are understood on the
+truncated domain <span class="math inline">\(v \in [v_{\min},
+v_{\max}]\)</span>, with normalizing constants absorbed into <span class="math inline">\(C_1\)</span> and <span class="math inline">\(C_2\)</span>.</p>
+<p><strong>Claim 1:</strong></p>
+<p>The posterior log density <span class="math inline">\(f(.)\)</span>
+satisfies the property that</p>
+<p><span class="math display">\[ f(v)=\log p_{prop}(v)+\log h(v) + C_{2}
+\]</span></p>
+<p>where <span class="math display">\[\begin{aligned}
+C_{2}
+&amp; = \Bigl( -  \log (C_{1}) \\[4pt]
+&amp; - [(a_0+  \frac{1}{2}\sum_i w_i ) \log\!\left(b_0 -
+\bar{c}(v_{\text{tangent}})\right) \;-\;
+\log\Gamma(a_0+  \frac{1}{2}\sum_i w_i )] \\[4pt]
+&amp; + [a_0 \log b_0 \;-\; \log\Gamma(a_0) ] \\[4pt]
+&amp;
++[\ell(v_{\text{tangent}})+\bar{c}(v_{\text{tangent}})v_{\text{tangent}}
+]\\[4pt]
+&amp; - [\frac{1}{2}\sum_i w_i] \log v_{\text{min}}\Bigr)\end{aligned}
+\]</span>.</p>
+<p><strong>Proof:</strong></p>
+<p><span class="math display">\[
+\begin{aligned}
+f(v) &amp; = \log p(v) +\ell(v) - \log (C_{1}) \\[4pt]
+&amp; = \Bigl( [a_0 \log b_0 \;-\; \log\Gamma(a_0)
+\;+\; (a_0 - 1)\log v \;-\; b_0 v]  \\[4pt]
+&amp; + [[\frac{1}{2}\sum_i w_i] \log v - [-\bar{c}(v_{\text{tangent}})
+v]   \\[4pt]
+&amp; + [(a_0+  \frac{1}{2}\sum_i w_i )\log [ b_0 -
+\bar{c}(v_{\text{tangent}})] \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i
+w_i )] \\[4pt]
+&amp; - [a_0 \log b_0 \;-\; \log\Gamma(a_0) ] \Bigr) \\[4pt]
+&amp;   + \Bigl(\ell(v) -  [[\frac{1}{2}\sum_i w_i] \log v -[-
+\bar{c}(v_{\text{tangent}}) v]] \Bigr) \\[4pt]
+&amp; + \Bigl( -  \log (C_{1}) \\[4pt]
+&amp; - [(a_0+  \frac{1}{2}\sum_i w_i )\log [ b_0 -
+\bar{c}(v_{\text{tangent}})] \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i
+w_i )] \\[4pt]
+&amp; + [a_0 \log b_0 \;-\; \log\Gamma(a_0) ] \Bigr) \\[4pt]
+&amp; = \Bigl( [(a_0+  \frac{1}{2}\sum_i w_i )\log [ b_0 -
+\bar{c}(v_{\text{tangent}})] \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i
+w_i )] \\[4pt]
+&amp; + ((a_0+  \frac{1}{2}\sum_i w_i ) - 1)\log v \;-\; [ b_0 -
+\bar{c}(v_{\text{tangent}})]v  \Bigr) \\[4pt]
+&amp;   + \Bigl(\ell(v) -  [[\frac{1}{2}\sum_i w_i] \log v -[-
+\bar{c}(v_{\text{tangent}}) v]] \\[4pt]
+&amp;
+-[\ell(v_{\text{tangent}})+\bar{c}(v_{\text{tangent}})v_{\text{tangent}}
+]  \\[4pt]
+&amp; + [\frac{1}{2}\sum_i w_i] \log v_{\text{min}} \Bigr) \\[4pt]
+&amp; + \Bigl( -  \log (C_{1}) \\[4pt]
+&amp; - [(a_0+  \frac{1}{2}\sum_i w_i )\log [ b_0 -
+\bar{c}(v_{\text{tangent}})] \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i
+w_i )] \\[4pt]
+&amp; + [a_0 \log b_0 \;-\; \log\Gamma(a_0) ] \\[4pt]
+&amp;
++[\ell(v_{\text{tangent}})+\bar{c}(v_{\text{tangent}})v_{\text{tangent}}
+]\\[4pt]
+&amp; - [\frac{1}{2}\sum_i w_i] \log v_{\text{min}} \Bigr) \\[4pt]
+&amp; = \log p_{prop}(v) \\[4pt]
+&amp;   +
+\Bigl([\ell(v)-[\ell(v_{\text{tangent}})-\bar{c}(v_{\text{tangent}})(v -
+v_{\text{tangent}})]] \\[4pt]
+&amp; - \frac{1}{2}\Bigl(\sum_i
+w_i\Bigr)\log\!\left(\frac{v}{v_{\min}}\right) \Bigr) \\[4pt]
+&amp; + \Bigl( -  \log (C_{1}) \\[4pt]
+&amp; - [(a_0+  \frac{1}{2}\sum_i w_i )\log [ b_0 -
+\bar{c}(v_{\text{tangent}})] \;-\; \log\Gamma(a_0+  \frac{1}{2}\sum_i
+w_i )] \\[4pt]
+&amp; + [a_0 \log b_0 \;-\; \log\Gamma(a_0) ] \\[4pt]
+&amp;
++[\ell(v_{\text{tangent}})+\bar{c}(v_{\text{tangent}})v_{\text{tangent}}
+]\\[4pt]
+&amp; - [\frac{1}{2}\sum_i w_i] \log v_{\text{min}}\Bigr) \\[4pt]
+&amp; = \log p_{prop}(v) + \log h(v) + C_{2}
+\end{aligned}
+\]</span></p>
+</div>
+<div id="implementation-outline" class="section level2">
+<h2>2.4 Implementation Outline</h2>
+<p>To implement the sampler, we proceed as follows:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Find the posterior mode</strong> <span class="math inline">\(v_\star\)</span> using a Gamma‑surrogate
+fixed‑point iteration.</li>
+<li><strong>Approximate the posterior mean</strong> <span class="math inline">\(v_{\text{mean}}\)</span> using curvature at <span class="math inline">\(v_\star\)</span> and a Gamma surrogate <span class="math inline">\(\Gamma(\alpha_{\!bar},
+\beta_{\!bar})\)</span>.</li>
+<li><strong>Set the tangency point</strong> to <span class="math display">\[
+v_{\text{tangent}} = v_{\text{mean}}.
+\]</span></li>
+<li><strong>Build the proposal and bounding function</strong> using
+<span class="math inline">\(v_{\text{tangent}}\)</span> as above.</li>
+<li><strong>Sample</strong> as follows:
+<ul>
+<li><ol style="list-style-type: lower-alpha">
+<li>Generate a candidate <span class="math inline">\(v_{\text{cand}}\)</span> from the (possibly
+truncated) proposal <span class="math inline">\(\mathrm{Gamma}(\text{shape}_\text{prop},
+\text{rate}_\text{prop})\)</span>.</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: lower-alpha">
+<li>Draw <span class="math inline">\(u \sim
+\mathrm{Uniform}(0,1)\)</span>.</li>
+</ol></li>
+<li><ol start="3" style="list-style-type: lower-alpha">
+<li>Accept if <span class="math display">\[
+\log h(v_{\text{cand}}) - \log u &gt; 0.
+\]</span></li>
+</ol></li>
+</ul></li>
+</ol>
+<p>The accepted draws for <span class="math inline">\(v\)</span> are
+then transformed to dispersion by <span class="math inline">\(\phi =
+1/v\)</span>.</p>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Agresti2015" class="csl-entry">
+Agresti, Alan. 2015. <em>Foundations of Linear and Generalized Linear
+Models</em>. New York: Cambridge University Press.
+</div>
+<div id="ref-Devroye1986" class="csl-entry">
+Devroye, Luc. 1986. <em>Non-Uniform Random Variate Generation</em>. New
+York: Springer.
+</div>
+<div id="ref-McCullagh1989" class="csl-entry">
+McCullagh, P., and J. A. Nelder. 1989. <em><span>Generalized Linear
+Models</span></em>. London: Chapman; Hall.
+</div>
+<div id="ref-RobertCasella2004" class="csl-entry">
+Robert, Christian P., and George Casella. 2004. <em>Monte Carlo
+Statistical Methods</em>. 2nd ed. New York: Springer.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2919 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A07: Accept–Reject Sampling for gaussian Regression models with independent normal-gamma priors</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A07: Accept–Reject Sampling for
+gaussian Regression models with independent normal-gamma priors</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div id="envelope-construction-with-independent-normalgamma-prior-gaussian-regression" class="section level1">
+<h1>Envelope construction with independent Normal–Gamma prior (Gaussian
+regression)</h1>
+<p>This vignette documents the envelope construction when the prior for
+<span class="math inline">\(\beta\)</span> is independent of the data
+dispersion. The regression coefficients have a fixed Normal prior with
+covariance <span class="math inline">\(\Sigma_\beta\)</span>, and the
+data precision <span class="math inline">\(\sigma_{\text{data}}\)</span>
+has its own Gamma prior.</p>
+</div>
+<div id="model-setup-gaussian-regression-with-independent-normalgamma-prior" class="section level1">
+<h1>1. Model Setup (Gaussian Regression with Independent Normal–Gamma
+Prior)</h1>
+<p>We consider the weighted Gaussian regression model</p>
+<p><span class="math display">\[
+y_i \mid \beta, \phi \;\sim\; N(x_i^\top\beta,\; \phi / w_i),
+\qquad i = 1,\ldots,n,
+\]</span></p>
+<p>with observation weights <span class="math inline">\(w_i &gt;
+0\)</span>.<br />
+Let the <strong>precision</strong> be</p>
+<p><span class="math display">\[
+\tau = \frac{1}{\phi}.
+\]</span></p>
+<p>Define the diagonal weight matrix</p>
+<p><span class="math display">\[
+W = \mathrm{diag}(w_1,\ldots,w_n),
+\qquad
+n_w = \sum_{i=1}^n w_i.
+\]</span></p>
+<hr />
+<div id="weighted-loglikelihood" class="section level2">
+<h2>1.1 Weighted log‑likelihood</h2>
+<p>Define the weighted residual sum of squares</p>
+<p><span class="math display">\[
+\mathrm{RSS}(\beta)
+=
+\sum_{i=1}^n w_i (y_i - x_i^\top\beta)^2.
+\]</span></p>
+<p>The weighted Gaussian log‑likelihood (up to constants) is</p>
+<p><span class="math display">\[
+\ell(\beta,\phi)
+=
+-\frac{1}{2\phi}\,\mathrm{RSS}(\beta)
+\;-\;
+\frac{n_w}{2}\log\phi
+\;+\; \text{const}.
+\]</span></p>
+<p>In precision form <span class="math inline">\(\tau =
+1/\phi\)</span>:</p>
+<p><span class="math display">\[
+\ell(\beta,\tau)
+=
+-\frac{\tau}{2}\,\mathrm{RSS}(\beta)
+\;+\;
+\frac{n_w}{2}\log\tau
+\;+\; \text{const}.
+\]</span></p>
+<p>This form is <strong>jointly concave</strong> in <span class="math inline">\((\beta,\tau)\)</span>.</p>
+<hr />
+</div>
+<div id="independent-normalgamma-prior" class="section level2">
+<h2>1.2 Independent Normal–Gamma prior</h2>
+<p>Chapter A07 uses the <strong>independent</strong> Normal–Gamma
+prior:</p>
+<p><span class="math display">\[
+\beta \sim N(\mu_0,\Sigma_0),
+\qquad
+\tau \sim \text{Gamma}(a_0,b_0),
+\]</span></p>
+<p>with log‑prior</p>
+<p><span class="math display">\[
+\log p(\beta,\tau)
+=
+-\tfrac12(\beta-\mu_0)^\top\Sigma_0^{-1}(\beta-\mu_0)
++ (a_0 - 1)\log\tau
+- b_0\tau
++ \text{const}.
+\]</span></p>
+<p>For numerical stability and envelope construction, the Gamma prior on
+<span class="math inline">\(\tau\)</span> is <strong>truncated</strong>
+to</p>
+<p><span class="math display">\[
+\tau \in [\tau_{\min}, \tau_{\max}],
+\]</span></p>
+<p>equivalently</p>
+<p><span class="math display">\[
+\phi \in [\phi_{\min}, \phi_{\max}],
+\qquad
+\phi = \frac{1}{\tau}.
+\]</span></p>
+<p>The truncated prior density is</p>
+<p><span class="math display">\[
+p_{\text{trunc}}(\tau)
+=
+\frac{
+\tau^{a_0 - 1} e^{-b_0\tau}
+}{
+F_{\Gamma}(\tau_{\max};a_0,b_0)
+-
+F_{\Gamma}(\tau_{\min};a_0,b_0)
+},
+\qquad
+\tau_{\min} \le \tau \le \tau_{\max}.
+\]</span></p>
+<hr />
+</div>
+</div>
+<div id="full-joint-logposterior-gaussian-case-weighted" class="section level1">
+<h1>2. Full Joint Log‑Posterior (Gaussian Case, Weighted)</h1>
+<p>Combining the weighted log‑likelihood and the independent
+Normal–Gamma prior gives</p>
+<p><span class="math display">\[
+\log p(\beta,\tau \mid y)
+=
+\ell(\beta,\tau)
+-\tfrac12(\beta-\mu_0)^\top\Sigma_0^{-1}(\beta-\mu_0)
++ (a_0 - 1)\log\tau
+- b_0\tau
++ \text{const}.
+\]</span></p>
+<p>Substituting the likelihood expression:</p>
+<p><span class="math display">\[
+\log p(\beta,\tau \mid y)
+=
+-\frac{\tau}{2}\,\mathrm{RSS}(\beta)
+\;+\;
+\frac{n_w}{2}\log\tau
+-\tfrac12(\beta-\mu_0)^\top\Sigma_0^{-1}(\beta-\mu_0)
++ (a_0 - 1)\log\tau
+- b_0\tau
++ \text{const}.
+\]</span></p>
+<p>Collecting terms in <span class="math inline">\(\tau\)</span>:</p>
+<p><span class="math display">\[
+\log p(\beta,\tau \mid y)
+=
+-\left(
+\frac{\mathrm{RSS}(\beta)}{2} + b_0
+\right)\tau
+\;+\;
+\left(
+a_0 - 1 + \frac{n_w}{2}
+\right)\log\tau
+-\tfrac12(\beta-\mu_0)^\top\Sigma_0^{-1}(\beta-\mu_0)
++ \text{const}.
+\]</span></p>
+<p>This joint log‑posterior is <strong>jointly concave</strong> in <span class="math inline">\((\beta,\tau)\)</span>, which is the key property
+enabling the envelope‑based accept–reject sampler developed in the
+remainder of Chapter A07.</p>
+<div id="general-sampling-process" class="section level2">
+<h2>3. General Sampling Process</h2>
+<ol style="list-style-type: decimal">
+<li><strong>Fit a classical model and extract an estimate for the
+dispersion</strong>
+<ul>
+<li>Use a standard regression fit (e.g., <code>lm()</code>) to obtain
+initial coefficient estimates and the residual sum of squares
+(RSS).<br />
+</li>
+<li>This provides a first estimate of the dispersion parameter.</li>
+</ul></li>
+<li><strong>Fit Bayesian models with fixed but gradually refined
+dispersion parameters</strong><br />
+</li>
+</ol>
+<ul>
+<li>Start from the classical dispersion estimate and iteratively refine
+it (a fixed-point refinement).<br />
+</li>
+<li>At each iteration, keep the dispersion fixed and compute the
+<strong>posterior expected weighted residual sum of squares</strong>
+(<code>RSS_Post2</code>) in closed form under the Normal posterior for
+<span class="math inline">\(\beta\)</span>. Update the Gamma parameters
+for the precision:<br />
+<span class="math display">\[
+\text{shape}_2 = \text{shape} + \tfrac{n_{w}}{2}, \qquad
+\text{rate}_2 = \text{rate} + \tfrac{\text{RSS}_{\text{Post}}}{2}.
+\]</span></li>
+</ul>
+<p>where<br />
+<span class="math display">\[
+\mathrm{RSS}_{\text{post}}
+= \mathbb{E}\!\left[\sum_{i=1}^n w_i (y_i - x_i^\top\beta)^2
+\,\middle|\, y,\phi\right]
+= \sum_{i=1}^n w_i\,(y_i - x_i^\top m_\beta)^2 \;+\;
+\mathrm{tr}\!\bigl(X^\top W X\,\Sigma_\beta\bigr),
+\]</span></p>
+<p>with <span class="math inline">\(m_\beta = \mathbb{E}[\beta \mid
+y,\phi]\)</span> and <span class="math inline">\(\Sigma_\beta =
+\mathrm{Var}(\beta \mid y,\phi)\)</span>.</p>
+<ul>
+<li>The posterior for the <strong>precision</strong> <span class="math inline">\(\tau = 1/\sigma^2\)</span> is then <span class="math inline">\(\text{Gamma}(\text{shape}_2,
+\text{rate}_2)\)</span>, whose mode is<br />
+<span class="math display">\[
+\tau_{\text{mode}} = \frac{\text{shape}_2 - 1}{\text{rate}_2}.
+\]</span></li>
+<li>The calibrated dispersion anchor is set as the reciprocal of this
+mode, i.e. the <strong>mode of the dispersion
+distribution</strong>:</li>
+</ul>
+<p><span class="math display">\[
+d^{*}_{1} = \frac{\operatorname{rate}_{2}}{\operatorname{shape}_{2} -
+1}.
+\]</span></p>
+<p>Here <code>shape2</code> and <code>rate2</code> use the
+<strong>weighted</strong> likelihood via <span class="math inline">\(n_{w}\)</span> and weighted RSS.<br />
+Thus <span class="math inline">\(d^{*}_{1}\)</span> is the mode of the
+<strong>weighted</strong> dispersion posterior.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><strong>Find the posterior mode for the model with calibrated
+dispersion <span class="math inline">\(d^{*}_{1}\)</span></strong>
+<ul>
+<li>With the refined dispersion, locate the posterior mode of the
+regression coefficients.<br />
+</li>
+<li>This mode serves as the anchor point for subsequent
+standardization.</li>
+</ul></li>
+<li><strong>Standardize the model</strong>
+<ul>
+<li>Re‑express the model using the calibrated dispersion and posterior
+mode.<br />
+</li>
+<li>Apply a linear transformation and, as needed, shift parts of the
+prior into the likelihood so that the standardized model has:
+<ul>
+<li>a diagonal posterior precision matrix, and<br />
+</li>
+<li>a standard multivariate normal prior (which by definition has zero
+mean and identity covariance).<br />
+</li>
+</ul></li>
+<li>This ensures numerical stability and simplifies envelope
+construction.</li>
+</ul></li>
+<li><strong>Build an envelope based on this standardized model (treating
+dispersion as fixed)</strong>
+<ul>
+<li>Call <code>EnvelopeBuild()</code> to construct an envelope over the
+regression coefficients.<br />
+</li>
+<li>At this stage, dispersion is treated as fixed at <span class="math inline">\(d^{*}_{1}\)</span>.</li>
+</ul></li>
+<li><strong>Build an envelope that accounts for the prior on dispersion
+as well</strong>
+<ul>
+<li>Keep the number of grid components and their gradient vectors fixed
+across dispersion values.<br />
+This ensures the <strong>conditional proposal density for the regression
+coefficients</strong> is always a truncated normal with
+<ul>
+<li>mean vector given by the negative gradient <span class="math inline">\(-\bar{c}_j\)</span>, and<br />
+</li>
+<li>bounds determined by <span class="math inline">\(\exp(\text{loglt}_{j,r})\)</span> and <span class="math inline">\(\exp(\text{logrt}_{j,r})\)</span>.<br />
+</li>
+</ul></li>
+<li>Construct a <strong>Gamma proposal for the dispersion (precision
+<span class="math inline">\(\tau\)</span>)</strong> with updated
+parameters:
+<ul>
+<li>shape parameter<br />
+<span class="math display">\[
+\mathrm{shape}_{3}= \mathrm{shape}    + \tfrac{n_{w}}{2}    -
+\mathrm{lmc2}\,\cdot\, d^{*}_{2}
+\]</span></li>
+</ul></li>
+</ul></li>
+</ol>
+<p>where: - <span class="math inline">\(\tfrac{n_{w}}{2}\)</span> comes
+from the likelihood contribution to the posterior shape, - <span class="math inline">\(\mathrm{lmc2} \cdot d^{*}_{2}\)</span> adjusts the
+shape to ensure the proposal dominates the posterior. - the rate
+parameter is defined further down</p>
+<p><span class="math display">\[
+\mathrm{rate}_{2}
+  = \mathrm{rate}
+    + \tfrac{\mathrm{RSS\_Min}}{2}
+\]</span><br />
+where: - <span class="math inline">\(\tfrac{\mathrm{RSS\_Min}}{2}\)</span> is the
+classical residual sum of squares,<br />
+- used as a conservative bound on the residual term that varies across
+tangency points.<br />
+- Construct the <strong>Per-Face Subgradient Selection Probabilities
+(PLSD)</strong> for each grid component <span class="math inline">\(j\)</span> as follows:<br />
+<span class="math display">\[
+     \text{PLSD}_j = \frac{
+     \left[
+     \prod_{r=1}^p \left(\exp(\text{logrt}_{j,r}) -
+\exp(\text{loglt}_{j,r})\right)
+     \right]
+     \cdot
+     \exp\left(
+     \lg\_prob\_factor2_{j}
+     \;+\;\tfrac{1}{2}\bar{c}_j^{\top}\bar{c}_j
+     \right)
+     }{
+     \sum_{k=1}^{K}
+     \left[
+     \prod_{r=1}^p \left(\exp(\text{logrt}_{k,r}) -
+\exp(\text{loglt}_{k,r})\right)
+     \right]
+     \cdot
+     \exp\left(
+     \lg\_prob\_factor2_{k}
+     \;+\;\tfrac{1}{2}\bar{c}_k^{\top}\bar{c}_k
+     \right)
+     }
+     \]</span> This expression mirrors the mixture weights <span class="math inline">\(\tilde{p}_j\)</span> in Claim 1 of <span class="citation">Nygren and Nygren (2006)</span></p>
+<ul>
+<li>Compute and store a set of constants (e.g.,
+<code>lg_prob_factor</code>, <code>lmc1</code>, <code>lmc2</code>) that
+are used in the accept/reject test and in adjusting the probabilities
+with which grid components are selected. Specifically, these constants
+are built so that UB3A(.) and UB3B(.) in the proposition below are
+always non-negative bounding functions.</li>
+</ul>
+</div>
+<div id="main-proposition-and-supporting-claims" class="section level2">
+<h2>4. Main Proposition and Supporting claims</h2>
+<p>The central goal of this section is to prepare for an
+<strong>accept–reject sampling algorithm</strong> for the joint
+posterior <span class="math inline">\(\pi(\beta,d)\)</span>.<br />
+In such algorithms, we need two ingredients:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Proposal distributions</strong> — simple, tractable
+distributions from which we can easily generate candidate values for
+<span class="math inline">\((\beta,d)\)</span>.<br />
+</li>
+<li><strong>Correction terms</strong> — adjustments that ensure the
+proposals form valid upper bounds on the true posterior, so that the
+accept–reject step is mathematically justified.</li>
+</ol>
+<p>To make this work, we will express the log‑posterior in a form that
+separates these two roles:<br />
+- the <strong>proposal part</strong>, which generates candidates,
+and<br />
+- the <strong>correction part</strong>, which determines the acceptance
+probability.</p>
+<p>Before we can state the main proposition that formalizes this
+decomposition, we need to introduce the <strong>constants and auxiliary
+quantities</strong> that appear in both the proposals and the
+corrections. These constants:</p>
+<ul>
+<li>Define the dispersion bounds, tangency maps, and slopes that
+structure the proposals.<br />
+</li>
+<li>Encode bounding line parameters and extrapolated constants that
+guarantee the correction terms are non‑negative.<br />
+</li>
+<li>Provide a bridge between the mathematical formulation and the
+implementation, since many of these constants correspond directly to
+terms in the code.</li>
+</ul>
+<p>By laying out these constants first, we ensure that every symbol used
+in the proposition and its supporting claims is defined explicitly and
+consistently. The table below serves as a reference point for all
+subsequent derivations.</p>
+<table>
+<colgroup>
+<col width="28%" />
+<col width="34%" />
+<col width="37%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Definition</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Posterior Gamma parameters</strong></td>
+<td><span class="math inline">\(\text{shape}_2 = \text{Shape} +
+\tfrac{n_{w}}{2}\)</span> <br> <span class="math inline">\(\text{rate}_2
+= \text{Rate} + \mathrm{RSS}_{\text{post}}/2\)</span></td>
+<td>Posterior shape and rate parameters.</td>
+</tr>
+<tr class="even">
+<td><strong>Envelope dispersion anchor</strong></td>
+<td><span class="math inline">\(d^{*}_{1} =
+\dfrac{\text{rate}_2}{\text{shape}_2 - 1}\)</span></td>
+<td>Dispersion used for baseline envelope.</td>
+</tr>
+<tr class="odd">
+<td><strong>Dispersion bounds</strong></td>
+<td><span class="math inline">\(\begin{aligned}
+&amp; \text{low} \\[4pt]
+&amp; \text{upp}
+\end{aligned}\)</span></td>
+<td>Lower and upper bounds for dispersion.</td>
+</tr>
+<tr class="even">
+<td><strong>Tangency offset vector</strong></td>
+<td><span class="math inline">\(B(d) = P\mu + \dfrac{1}{d}\,X^\top
+W(\alpha - y)\)</span></td>
+<td>Offset vector used in the inverse map <span class="math inline">\(c^{-1}(\bar c, d)\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Tangency slope components</strong></td>
+<td><span class="math inline">\(\begin{aligned} Q &amp;= X^\top X \\
+A(d) &amp;= Q + dP \\ r &amp;= X^\top(y-\alpha) \\ V(d) &amp;= \bar c_j
+- P\,A(d)^{-1}(r + d\,\bar c_j) \end{aligned}\)</span></td>
+<td>Components for quad–linear slope term.</td>
+</tr>
+<tr class="even">
+<td><strong>Tangency inverse map</strong></td>
+<td><span class="math inline">\(c^{-1}(\bar c, d) = A(d)^{-1}(\bar c -
+B(d))\)</span></td>
+<td>Maps gradient vector <span class="math inline">\(\bar c\)</span> and
+dispersion <span class="math inline">\(d\)</span> to tangency point
+<span class="math inline">\(\theta\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Tangency map</strong></td>
+<td><span class="math inline">\(\theta(d) = c^{-1}(\bar c_j,
+d)\)</span></td>
+<td>Tangency point in coefficient space at dispersion <span class="math inline">\(d\)</span>.</td>
+</tr>
+<tr class="even">
+<td><strong>Tangency face energy</strong></td>
+<td><span class="math inline">\(g_{1j}(d) = -\tfrac12\,\theta(d)^\top
+P\,\theta(d) + \bar c_j^\top \theta(d)\)</span></td>
+<td>Quadratic–linear face energy at dispersion <span class="math inline">\(d\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Baseline face constant</strong></td>
+<td><span class="math inline">\(g_{1j}(d^{*}_{1})\)</span></td>
+<td>Face‑specific constant obtained by evaluating <span class="math inline">\(g_{1j}(d)\)</span> at the anchor <span class="math inline">\(d^{*}_{1}\)</span>.</td>
+</tr>
+<tr class="even">
+<td><strong>Derivative of face energy</strong></td>
+<td><span class="math inline">\(\begin{aligned} &amp; g&#39;_{1j}(d) =
+V(d)^\top A(d)^{-1}\,\bar c_j \\[6pt] &amp; \qquad -\, \Big( V(d)^\top
+A(d)^{-1} P\,A(d)^{-1} \\[2pt] &amp; \qquad\qquad\qquad\;\;\times \big(r
++ d\,\bar c_j\big) \Big) \end{aligned}\)</span></td>
+<td>Derivative of <span class="math inline">\(g_{1j}(d)\)</span> with
+respect to dispersion.</td>
+</tr>
+<tr class="odd">
+<td><strong>Derivative at the anchor</strong></td>
+<td><span class="math inline">\(\begin{aligned}
+&amp; g&#39;_{1j}(d^{*}_{1}) = V(d^{*}_{1})^\top A(d^{*}_{1})^{-1}\,\bar
+c_j \\[6pt]
+&amp; \qquad -\, \Big( V(d^{*}_{1})^\top A(d^{*}_{1})^{-1}
+P\,A(d^{*}_{1})^{-1} \\[2pt]
+&amp; \qquad\qquad\qquad\;\;\times \big(r + d^{*}_{1}\,\bar c_j\big)
+\Big)
+\end{aligned}\)</span></td>
+<td>Value of the derivative at the envelope anchor <span class="math inline">\(d^{*}_{1}\)</span>.</td>
+</tr>
+<tr class="even">
+<td><strong>Tangency face energy</strong></td>
+<td><span class="math inline">\(g_{1j}(d) = -\tfrac12\,\theta(d)^\top
+P\,\theta(d) + \bar c_j^\top \theta(d)\)</span></td>
+<td>Quadratic–linear face energy at dispersion <span class="math inline">\(d\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Mean quad–linear slope</strong></td>
+<td><span class="math inline">\(\mathrm{m}_{g&#39;_{1}} = \displaystyle
+\operatorname*{mean}\limits_{j}\!\big(g&#39;_{1j}(d^{*}_{1})\big)\)</span></td>
+<td>Average derivative <span class="math inline">\(g&#39;_{1j}(d^{*}_{1})\)</span> across faces.</td>
+</tr>
+<tr class="even">
+<td><strong>Supporting line for face <span class="math inline">\(j\)</span></strong></td>
+<td><span class="math inline">\(g_{2j}(d) = g_{1j}(d^{*}_{1}) + (d -
+d^{*}_{1})\,g&#39;_{1j}(d^{*}_{1})\)</span></td>
+<td>Linear supporting line of <span class="math inline">\(g_{1j}(d)\)</span> at the anchor <span class="math inline">\(d^{*}_{1}\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Extrapolated face constants</strong></td>
+<td><span class="math inline">\(\begin{aligned}
+&amp; g_{2j}(\text{upp}) = g_{1j}(d^{*}_{1}) \\[2pt]
+&amp; \qquad\qquad\;\; +\, (\text{upp}-d^{*}_{1})\,
+g&#39;_{1j}(d^{*}_{1}) \\[6pt]
+&amp; g_{2j}(\text{low}) = g_{1j}(d^{*}_{1}) \\[2pt]
+&amp; \qquad\qquad\;\; +\, (\text{low}-d^{*}_{1})\,
+g&#39;_{1j}(d^{*}_{1})
+\end{aligned}\)</span></td>
+<td>Linear extrapolations to dispersion bounds.</td>
+</tr>
+<tr class="even">
+<td><strong>Endpoint maxima</strong></td>
+<td><span class="math inline">\(\begin{aligned}
+\mathrm{max\_upp} &amp; = \max_j\!\big(g_{2j}(\text{upp})\big) \\[8pt]
+\mathrm{max\_low} &amp; = \max_j\!\big(g_{2j}(\text{low})\big)
+\end{aligned}\)</span></td>
+<td>Maxima at upper and lower dispersion bounds.</td>
+</tr>
+<tr class="odd">
+<td><strong>Mean lower-bound maximum</strong></td>
+<td><span class="math inline">\(\begin{aligned}
+&amp;\mathrm{max\_low\_mean} \\[4pt]
+&amp;= \mathrm{max\_upp} \\[4pt]
+&amp;\quad - \mathrm{m}_{g&#39;_{1}}\,(\text{upp}-\text{low})
+\end{aligned}\)</span></td>
+<td>Linearized lower-bound maximum.</td>
+</tr>
+<tr class="even">
+<td><strong>Global line parameters</strong></td>
+<td><span class="math inline">\(\text{lmc}_2 = \dfrac{\mathrm{max\_upp}
+- \mathrm{max\_low\_mean}}{\text{upp}-\text{low}}\)</span> <br> <span class="math inline">\(\text{lmc}_1 = \mathrm{max\_low\_mean} -
+\text{lmc}_2\,\text{low}\)</span></td>
+<td>Slope and intercept of global affine bound.</td>
+</tr>
+<tr class="odd">
+<td><strong>Log–linear anchor</strong></td>
+<td><span class="math inline">\(d^{*}_{2} =
+\dfrac{\text{upp}-\text{low}}{\log(\text{upp}/\text{low})}\)</span></td>
+<td>Anchor point for log–tilt.</td>
+</tr>
+<tr class="even">
+<td><strong>Log–tilt coefficients</strong></td>
+<td><span class="math inline">\(\begin{aligned} &amp; \mathrm{lm\_log2}
+= \\[4pt]
+&amp; \text{lmc}_2\,d^{*}_{2} \\[4pt]
+&amp; \mathrm{lm\_log1} = \\[4pt]
+&amp; \text{lmc}_1 + \text{lmc}_2 d^{*}_{2} -
+\text{lmc}_2\log(d^{*}_{2}) \\[4pt]
+&amp; \mathrm{max\_LL\_log\_disp} =\\[4pt]
+&amp; \mathrm{lm\_log1} + \mathrm{lm\_log2}\log(\text{upp})
+\end{aligned}\)</span></td>
+<td>Coefficients for log–tilt bounding function.</td>
+</tr>
+<tr class="odd">
+<td><strong>Face-specific RSS</strong></td>
+<td><span class="math inline">\(\mathrm{RSS}_j(d) = \sum_{i=1}^n
+w_i\,(y_i - x_i^\top c^{-1}(\bar c_j,d))^2\)</span></td>
+<td>Residual sum of squares for face <span class="math inline">\(j\)</span> at dispersion <span class="math inline">\(d\)</span>.</td>
+</tr>
+<tr class="even">
+<td><strong>Global minimum RSS</strong></td>
+<td><span class="math inline">\(\mathrm{RSS\_Min} =
+\min_{j}\;\min_{d\in[\text{low},\,\text{upp}]}\;\mathrm{RSS}_j(d)\)</span></td>
+<td>Global minimum RSS across all faces and dispersion values.</td>
+</tr>
+<tr class="odd">
+<td><strong>UB2 term</strong></td>
+<td><span class="math inline">\(\mathrm{UB2}_j(d) =
+\dfrac{1}{2d}\big(\mathrm{RSS}_j(d) -
+\mathrm{RSS\_Min}\big)\)</span></td>
+<td>Nonnegative UB2 bound for face <span class="math inline">\(j\)</span>.</td>
+</tr>
+<tr class="even">
+<td><strong>Per-face UB2 minimum</strong></td>
+<td><span class="math inline">\(\mathrm{UB2\_Min}_j =
+\min_{d\in[\text{low},\,\text{upp}]}\mathrm{UB2}_j(d)\)</span></td>
+<td>Minimum UB2 value for face <span class="math inline">\(j\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><strong>Per‑face shift (UB3A)</strong></td>
+<td><span class="math inline">\(\begin{aligned}
+&amp; \mathrm{lg\_prob\_factor1}_{j} = \\[4pt]
+&amp; \max\Big\{\, g_{2j}(\text{upp}) - \mathrm{max\_upp}, \\[-2pt]
+&amp; \qquad\;\; g_{2j}(\text{low}) - \mathrm{max\_low} \Big\}
+\end{aligned}\)</span></td>
+<td>Raw per‑face shift used in UB3A construction.</td>
+</tr>
+<tr class="even">
+<td><strong>Per‑face shift (PLSD)</strong></td>
+<td><span class="math inline">\(\begin{aligned}
+&amp; \mathrm{lg\_prob\_factor2}_{j} = \\[4pt]
+&amp; \mathrm{lg\_prob\_factor1}_{j} \;-\; \mathrm{UB2\_Min}_{j}
+\end{aligned}\)</span></td>
+<td>UB2‑adjusted shift used in PLSD mixture weights.</td>
+</tr>
+<tr class="odd">
+<td><strong>Global affine bound <span class="math inline">\(g3_j\)</span></strong></td>
+<td><span class="math inline">\(\displaystyle
+g3_{j}(d)
+=
+\mathrm{lg\_prob\_factor1}_{j}
++
+\mathrm{lmc}_1
++
+\mathrm{lmc}_2\, d\)</span></td>
+<td>Global affine upper bound for the quadratic–linear face energy.</td>
+</tr>
+<tr class="even">
+<td><strong>Gamma proposal parameters</strong></td>
+<td><span class="math inline">\(\text{shape}_3 = \text{shape}_2 -
+\mathrm{lm\_log2}\)</span> <br> <span class="math inline">\(\text{rate}_3 = \text{Rate} +
+\mathrm{RSS\_Min}/2\)</span></td>
+<td>Adjusted Gamma proposal parameters.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Remark 4.1.1</strong><br />
+The envelope uses the dispersion variable <span class="math inline">\(d
+\equiv \phi = 1/\tau\)</span>, where <span class="math inline">\(\tau\)</span> is the precision appearing in
+Sections 1.1–1.2. When the user does not supply bounds, the default
+implementation truncates the surrogate posterior<br />
+<span class="math display">\[
+\tau \mid y \sim \Gamma(\text{shape}_2,\text{rate}_2)
+\]</span> by selecting central quantiles at level <span class="math inline">\(\mathrm{max\_disp\_perc}\)</span> (default <span class="math inline">\(0.99\)</span>): <span class="math display">\[
+\tau_{\min} =
+qgamma(\mathrm{max\_disp\_perc},\text{shape}_2,\text{rate}_2),
+\qquad
+\tau_{\max} =
+qgamma(1-\mathrm{max\_disp\_perc},\text{shape}_2,\text{rate}_2).
+\]</span> The dispersion bounds used in the envelope are then <span class="math display">\[
+\text{low} = \frac{1}{\tau_{\max}},
+\qquad
+\text{upp} = \frac{1}{\tau_{\min}}.
+\]</span></p>
+<p>These bounds exclude only the far tails of the surrogate Gamma
+posterior for <span class="math inline">\(\tau\)</span> while still
+restricting <span class="math inline">\(d\)</span> enough for the global
+log‑tilt bound to dominate the linear supporting line <span class="math inline">\(g_{2j}(d)\)</span> across the entire interval.</p>
+<p><strong>Remark 4.1.2</strong><br />
+By construction, the global affine bound satisfies <span class="math display">\[
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{low} = \mathrm{max\_low},
+\qquad
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{upp} = \mathrm{max\_upp}.
+\]</span></p>
+<p><em>Proof of Remark 4.1.2</em></p>
+<p>From the definitions of the global affine bound, <span class="math display">\[
+\mathrm{lmc}_2
+=
+\frac{\mathrm{max\_upp} - \mathrm{max\_low}}{\text{upp} - \text{low}},
+\qquad
+\mathrm{lmc}_1
+=
+\mathrm{max\_low} - \mathrm{lmc}_2\,\text{low},
+\]</span> we verify the endpoint identities as follows.</p>
+<p>At <span class="math inline">\(d = \text{low}\)</span>, <span class="math display">\[
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{low}
+=
+\big(\mathrm{max\_low} - \mathrm{lmc}_2\,\text{low}\big)
++ \mathrm{lmc}_2\,\text{low}
+=
+\mathrm{max\_low}.
+\]</span></p>
+<p>At <span class="math inline">\(d = \text{upp}\)</span>, <span class="math display">\[
+\begin{aligned}
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{upp}
+&amp;=
+\mathrm{max\_low} - \mathrm{lmc}_2\,\text{low}
++ \mathrm{lmc}_2\,\text{upp} \\
+&amp;=
+\mathrm{max\_low} + \mathrm{lmc}_2(\text{upp} - \text{low}) \\
+&amp;=
+\mathrm{max\_low}
++ \frac{\mathrm{max\_upp} - \mathrm{max\_low}}{\text{upp} -
+\text{low}}(\text{upp} - \text{low}) \\
+&amp;=
+\mathrm{max\_upp}.
+\end{aligned}
+\]</span></p>
+<p>Thus the global affine function <span class="math inline">\(d \mapsto
+\mathrm{lmc}_1 + \mathrm{lmc}_2 d\)</span> interpolates the endpoint
+maxima: <span class="math display">\[
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{low} = \mathrm{max\_low},
+\qquad
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{upp} = \mathrm{max\_upp}.
+\]</span></p>
+<p><strong>Remark 4.1.3</strong></p>
+<p>A requirement for the above to be a valid sampler is that <span class="math inline">\(\mathrm{lm\_log2}&lt;\text{shape}_2\)</span>. We
+impose the stronger requirement that <span class="math inline">\(\mathrm{lm\_log2} \leq \tfrac{n_{w}}{2}\)</span>
+in our implementation and adjust the global bound as needed while still
+maintaining validity of the sampler (see the implementation for
+details).</p>
+<!-- | **Baseline face constant** | $\begin{aligned} & \mathrm{thetabarconst}[j] = \\[4pt]  -->
+<!--  &  -\tfrac{1}{2}\,\theta(d^{*}_{1})^\top P\,\theta(d^{*}_{1})  \\[4pt] -->
+<!--  & \quad + \bar c_j^\top\,\theta(d^{*}_{1}) \end{aligned}$ | Baseline constant for face $j$ at $d^{*}_{1}$. | -->
+<!-- | **Extrapolated face constants** | $\begin{aligned} & \mathrm{thetabarconst\_upp\_apprx}[j] = \\[4pt]  -->
+<!-- &  \mathrm{thetabarconst}[j] \\[4pt] -->
+<!-- & + (\text{upp}-d^{*}_{1})\,\mathrm{New\_LL\_Slope}[j] \\[4pt]  -->
+<!-- & \mathrm{thetabarconst\_low\_apprx}[j] = \\[4pt] -->
+<!-- & \mathrm{thetabarconst}[j] \\[4pt] -->
+<!-- & + (\text{low}-d^{*}_{1})\,\mathrm{New\_LL\_Slope}[j] \end{aligned}$ | Linear extrapolations to dispersion bounds. | -->
+<!-- | **Quad–linear dispersion slope** | $\begin{aligned} & \mathrm{New\_LL\_Slope}[j] = \\[4pt] -->
+<!-- &  V(d^{*}_{1})^\top A(d^{*}_{1})^{-1}\bar c_j \\[4pt]  -->
+<!-- &  - V(d^{*}_{1})^\top A(d^{*}_{1})^{-1}P\,A(d^{*}_{1})^{-1}(r + d^{*}_{1}\bar c_j) \end{aligned}$ | Slope of quad–linear face energy w.r.t. dispersion. | -->
+<!-- | **Supporting line for face \(j\)** | \(g_{2j}(d) = g_{1j}(d^{*}_{1}) + (d - d^{*}_{1})\,\mathrm{New\_LL\_Slope}[j]\) | Linear supporting line of \(g_{1j}(d)\) at the anchor \(d^{*}_{1}\). | -->
+<!-- | **Extrapolated face constants** | \(\begin{aligned} -->
+<!-- & g_{2j}(\text{upp}) = g_{1j}(d^{*}_{1}) + (\text{upp}-d^{*}_{1})\,\mathrm{New\_LL\_Slope}[j] \\[4pt] -->
+<!-- & g_{2j}(\text{low}) = g_{1j}(d^{*}_{1}) + (\text{low}-d^{*}_{1})\,\mathrm{New\_LL\_Slope}[j] -->
+<!-- \end{aligned}\) | Values of \(g_{2j}(d)\) at the dispersion endpoints. | -->
+<!-- | **Mean quad–linear slope** | $\mathrm{m\_New\_LL\_Slope} = \mathrm{mean}\big(\mathrm{New\_LL\_Slope}[i]\big)$ | Average slope across faces. | -->
+<!-- | **Endpoint maxima** | $\begin{aligned} & \mathrm{max\_upp} \\[4pt] -->
+<!-- & = \max_j\!\Big(\mathrm{thetabarconst}[j] \\[4pt]  -->
+<!-- & + (\text{upp}-d^{*}_{1})\,\mathrm{New\_LL\_Slope}[j]\Big) \\[4pt] & \mathrm{max\_low} = \\[4pt]  -->
+<!-- & \max_j\!\Big(\mathrm{thetabarconst}[j] \\[4pt] -->
+<!-- & + (\text{low}-d^{*}_{1})\,\mathrm{New\_LL\_Slope}[j]\Big) \end{aligned}$ | Maxima at upper and lower dispersion bounds. | -->
+<!-- | **Mean lower-bound maximum** | $\begin{aligned} -->
+<!-- &\mathrm{max\_low\_mean} \\[4pt] -->
+<!-- &= \mathrm{max\_upp} \\[4pt] -->
+<!-- &\quad - \mathrm{m\_New\_LL\_Slope}\,(\text{upp}-\text{low}) -->
+<!-- \end{aligned}$ | Linearized lower-bound maximum. | -->
+<!-- | **Mean quad–linear slope** | $\mathrm{m}_{g'_{1}} = \operatorname*{mean}_{j}\!\big(g'_{1j}(d^{*}_{1})\big)$ | Average derivative $g'_{1j}(d^{*}_{1})$ across faces. | -->
+<!-- | **Mean quad–linear slope** | $\mathrm{m}_{g'_{1}} = \mathrm{mean} \!\big(g'_{1j}(d^{*}_{1})\big)$ | Average derivative $g'_{1j}(d^{*}_{1})$ across faces. | -->
+<!-- | **Per-face shift** | $\begin{aligned} & \mathrm{lg\_prob\_factor}_j =\\[4pt] -->
+<!-- & \max\Big\{ \mathrm{thetabarconst\_upp\_apprx}[j] - \mathrm{max\_upp}, \\[-2pt]  -->
+<!-- & \qquad\mathrm{thetabarconst\_low\_apprx}[j] - \mathrm{max\_low} \Big\} \\[4pt]  -->
+<!-- & - \mathrm{UB2\_Min}_j  -->
+<!-- \end{aligned}$ | Shift applied to mixture weights; absorbs $\mathrm{UB2\_Min}_j$. | -->
+<!-- | **Per-face shift** | $\begin{aligned} -->
+<!-- & \mathrm{lg\_prob\_factor}_j = \\[4pt] -->
+<!-- & \max\Big\{\, g_{2j}(\text{upp}) - \mathrm{max\_upp}, \\[-2pt] -->
+<!-- & \qquad\;\; g_{2j}(\text{low}) - \mathrm{max\_low} \Big\} \\[6pt] -->
+<!-- & \;-\; \mathrm{UB2\_Min}_j -->
+<!-- \end{aligned}$ | Shift applied to mixture weights; absorbs $\mathrm{UB2\_Min}_j$. | -->
+<!-- | **Dispersion bounds** | $\text{low} = \dfrac{1}{qgamma(\mathrm{max\_disp\_perc},\,\text{shape}_2,\,\text{rate}_2)}$ <br> $\text{upp} = \dfrac{1}{qgamma(1-\mathrm{max\_disp\_perc},\,\text{shape}_2,\,\text{rate}_2)}$ | Lower and upper bounds for dispersion. | -->
+<!-- | **Derivative of face energy** | $\begin{aligned} -->
+<!-- & g'_{1j}(d) =  \quad V(d)^\top A(d)^{-1}\,\bar c_j \\[4pt] -->
+<!-- & \quad -\, V(d)^\top A(d)^{-1} P\,A(d)^{-1}\big(r + d\,\bar c_j\big) -->
+<!-- \end{aligned}$ | Derivative of $g_{1j}(d)$ with respect to dispersion. | -->
+<!-- | **Derivative at the anchor** | $\begin{aligned} -->
+<!-- & g'_{1j}(d^{*}_{1}) =  \quad V(d^{*}_{1})^\top A(d^{*}_{1})^{-1}\,\bar c_j \\[4pt] -->
+<!-- & \quad -\, V(d^{*}_{1})^\top A(d^{*}_{1})^{-1} P\,A(d^{*}_{1})^{-1}\big(r + d^{*}_{1}\,\bar c_j\big) -->
+<!-- \end{aligned}$ | Value of the derivative at the envelope anchor $d^{*}_{1}$. | -->
+<div id="proposal-distributions" class="section level3">
+<h3>4.2 Proposal distributions</h3>
+<p>In the accept–reject scheme, proposals are the distributions we can
+sample from directly to generate candidate values. We use two
+proposals:</p>
+<ol style="list-style-type: decimal">
+<li>A <strong>Gamma-based proposal for dispersion <span class="math inline">\(d\)</span></strong> (implemented as a truncated
+inverse‑Gamma in <span class="math inline">\(d\)</span>, equivalently a
+truncated Gamma in <span class="math inline">\(1/d\)</span>).<br />
+</li>
+<li>A <strong>mixture of truncated normal proposals for <span class="math inline">\(\beta\)</span></strong>, sampled in two steps:
+<ul>
+<li>First, sample a face index <span class="math inline">\(j\)</span>
+using the per‑face mixture weights <span class="math inline">\(\text{PLSD}_j\)</span>.<br />
+</li>
+<li>Then, conditional on <span class="math inline">\(j\)</span>, sample
+<span class="math inline">\(\beta\)</span> from the face‑specific
+truncated normal.</li>
+</ul></li>
+</ol>
+<p>These proposals are constructed to be tractable for sampling and to
+support tight bounds via the correction terms.</p>
+<hr />
+<div id="gamma-proposal-in-dispersion-d-with-truncation" class="section level4">
+<h4>Gamma proposal in dispersion <span class="math inline">\(d\)</span>
+(with truncation)</h4>
+<p>For dispersion <span class="math inline">\(d \in
+[\,\text{low},\,\text{upp}\,]\)</span>, define the truncated
+inverse‑Gamma proposal density (equivalently, a truncated Gamma in <span class="math inline">\(1/d\)</span>):</p>
+<p><span class="math display">\[
+\begin{aligned}
+\log q_\Gamma^{\text{trunc}}(d)
+&amp;= \Big(\text{Shape} + \tfrac{n_{w}}{2} -
+\mathrm{lm\_log2}\Big)\,\log\!\Big(\text{Rate} +
+\tfrac{\mathrm{RSS\_Min}}{2}\Big) \\
+&amp;\quad - \log \Gamma\!\Big(\text{Shape} + \tfrac{n_{w}}{2} -
+\mathrm{lm\_log2}\Big) \\[6pt]
+&amp;\quad - \Big(\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2} +
+1\Big)\,\log d
+   - \frac{\text{Rate} + \tfrac{\mathrm{RSS\_Min}}{2}}{d} \\[6pt]
+&amp;\quad - \log\!\Bigg(
+F_\Gamma\!\Big(\tfrac{1}{\text{low}};\,\text{Shape} + \tfrac{n_{w}}{2} -
+\mathrm{lm\_log2},\,
+\text{Rate} + \tfrac{\mathrm{RSS\_Min}}{2}\Big) \\[6pt]
+&amp;\quad  -\;  F_\Gamma\!\Big(\tfrac{1}{\text{upp}};\,\text{Shape} +
+\tfrac{n_{w}}{2} - \mathrm{lm\_log2},\,
+\text{Rate} + \tfrac{\mathrm{RSS\_Min}}{2}\Big)
+\Bigg),
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(F_\Gamma(\cdot;\,\text{shape},\,\text{rate})\)</span>
+is the Gamma CDF for <span class="math inline">\(1/d\)</span>.<br />
+Sampling proceeds by drawing <span class="math inline">\(u \sim
+\text{Uniform}(0,1)\)</span> on the truncated CDF interval and inverting
+to obtain <span class="math inline">\(1/d\)</span>, then mapping to
+<span class="math inline">\(d\)</span>.</p>
+<hr />
+</div>
+<div id="mixture-of-truncated-normals-for-beta-two-step-sampling" class="section level4">
+<h4>Mixture of truncated normals for <span class="math inline">\(\beta\)</span> (two-step sampling)</h4>
+<p>We construct a mixture over faces, each with a truncated normal
+component. Sampling is performed in two steps:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Sample the face index <span class="math inline">\(j\)</span>
+(mixture weights):</strong></li>
+</ol>
+<p><span class="math display">\[
+\begin{aligned}
+\log \mathrm{PLSD}_j
+&amp;= \mathrm{lg\_prob\_factor2}_j
+   + \tfrac{1}{2}\,\bar c_j^\top \bar c_j
+   + \sum_{r=1}^p
+       \log\!\big(e^{\mathrm{logrt}_{j,r}} -
+e^{\mathrm{loglt}_{j,r}}\big)
+\\[6pt]
+&amp;\quad
+- \log\!\left(
+    \sum_{k=1}^K
+      \exp\!\Big(
+        \mathrm{lg\_prob\_factor2}_k
+        + \tfrac{1}{2}\,\bar c_k^\top \bar c_k
+      \Big)
+      \prod_{r=1}^p
+        \big(e^{\mathrm{logrt}_{k,r}} - e^{\mathrm{loglt}_{k,r}}\big)
+  \right).
+\end{aligned}
+\]</span></p>
+<ul>
+<li>Exponentiating and normalizing across <span class="math inline">\(j=1,\dots,K\)</span> yields a valid categorical
+distribution for the face index.</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li><strong>Sample <span class="math inline">\(\beta\)</span>
+conditional on <span class="math inline">\(j\)</span> (truncated
+normal):</strong> <span class="math display">\[
+\log q_{\text{TN}}(\beta\mid j)
+= -\tfrac{1}{2}\,\beta^\top \beta
+- \bar c_j^\top \beta
+- \tfrac{1}{2}\,\bar c_j^\top \bar c_j
++ \tfrac{p}{2}\log(2\pi)
+- \sum_{r=1}^p \log\!\big(e^{\text{logrt}_{j,r}} -
+e^{\text{loglt}_{j,r}}\big).
+\]</span>
+<ul>
+<li>This corresponds to a normal with mean <span class="math inline">\(-\bar c_j\)</span> and identity covariance,
+truncated coordinate‑wise to intervals <span class="math inline">\((e^{\text{loglt}_{j,r}},\,e^{\text{logrt}_{j,r}})\)</span>.<br />
+</li>
+<li>Sampling can be performed via independent truncated univariate
+normals in each coordinate, with acceptance on the rectangle.</li>
+</ul></li>
+</ol>
+<hr />
+<p>These proposals provide efficient candidate generation: <span class="math inline">\(d\)</span> from the truncated inverse‑Gamma, and
+<span class="math inline">\(\beta\)</span> from a face‑indexed mixture
+of truncated normals. In the accept–reject algorithm, the corresponding
+<strong>correction terms</strong> will ensure that the proposals
+upper‑bound the target, yielding valid acceptance probabilities.</p>
+</div>
+</div>
+<div id="correction-terms" class="section level3">
+<h3>4.3 Correction terms</h3>
+<p>In the accept–reject framework, the <strong>proposal
+distributions</strong> generate candidate values, while the
+<strong>correction terms</strong> ensure that the proposals form valid
+upper bounds on the true posterior.<br />
+These corrections are carefully constructed so that:</p>
+<ul>
+<li>They are always non‑negative (or non‑positive in the case of
+<code>test1</code>),<br />
+</li>
+<li>They vanish or simplify at key anchor points, and<br />
+</li>
+<li>They guarantee that the acceptance probability is well‑defined.</li>
+</ul>
+<p>Together, they measure the “gap” between the proposal approximation
+and the exact log‑posterior.</p>
+<hr />
+<table>
+<colgroup>
+<col width="19%" />
+<col width="38%" />
+<col width="41%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Definition</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\text{test1}_{j}(\beta,d)\)</span></td>
+<td><span class="math display">\[\begin{aligned}
+&amp; LL(\beta,d) - \\[4pt]
+&amp; \Big( LL(\bar c^{-1}(\bar c_j,d),d) - \bar c_j^{\top}(\beta - \bar
+c^{-1}(\bar c_j,d)) \Big) \\[6pt]
+&amp;= \Bigg[ - \tfrac{1}{2d}\sum_{i=1}^n w_i\,(y_i - x_i^\top \beta)^2
+- \tfrac{1}{2}\beta^\top P \beta \Bigg] \\[6pt]
+&amp;\quad - \Bigg[ - \tfrac{1}{2d}\sum_{i=1}^n w_i\,(y_i - x_i^\top
+\bar c^{-1}(\bar c_j,d))^2  \\[4pt]
+&amp; -\tfrac{1}{2}\big(\bar c^{-1}(\bar c_j,d)\big)^\top P\,\bar
+c^{-1}(\bar c_j,d) \\[4pt]
+&amp; - \bar c_j^{\top}\big(\beta - \bar c^{-1}(\bar c_j,d)\big) \Bigg]
+\end{aligned}\]</span></td>
+<td>Difference between the log‑likelihood and its linearization at the
+tangency point. By concavity, this term is always <span class="math inline">\(\leq 0\)</span>.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{RSS}_{j}(d)\)</span></td>
+<td><span class="math inline">\(\sum_{i=1}^n w_i\,(y_i - x_i^\top \bar
+c^{-1}(\bar c_j,d))^2\)</span></td>
+<td>Residual Sum of Squares for face j at dispersion <span class="math inline">\(d\)</span> .</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{RSS\_Min}\)</span></td>
+<td><span class="math display">\[\begin{aligned}
+&amp; \min_{j}\;\min\limits_{d \in [d_{\mathrm{low}},\,
+d_{\mathrm{upp}}]} \\[4pt]
+&amp; \sum_{i=1}^n w_i \,\Big(y_i - x_i^\top \bar c^{-1}(\bar
+c_j,d)\Big)^2
+\end{aligned}\]</span></td>
+<td>Global minimum residual sum of squares across all faces <span class="math inline">\(j\)</span> and dispersion values <span class="math inline">\(d\)</span>.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{UB2}_{j}(d)\)</span></td>
+<td><span class="math inline">\(\tfrac{1}{2d}\Big(\sum_{i=1}^n w_i\,(y_i
+- x_i^\top \bar c^{-1}(\bar c_j,d))^2 -
+\mathrm{RSS}_{Min}\Big)\)</span></td>
+<td>Bound relative to the ML residual sum of squares. Always <span class="math inline">\(\geq 0\)</span>.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{UB2\_Min}_{j}\)</span></td>
+<td><span class="math display">\[\begin{aligned} &amp;
+\min\limits_{d \in [d_{\mathrm{low}},\, d_{\mathrm{upp}}]}
+\;\text{UB2}_{j}(d)
+\end{aligned}\]</span></td>
+<td>Minimum UB2 value across the dispersion range.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{UB2A}_{j}(d)\)</span></td>
+<td><span class="math inline">\(\text{UB2}_{j}(d) -
+\mathrm{UB2\_Min}_{j}\)</span></td>
+<td>Non‑negative UB2 adjustment.</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\text{UB3A}_j(d)\)</span></td>
+<td><span class="math display">\[\begin{aligned}
+&amp;\mathrm{lg\_prob\_factor1\_j} + \text{lmc}_1 + \text{lmc}_2\, d \\
+&amp;- \Big(-\tfrac{1}{2}(\bar c^{-1}(\bar c_j,d))^\top P\,\bar
+c^{-1}(\bar c_j,d) \\[4pt]
+&amp; + \bar c_j^\top \bar c^{-1}(\bar c_j,d)\Big)
+\end{aligned}\]</span></td>
+<td>Bound from the quadratic–linear face energy. Constructed so the
+global line dominates the exact quadratic–linear term.</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{UB3B}(d)\)</span></td>
+<td><span class="math display">\[\begin{aligned}
+&amp;(\mathrm{max\_upp} - \mathrm{max\_LL\_log\_disp}) \\
+&amp;+ (\mathrm{lm\_log1} + \mathrm{lm\_log2} \cdot \log d) \\[4pt]
+&amp; - (\text{lmc}_1 + \text{lmc}_2 \cdot d)
+\end{aligned}\]</span></td>
+<td>Bound from the dispersion log–tilt construction. Ensures the global
+log–linear approximation dominates the true log‑dispersion curve.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>Here, the standardized log‑likelihood is</p>
+<p><span class="math display">\[
+LL(\beta,d) \;=\; -\tfrac{n_{w}}{2}\log d
+\;-\; \tfrac{1}{2d}\sum_{i=1}^n w_i\,(y_i - x_i^\top \beta)^2
+\;-\; \tfrac{1}{2}\,\beta^\top P\,\beta.
+\]</span></p>
+<hr />
+<p><strong>Interpretation.</strong><br />
+- <code>test1</code> measures how far the log‑likelihood lies below its
+tangent plane.<br />
+- <code>UB2</code> enforces that the residual sum of squares at the
+tangency point cannot beat the ML fit.<br />
+- <code>UB3A</code> ensures that the quadratic–linear face energy is
+bounded above by a global line.<br />
+- <code>UB3B</code> ensures that the log‑dispersion contribution is
+bounded above by a log–linear tilt.</p>
+<p>Together, these correction terms guarantee that the proposals
+dominate the target posterior, making the accept–reject step valid.</p>
+</div>
+<div id="proposition-logposterior-decomposition-in-dispersion-form" class="section level3">
+<h3>4.4 Proposition: Log‑posterior decomposition in dispersion form</h3>
+<p><strong>Proposition</strong> For face index <span class="math inline">\(j\)</span>, dispersion <span class="math inline">\(d\)</span>, and tangency point <span class="math inline">\(\theta(d) = c^{-1}(\bar c_j,d)\)</span>,<br />
+the joint log‑posterior can be written as <span class="math display">\[
+\begin{aligned}
+\log \pi(\beta,d)
+&amp;= \underbrace{\log q_\Gamma(d)}_{\text{Gamma proposal}}
++ \underbrace{\log q_{\mathrm{TN}}(\beta\mid j)}_{\text{Truncated normal
+proposal}}
++ \underbrace{\log \mathrm{PLSD}_j}_{\text{Per‑face mixture weight}}
+\\[6pt]
+&amp;\quad
++ \underbrace{
+      \mathrm{test1}(\beta,d)
+      - \mathrm{UB2A}_j(d)
+      - \mathrm{UB3A}_j(d)
+      - \mathrm{UB3B}(d)
+   }_{\text{Correction block}}
++ \text{const}.
+\end{aligned}
+\]</span></p>
+<p>Moreover, the correction terms satisfy the following sign
+properties</p>
+<ul>
+<li><p><span class="math inline">\(\mathrm{test1}(\beta,d) \le
+0\)</span><br />
+(concavity of the standardized log‑likelihood and its supporting
+hyperplane at<br />
+<span class="math inline">\(c^{-1}(\bar c_j,d)\)</span>).</p></li>
+<li><p><span class="math inline">\(\mathrm{UB2A}_j(d) \ge
+0\)</span><br />
+(since <span class="math inline">\(\mathrm{UB2}_j(d)\)</span> is defined
+relative to the global minimum<br />
+<span class="math inline">\(\mathrm{RSS}_{\mathrm{Min}}\)</span>, and
+<span class="math inline">\(\mathrm{UB2A}_j(d) = \mathrm{UB2}_j(d) -
+\mathrm{UB2\_Min}_j\)</span>.</p></li>
+<li><p><span class="math inline">\(\mathrm{UB3A}_j(d) \ge
+0\)</span><br />
+(quadratic–linear face energy bound dominates the exact term).</p></li>
+<li><p><span class="math inline">\(\mathrm{UB3B}(d) \ge 0\)</span><br />
+(dispersion log–tilt bound dominates the exact log‑dispersion).</p></li>
+</ul>
+<p>and we further have the following</p>
+<ul>
+<li><p><span class="math inline">\(\min_{d\in[\text{low},\,\text{upp}]}\;\mathrm{RSS}_j(d)=
+\mathrm{RSS}_j(low)\)</span> which implies <span class="math inline">\(\mathrm{RSS}_{\mathrm{Min}}= \min_{j}
+\mathrm{RSS}_j(low)\)</span></p></li>
+<li><p><span class="math inline">\(\mathrm{UB2\_Min}_j=\min
+[\mathrm{UB2}_j(low),\mathrm{UB2}_j(upp) ]\)</span></p></li>
+</ul>
+<p>which enables efficient implementation of the minimization.</p>
+<hr />
+</div>
+<div id="explanation" class="section level3">
+<h3>Explanation</h3>
+<ul>
+<li><p><strong>What this does:</strong><br />
+It separates the log‑posterior into three parts:</p>
+<ol style="list-style-type: lower-roman">
+<li>proposal distributions you can sample from directly (Gamma in <span class="math inline">\(d\)</span>, truncated normal in <span class="math inline">\(\beta\)</span>),<br />
+</li>
+<li>a correction block ensuring the proposals form valid upper bounds,
+and<br />
+</li>
+<li>a parameter‑free constant.</li>
+</ol></li>
+<li><p><strong>Why the signs matter:</strong><br />
+The correction block is <span class="math display">\[
+\mathrm{test1}(\beta,d)
+- \mathrm{UB2A}_j(d)
+- \mathrm{UB3A}_j(d)
+- \mathrm{UB3B}(d),
+\]</span> where <span class="math inline">\(\mathrm{test1}\le 0\)</span>
+and each <span class="math inline">\(\mathrm{UB}\ge 0\)</span>.<br />
+This guarantees that, when combined with the proposal terms, we obtain a
+valid envelope for accept–reject sampling: proposals generate
+candidates; the correction block calibrates acceptance.</p></li>
+<li><p><strong>How it’s used:</strong><br />
+In the sampler, candidates are drawn from the proposal distributions and
+accepted with probability determined by the correction block.<br />
+The constant term does not affect acceptance and simply keeps the
+identity exact.</p></li>
+</ul>
+<hr />
+</div>
+<div id="proof-of-proposition" class="section level3">
+<h3>Proof of Proposition</h3>
+<p>We verify the decomposition and the sign properties by appealing to
+Claims 1–5.</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Algebraic decomposition (Claim-1):</strong><br />
+Claim 1 establishes, via the sequence of substitutions (1a)–(5d), that
+for each face <span class="math inline">\(j\)</span> the chain of
+equalities transforms <span class="math display">\[
+\log q_\Gamma(d)
++ \log q_{\mathrm{TN}}(\beta\mid j)
++ \log \mathrm{PLSD}_j
++ \big[
+    \mathrm{test1}(\beta,d)
+    - \mathrm{UB2A}_j(d)
+    - \mathrm{UB3A}_j(d)
+    - \mathrm{UB3B}(d)
+  \big]
++ \text{const}
+\]</span> into the standardized form with prior Gamma, prior
+multivariate normal, and the standardized log‑likelihood, absorbing all
+parameter‑free remnants into a global constant.</p></li>
+<li><p><strong>Concavity gap sign (Claim 2):</strong><br />
+Claim 2 shows <span class="math inline">\(\mathrm{test1}(\beta,d) \le
+0\)</span> because the standardized log‑likelihood lies below its
+supporting hyperplane at the tangency point <span class="math inline">\(c^{-1}(\bar c_j,d)\)</span>.</p></li>
+<li><p><strong>Residual sum‑of‑squares bound (Claim-3):</strong><br />
+Claim 3 shows <span class="math inline">\(\mathrm{UB2}_j(d) \ge
+0\)</span> because<br />
+<span class="math display">\[
+\mathrm{UB2}_j(d)
+= \frac{1}{2d}\big(\mathrm{RSS}_j(d) - \mathrm{RSS}_{\mathrm{Min}}\big)
+\ge 0,
+\]</span> and therefore<br />
+<span class="math display">\[
+\mathrm{UB2A}_j(d)
+= \mathrm{UB2}_j(d) - \mathrm{UB2\_Min}_j
+\ge 0.
+\]</span></p></li>
+<li><p><strong>Quadratic–linear face bound (Claim-4):</strong><br />
+Claim 4 shows that <span class="math inline">\(\mathrm{UB3A}_j(d) \ge
+0\)</span>.</p></li>
+</ol>
+<p>Define three functions<br />
+by</p>
+<p><span class="math display">\[ g1_{j}(d)= -\tfrac{1}{2}(\bar
+c^{-1}(\bar c_j,d))^\top P\,\bar c^{-1}(\bar c_j,d) + \bar c_j^\top \bar
+c^{-1}(\bar c_j,d) \]</span></p>
+<p><span class="math display">\[
+g2_{j}(d)=g1_{j}(d^{*}_{1})\;+\;g&#39;_{1j}(d^{*}_{1})\, (d -
+d^{*}_{1}).
+\]</span></p>
+<p><span class="math display">\[
+g3_{j}(d) = \mathrm{lg\_prob\_factor1\_j} + \text{lmc}_1 +
+\text{lmc}_2\, d
+\]</span></p>
+<p>The key step is to compare:</p>
+<ul>
+<li><span class="math inline">\(g1_j(d)\)</span>: exact quadratic–linear
+face energy,<br />
+</li>
+<li><span class="math inline">\(g2_j(d)\)</span>: its supporting line at
+the tangency point,<br />
+</li>
+<li><span class="math inline">\(g3_j(d)\)</span>: the global affine
+bound constructed from <span class="math inline">\(\mathrm{lmc}_1\)</span>, <span class="math inline">\(\mathrm{lmc}_2\)</span>, and the per‑face
+adjustment <span class="math inline">\(\widetilde{\lg\_prob\_factor1}_j\)</span>.<br />
+Concavity ensures <span class="math inline">\(g1_j(d) \le
+g2_j(d)\)</span>.<br />
+Endpoint calibration ensures <span class="math inline">\(g3_j(d) \ge
+g2_j(d)\)</span>.<br />
+Thus <span class="math inline">\(g3_j(d) \ge g1_j(d)\)</span>, and<br />
+<span class="math display">\[
+   \mathrm{UB3A}_j(d) = g3_j(d) - g1_j(d) \ge 0.
+   \]</span></li>
+</ul>
+<ol start="5" style="list-style-type: decimal">
+<li><p><strong>Dispersion tilt bound (Claim-5):</strong><br />
+Claim 5 shows that <span class="math inline">\(\mathrm{UB3B}(d) \ge
+0\)</span>.<br />
+The comparison is between:</p>
+<ul>
+<li>the linear function <span class="math inline">\(\mathrm{lmc}_1 +
+\mathrm{lmc}_2 d\)</span>, and<br />
+</li>
+<li>the concave log‑function <span class="math inline">\(\mathrm{lm\_log1} + \mathrm{lm\_log2}\log
+d\)</span>.<br />
+The log‑function is calibrated at the endpoints of the dispersion
+interval so that it lies above the linear function at both <span class="math inline">\(\text{low}\)</span> and <span class="math inline">\(\text{upp}\)</span>, and therefore dominates it
+everywhere.</li>
+</ul></li>
+<li><p><strong>Property of RSS_j (Claim-6):</strong></p>
+<p><span class="math inline">\(\min_{d\in[\text{low},\,\text{upp}]}\;\mathrm{RSS}_j(d)=
+\mathrm{RSS}_j(low)\)</span></p></li>
+<li><p><strong>Property of UB2_j (Claim-7):</strong></p></li>
+</ol>
+<p><span class="math inline">\(\mathrm{UB2\_Min}_j=\min
+[\mathrm{UB2}_j(low),\mathrm{UB2}_j(upp) ]\)</span></p>
+<hr />
+<p>Combining these results: Claim 1 validates the exact algebraic split,
+while Claims 2–5 confirm the properties that <span class="math display">\[
+\mathrm{test1}(\beta,d) \le 0,\quad
+\mathrm{UB2A}_j(d) \ge 0,\quad
+\mathrm{UB3A}_j(d) \ge 0,\quad
+\mathrm{UB3B}(d) \ge 0.
+\]</span> Thus the correction block<br />
+<span class="math display">\[
+\mathrm{test1}
+- \mathrm{UB2A}_j
+- \mathrm{UB3A}_j
+- \mathrm{UB3B}
+\]</span></p>
+<p>and hence has the intended signs while Claims 6-7 enables us to
+readily find the needed minimizing constants for the implementation.</p>
+<p>Therefore, the proposition holds and provides a valid foundation for
+the accept–reject sampler.</p>
+</div>
+</div>
+<div id="supporting-claims" class="section level2">
+<h2>5. Supporting Claims</h2>
+<p>In this section we provide detailed statements and proofs of the five
+claims that underpin the main proposition. The first claims shows that
+the decomposition is algebraically valid while claims 2–5 validates the
+sign properties that guarantee correctness of the accept–reject scheme.
+Claims 6 and 7 finally establishes properties of <span class="math inline">\(RSS_j(\cdot)\)</span> and <span class="math inline">\(UB2_j(\cdot)\)</span> that allows us to easily
+calculate <span class="math inline">\(\mathrm{RSS\_Min}\)</span> and
+<span class="math inline">\(\mathrm{UB2\_Min}_j\)</span>.</p>
+<div id="claim-1" class="section level3">
+<h3>5.1 Claim 1</h3>
+<p><strong>Claim 1.</strong><br />
+The joint log‑posterior admits the decomposition<br />
+<span class="math display">\[
+\log \pi(\beta,d)
+= \log q_{\Gamma}(d)
++ \log q_{\mathrm{TN}}(\beta\mid j)
++ \log \mathrm{PLSD}_j
++ \big[
+\mathrm{test1}(\beta,d)
+- \mathrm{UB2A}_j(d)
+- \mathrm{UB3A}_j(d)
+- \mathrm{UB3B}(d)
+\big]
++ \mathrm{const},
+\]</span> where<br />
+<span class="math display">\[
+\mathrm{UB2A}_j(d)
+= \mathrm{UB2}_j(d) - \mathrm{UB2\_Min}_j,
+\qquad
+\log \mathrm{PLSD}_{j,2}
+= \log \mathrm{PLSD}_j - \mathrm{UB2\_Min}_j.
+\]</span></p>
+<p><em>Proof of Claim 1.</em><br />
+Define the following.</p>
+<hr />
+<div id="a" class="section level4">
+<h4>(1a)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log q_{\Gamma,2}(d)
+&amp;= \log q_{\Gamma}(d)
+   - \mathrm{lm\_log2}\,\log d \\[6pt]
+&amp;= (\text{Shape} + n/2)\,\log \tfrac{1}{d}
+   - (\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)\,\tfrac{1}{d} \\[6pt]
+&amp;\quad + (\text{Shape} + n_{w}/2 - \mathrm{lm\_log2})\,
+      \log(\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)
+   - \log \Gamma(\text{Shape} + n_{w}/2 - \mathrm{lm\_log2}) \\[6pt]
+&amp;\quad - \log\!\Bigg(
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\\[-2pt]
+&amp;\qquad\qquad\qquad
+-\;
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\Bigg).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="b" class="section level4">
+<h4>(1b)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\mathrm{UB3A}_{j,2}(d)
+&amp;= \mathrm{UB3A}_j(d)
+   - (\mathrm{lmc}_1 + \mathrm{lmc}_2\,d) \\[6pt]
+&amp;= \widetilde{\lg\_prob\_factor1}_j
+   - \Big(
+      -\tfrac12\big(c^{-1}(\bar c_j,d)\big)^\top
+        P\,c^{-1}(\bar c_j,d)
+      + \bar c_j^\top c^{-1}(\bar c_j,d)
+     \Big),
+\end{aligned}
+\]</span> where<br />
+<span class="math display">\[
+\widetilde{\lg\_prob\_factor1}_j
+= \lg\_prob\_factor_j - \mathrm{UB2\_Min}_j.
+\]</span></p>
+<hr />
+</div>
+<div id="c" class="section level4">
+<h4>(1c)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\mathrm{UB3B}_{2}(d)
+&amp;= \mathrm{UB3B}(d)
+   - \mathrm{lm\_log2}\log d
+   + (\mathrm{lmc}_1 + \mathrm{lmc}_2 d) \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - \mathrm{max\_LL\_log\_disp}\big)
+   + \mathrm{lm\_log1}.
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="a-1" class="section level4">
+<h4>(2a)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\mathrm{test1}_{2}(\beta,d)
+&amp;= \mathrm{test1}(\beta,d)
+  + \Big[
+      -\tfrac12\big(c^{-1}(\bar c_j,d)\big)^\top
+        P\,c^{-1}(\bar c_j,d)
+      + \bar c_j^\top c^{-1}(\bar c_j,d)
+    \Big] \\[6pt]
+&amp;=
+\Big[
+-\tfrac{1}{2d}\sum_{i=1}^n w_i (y_i - x_i^\top \beta)^2
+-\tfrac12\,\beta^\top P\beta
+\Big]
+\\[4pt]
+&amp;\quad -
+\Big[
+-\tfrac{1}{2d}\sum_{i=1}^n w_i (y_i - x_i^\top c^{-1}(\bar c_j,d))^2
+- \bar c_j^\top \beta
+\Big].
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="b-1" class="section level4">
+<h4>(2b)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log \mathrm{PLSD}_{j,2}
+&amp;= \log \mathrm{PLSD}_j - \mathrm{UB2\_Min}_j \\[6pt]
+&amp;= \tfrac12\,\bar c_j^\top \bar c_j
++ \sum_{r=1}^p
+   \log\!\big(e^{\mathrm{logrt}_{j,r}}
+              - e^{\mathrm{loglt}_{j,r}}\big)
+\\[4pt]
+&amp;\quad - \log\!\left(
+\sum_{k=1}^K
+\exp\!\Big(
+\widetilde{\lg\_prob\_factor2}_k
++ \tfrac12\,\bar c_k^\top \bar c_k
+\Big)
+\prod_{r=1}^p
+\big(e^{\mathrm{logrt}_{k,r}}
+    - e^{\mathrm{loglt}_{k,r}}\big)
+\right).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="a-2" class="section level4">
+<h4>(3a)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log q_{\Gamma,3}(d)
+&amp;= \log q_{\Gamma,2}(d)
+  + (\mathrm{RSS}_{\mathrm{Min}}/2)\,\tfrac{1}{d} \\[6pt]
+&amp;= (\text{Shape} + n_{w}/2)\,\log \tfrac{1}{d}
+   - \text{Rate}\,\tfrac{1}{d} \\[6pt]
+&amp;\quad + (\text{Shape} + n/2 - \mathrm{lm\_log2})\,
+      \log(\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)
+   - \log \Gamma(\text{Shape} + n_{w}/2 - \mathrm{lm\_log2}) \\[6pt]
+&amp;\quad - \log\!\Bigg(
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\\[-2pt]
+&amp;\qquad\qquad\qquad
+-\;
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\Bigg).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="b-2" class="section level4">
+<h4>(3b)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\mathrm{test1}_{3}(\beta,d)
+&amp;= \mathrm{test1}_{2}(\beta,d)
+  + \tfrac{1}{2d}\sum_{i=1}^n
+     w_i\,(y_i - x_i^\top c^{-1}(\bar c_j,d))^2 \\[6pt]
+&amp;=
+\Big[
+-\tfrac{1}{2d}\sum_{i=1}^n w_i (y_i - x_i^\top \beta)^2
+-\tfrac12\,\beta^\top P\beta
+\Big]
++ \bar c_j^\top \beta.
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="a-3" class="section level4">
+<h4>(4a)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log q_{\Gamma,4}(d)
+&amp;= \log q_{\Gamma,3}(d)
+  - (n_{w}/2)\,\log \tfrac{1}{d} \\[6pt]
+&amp;= \text{Shape}\,\log \tfrac{1}{d}
+   - \text{Rate}\,\tfrac{1}{d} \\[6pt]
+&amp;\quad + (\text{Shape} + n_{w}/2 - \mathrm{lm\_log2})\,
+      \log(\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)
+   - \log \Gamma(\text{Shape} + n_{w}/2 - \mathrm{lm\_log2}) \\[6pt]
+&amp;\quad - \log\!\Bigg(
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\\[-2pt]
+&amp;\qquad\qquad\qquad
+-\;
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape} + \tfrac{n_{w}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\Bigg).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="b-3" class="section level4">
+<h4>(4b)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log q_{\mathrm{TN},2}(\beta\mid j)
+&amp;= \log q_{\mathrm{TN}}(\beta\mid j)
+   + \bar c_j^\top \beta
+   + \tfrac12\,\bar c_j^\top \bar c_j \\[6pt]
+&amp;= -\tfrac12\,\beta^\top \beta
+   + \tfrac{p}{2}\log(2\pi)
+   - \sum_{r=1}^p
+      \log\!\big(e^{\mathrm{logrt}_{j,r}}
+                 - e^{\mathrm{loglt}_{j,r}}\big).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="c-1" class="section level4">
+<h4>(4c)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log \mathrm{PLSD}_{j,3}
+&amp;= \log \mathrm{PLSD}_{j,2}
+   - \tfrac12\,\bar c_j^\top \bar c_j \\[6pt]
+&amp;=
+\sum_{r=1}^p
+\log\!\big(e^{\mathrm{logrt}_{j,r}}
+           - e^{\mathrm{loglt}_{j,r}}\big)
+\\[4pt]
+&amp;\quad - \log\!\left(
+\sum_{k=1}^K
+\exp\!\Big(
+\widetilde{\lg\_prob\_factor2}_k
++ \tfrac12\,\bar c_k^\top \bar c_k
+\Big)
+\prod_{r=1}^p
+\big(e^{\mathrm{logrt}_{k,r}}
+    - e^{\mathrm{loglt}_{k,r}}\big)
+\right).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="d" class="section level4">
+<h4>(4d)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\mathrm{test1}_{4}(\beta,d)
+&amp;= \mathrm{test1}_{3}(\beta,d)
+  - \bar c_j^\top \beta
+  + (n_{w}/2)\,\log \tfrac{1}{d} \\[6pt]
+&amp;=
+\Big[
+-\tfrac{1}{2d}\sum_{i=1}^n w_i (y_i - x_i^\top \beta)^2
+-\tfrac12\,\beta^\top P\beta
++ (n/2)\log \tfrac{1}{d}
+\Big] \\[4pt]
+&amp;= LL(\beta,d).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="a-4" class="section level4">
+<h4>(5a)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log q_{\Gamma,5}(d)
+&amp;= \log q_{\Gamma,4}(d)
++ \big[\text{Shape}\log(\text{Rate})
+       - \log\Gamma(\text{Shape})\big] \\[6pt]
+&amp;\quad - \Big[
+(\text{Shape} + n_{2}/2 - \mathrm{lm\_log2})
+\log(\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)
+- \log\Gamma(\text{Shape} + n_{2}/2 - \mathrm{lm\_log2})
+\Big] \\[6pt]
+&amp;\quad - \log\!\Bigg(
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape},\text{Rate}
+\Big)
+-
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape},\text{Rate}
+\Big)
+\Bigg) \\[6pt]
+&amp;\quad + \log\!\Bigg(
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape} + \tfrac{n_{2}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\\[-2pt]
+&amp;\qquad\qquad\qquad
+-
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape} + \tfrac{n_{2}}{2} - \mathrm{lm\_log2},
+\text{Rate} + \tfrac{\mathrm{RSS}_{\mathrm{Min}}}{2}
+\Big)
+\Bigg) \\[6pt]
+&amp;= \text{Shape}\,\log\tfrac{1}{d}
+   - \text{Rate}\,\tfrac{1}{d}
+   + \text{Shape}\log(\text{Rate})
+   - \log\Gamma(\text{Shape}) \\[4pt]
+&amp;\quad - \log\!\Bigg(
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape},\text{Rate}
+\Big)
+-
+F_{\Gamma}\!\Big(
+\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape},\text{Rate}
+\Big)
+\Bigg).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="b-4" class="section level4">
+<h4>(5b)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log q_{\mathrm{TN},3}(\beta\mid j)
+&amp;= \log q_{\mathrm{TN},2}(\beta\mid j)
++ \sum_{r=1}^p
+   \log\!\big(e^{\mathrm{logrt}_{j,r}}
+              - e^{\mathrm{loglt}_{j,r}}\big) \\[6pt]
+&amp;= -\tfrac12\,\beta^\top \beta
+   + \tfrac{p}{2}\log(2\pi).
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="c-2" class="section level4">
+<h4>(5c)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+\log \mathrm{PLSD}_{j,4}
+&amp;= \log \mathrm{PLSD}_{j,3}
+- \sum_{r=1}^p
+   \log\!\big(e^{\mathrm{logrt}_{j,r}}
+              - e^{\mathrm{loglt}_{j,r}}\big)
++ C_{\mathrm{PLSD}} \\[6pt]
+&amp;= 0.
+\end{aligned}
+\]</span></p>
+<hr />
+</div>
+<div id="d-1" class="section level4">
+<h4>(5d)</h4>
+<p><span class="math display">\[
+\begin{aligned}
+C_{\mathrm{final}}
+&amp;= -\,\mathrm{UB3B}_{2}(d)
++ \text{const}
++ \text{Shape}\log(\text{Rate})
+- \log\Gamma(\text{Shape}) \\[4pt]
+&amp;\quad - \Big[
+(\text{Shape} + n_{2}/2 - \mathrm{lm\_log2})
+\log(\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)
+- \log\Gamma(\text{Shape} + n_{2}/2 - \mathrm{lm\_log2})
+\Big] \\[4pt]
+&amp;\quad + \log\!\Big(
+F_{\Gamma}(\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape},\text{Rate})
+-
+F_{\Gamma}(\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape},\text{Rate})
+\Big) \\[4pt]
+&amp;\quad - \log\!\Big(
+F_{\Gamma}(\tfrac{1}{\mathrm{disp}_{\mathrm{lower}}};
+\text{Shape} + n_{2}/2 - \mathrm{lm\_log2},
+\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)
+\\[-2pt]
+&amp;\qquad\qquad\qquad
+-
+F_{\Gamma}(\tfrac{1}{\mathrm{disp}_{\mathrm{upper}}};
+\text{Shape} + n_{2}/2 - \mathrm{lm\_log2},
+\text{Rate} + \mathrm{RSS}_{\mathrm{Min}}/2)
+\Big).
+\end{aligned}
+\]</span></p>
+<hr />
+<p>Then for each face j:</p>
+<p><span class="math display">\[
+\begin{aligned}
+&amp; \underbrace{\log q_{\Gamma}(d)}_{\text{Gamma proposal}}
++ \underbrace{\log q_{\mathrm{TN}}(\beta\mid j)}_{\text{Truncated normal
+proposal}}
++ \underbrace{\log \mathrm{PLSD}_j}_{\text{Per‑face mixture weight}}
+\\[6pt]
+&amp; + \underbrace{\mathrm{test1}(\beta,d)
+              - \mathrm{UB2A}_j(d)
+              - \mathrm{UB3A}_j(d)
+              - \mathrm{UB3B}(d)}_{\text{corrections}}
++ \mathrm{const} \\[6pt]
+&amp;= \underbrace{\log q_{\Gamma,2}(d)}_{\text{Interim Gamma Term}}
++ \underbrace{\log q_{\mathrm{TN}}(\beta\mid j)}_{\text{Truncated normal
+proposal}}
++ \underbrace{\log \mathrm{PLSD}_j}_{\text{Per‑face mixture weight}}
+\\[6pt]
+&amp;  + \underbrace{\mathrm{test1}(\beta,d)
+              - \mathrm{UB2A}_j(d)
+              - \mathrm{UB3A}_{j,2}(d)
+              - \mathrm{UB3B}_{2}(d)}_{\text{Interim correction terms}}
++ \mathrm{const} \\[6pt]
+&amp;= \underbrace{\log q_{\Gamma,2}(d)}_{\text{Interim Gamma Term}}
++ \underbrace{\log q_{\mathrm{TN}}(\beta\mid j)}_{\text{Truncated normal
+proposal}}
++ \underbrace{\log \mathrm{PLSD}_{j,2}}_{\text{Interim Per‑face mixture
+weight}} \\[6pt]
+&amp;   + \underbrace{\mathrm{test1}_{2}(\beta,d)
+              - \mathrm{UB2A}_j(d)
+              - \mathrm{UB3B}_{2}(d)}_{\text{Interim correction Terms}}
++ \mathrm{const} \\[6pt]
+&amp;= \underbrace{\log q_{\Gamma,3}(d)}_{\text{Interim Gamma Term}}
++ \underbrace{\log q_{\mathrm{TN}}(\beta\mid j)}_{\text{Truncated normal
+proposal}}
++ \underbrace{\log \mathrm{PLSD}_{j,2}}_{\text{Interim Per‑face mixture
+weight}}
++ \underbrace{\mathrm{test1}_{3}(\beta,d)
+              - \mathrm{UB3B}_{2}(d)}_{\text{Interim correction Terms}}
++ \mathrm{const} \\[6pt]
+&amp;= \underbrace{\log q_{\Gamma,4}(d)}_{\text{Interim Gamma Term}}
++ \underbrace{\log q_{\mathrm{TN},2}(\beta\mid j)}_{\text{Interim Normal
+term}}
++ \underbrace{\log \mathrm{PLSD}_{j,3}}_{\text{Interim Per‑face mixture
+weight}}
++ \underbrace{\mathrm{test1}_{4}(\beta,d)
+              - \mathrm{UB3B}_{2}(d)}_{\text{Interim correction Terms}}
++ \mathrm{const} \\[6pt]
+&amp;= \underbrace{\log q_{\Gamma,5}(d)}_{\text{Prior Gamma Distribution
+Term}}
++ \underbrace{\log q_{\mathrm{TN},3}(\beta\mid j)}_{\text{Prior
+Multivariate Normal Term}}
++ \underbrace{LL(\beta,d)}_{\text{Standardized Log-Likelihood Term}}
++ C_{\mathrm{final}}.
+\end{aligned}
+\]</span></p>
+<p><strong>Narrative explanation.</strong><br />
+In the above chain of equalities, each step systematically replaces
+interim definitions with their standardized counterparts, while
+absorbing constants into a global term:</p>
+<ul>
+<li><p>The <strong>first equality</strong> follows from substituting the
+adjusted definitions in (1a), (1b), and (1c), which restructure the
+Gamma proposal and the UB3A/UB3B corrections.</p></li>
+<li><p>The <strong>second equality</strong> uses (2a) and (2b) to absorb
+the quadratic–linear adjustment into <span class="math inline">\(\mathrm{test1}_{2}\)</span> and to shift the
+per‑face mixture weight into <span class="math inline">\(\mathrm{PLSD}_{j,2}\)</span>.<br />
+At this stage, the UB2 term has already been centered, so <span class="math inline">\(\mathrm{UB2}_j(d)\)</span> is replaced by<br />
+<span class="math display">\[
+\mathrm{UB2A}_j(d)=\mathrm{UB2}_j(d)-\mathrm{UB2\_Min}_j,
+\]</span> with <span class="math inline">\(\mathrm{UB2\_Min}_j\)</span>
+absorbed into the mixture weight.</p></li>
+<li><p>The <strong>third equality</strong> applies (3a) and (3b),
+re‑expressing the Gamma proposal and <span class="math inline">\(\mathrm{test1}\)</span> by incorporating the
+residual‑sum‑of‑squares adjustment.</p></li>
+<li><p>The <strong>fourth equality</strong> follows from (4a)–(4d),
+where the dispersion‑dependent log term is absorbed into <span class="math inline">\(\mathrm{test1}_{4}\)</span>, the truncated normal
+proposal is simplified to <span class="math inline">\(\log
+q_{\mathrm{TN},2}\)</span>, and the mixture weight is reduced to <span class="math inline">\(\mathrm{PLSD}_{j,3}\)</span>.</p></li>
+<li><p>Finally, the <strong>fifth equality</strong> applies the
+adjustments in (5a)–(5d):</p>
+<ul>
+<li>(5a) replaces the interim Gamma normalization with the true
+<strong>prior Gamma distribution</strong> in dispersion form.<br />
+</li>
+<li>(5b) removes the truncation‑width adjustment, leaving the standard
+<strong>prior multivariate normal distribution</strong> term.<br />
+</li>
+<li>(5c) shows that the per‑face mixture weight cancels to zero once the
+truncation widths and denominator are absorbed.<br />
+</li>
+<li>(5d) consolidates all remaining parameter‑free terms, including the
+UB3B correction, into a single adjusted constant <span class="math inline">\(C_{\text{final}}\)</span>.</li>
+</ul></li>
+</ul>
+<p>Thus, the final decomposition is: <span class="math display">\[
+\log \pi(\beta,d)
+= \underbrace{\log q_{\Gamma,5}(d)}_{\text{Prior Gamma Distribution
+Term}}
++ \underbrace{\log q_{\mathrm{TN},3}(\beta\mid j)}_{\text{Prior
+Multivariate Normal Term}}
++ \underbrace{LL(\beta,d)}_{\text{Standardized Log-Likelihood Term}}
++ C_{\text{final}}.
+\]</span></p>
+<p>This shows that after all substitutions, the surviving terms are
+exactly the <strong>prior Gamma distribution in <span class="math inline">\(d\)</span></strong>, the <strong>prior
+multivariate normal distribution in <span class="math inline">\(\beta\)</span></strong>, and the
+<strong>standardized log‑likelihood contribution</strong>. Everything
+else has been absorbed into a global constant. In other words, the
+decomposition now cleanly separates into the canonical
+<strong>prior</strong> and <strong>likelihood</strong> components, with
+no extraneous dependence on interim proposals or mixture weights.</p>
+<p>Starting from the standardized log‑posterior, we separate the
+dispersion‑dependent Gamma component, the truncated normal component in
+<span class="math inline">\(\beta\)</span>, and the per‑face mixture
+weight. The residual terms are collected into the correction block<br />
+<span class="math display">\[
+\mathrm{test1} - \mathrm{UB2A}_j - \mathrm{UB3A}_j - \mathrm{UB3B},
+\]</span> which is an algebraic rearrangement, so the decomposition
+holds exactly.</p>
+<hr />
+</div>
+</div>
+<div id="claim-2" class="section level3">
+<h3>5.2 Claim 2</h3>
+<p><strong>Claim 2.</strong><br />
+<span class="math inline">\(\text{test1}(\beta,d) \le 0\)</span>.</p>
+<p><em>Proof of Claim 2.</em><br />
+By the definition of the inverse map <span class="math inline">\(c^{-1}(\cdot)\)</span>, the vector <span class="math inline">\(\bar c_j\)</span> is a subgradient of the negative
+standardized log‑likelihood at the tangency point <span class="math inline">\(c^{-1}(\bar c_j,d)\)</span>. From the
+supporting‑hyperplane property of concave functions, it follows that for
+every <span class="math inline">\((\beta,d)\)</span>,</p>
+<p><span class="math display">\[
+LL(\beta,d) \;\le\; LL\!\big(c^{-1}(\bar c_j,d),d\big) \;-\; \bar
+c_j^{\top}\big(\beta - c^{-1}(\bar c_j,d)\big).
+\]</span></p>
+<p>By definition, <span class="math inline">\(\text{test1}(\beta,d)\)</span> is exactly the
+difference between the standardized log‑likelihood <span class="math inline">\(LL(\beta,d)\)</span> and this linearization at the
+tangency point. Hence,</p>
+<p><span class="math display">\[ \text{test1}(\beta,d) \le 0.
+\]</span></p>
+<p>This completes the proof of Claim 2.</p>
+<hr />
+</div>
+<div id="claim-3" class="section level3">
+<h3>5.3 Claim 3</h3>
+<p><strong>Claim 3.</strong><br />
+<span class="math inline">\(\mathrm{UB2A}_j(d) \ge 0.\)</span></p>
+<p><em>Proof of Claim 3.</em><br />
+For every face <span class="math inline">\(j\)</span> and dispersion
+<span class="math inline">\(d\)</span>, <span class="math display">\[
+\mathrm{UB2}_j(d)
+= \frac{\mathrm{RSS}_j(d) - \mathrm{RSS\_Min}}{2d}
+\ge 0,
+\]</span> because <span class="math inline">\(\mathrm{RSS\_Min}\)</span>
+is the global minimum of <span class="math inline">\(\mathrm{RSS}_j(d)\)</span> across all faces and
+all dispersion values.</p>
+<p>Since <span class="math display">\[
+\mathrm{UB2A}_j(d)
+= \mathrm{UB2}_j(d) - \mathrm{UB2\_Min}_j,
+\]</span> and <span class="math inline">\(\mathrm{UB2\_Min}_j = \min_d
+\mathrm{UB2}_j(d)\)</span>, it follows that <span class="math display">\[
+\mathrm{UB2A}_j(d) \ge 0.
+\]</span></p>
+<p>This completes the proof of Claim 3.</p>
+<p>Here <span class="math inline">\(\text{RSS}_j(d)\)</span> and <span class="math inline">\(\text{RSS}_{\min}\)</span> use weighted
+residuals<br />
+<span class="math display">\[
+\sum_i w_i (y_i - x_i^\top\theta)^2.
+\]</span></p>
+<hr />
+</div>
+<div id="claims-4-and-5" class="section level3">
+<h3>5.4 Claims 4 and 5</h3>
+<p>Before proceeding with the proofs, we first introduce a couple of
+additional functions and state a couple of remarks.</p>
+<p>For each <span class="math inline">\(j\)</span> Define functions
+<span class="math inline">\(g1_{j}(.)\)</span>, <span class="math inline">\(g2_{j}(.)\)</span> and <span class="math inline">\(g3_{j}(.)\)</span></p>
+<p>by <span class="math display">\[ g1_{j}(d)= -\tfrac{1}{2}(\bar
+c^{-1}(\bar c_j,d))^\top P\,\bar c^{-1}(\bar c_j,d) + \bar c_j^\top \bar
+c^{-1}(\bar c_j,d) \]</span></p>
+<p><span class="math display">\[
+g2_{j}(d)=g1_{j}(d^{*}_{1})\;+\;g&#39;_{1j}(d^{*}_{1})\, (d -
+d^{*}_{1}).
+\]</span></p>
+<!-- \[ -->
+<!-- g2_{j}(d) = g1_{j}(d^{*}_{1}) + \mathrm{New\_LL\_Slope}[j] \cdot (d - d^{*}_{1}) -->
+<!-- \] -->
+<p><span class="math display">\[
+g3_{j}(d) = \mathrm{lg\_prob\_factor1\_j} + \text{lmc}_1 +
+\text{lmc}_2\, d
+\]</span></p>
+<p><strong>Remark 5.4.1.</strong><br />
+For each face <span class="math inline">\(j\)</span>, the derivative of
+<span class="math inline">\(g1_{j}(\cdot)\)</span> with respect to <span class="math inline">\(d\)</span> admits the equivalent forms <span class="math display">\[
+\frac{d}{dd}\,g1_{j}(d)
+= V(d)^\top A(d)^{-1} V(d)
+= V(d)^\top A(d)^{-1}\bar c_j
+- V(d)^\top A(d)^{-1} P\,A(d)^{-1}\big(r + d\,\bar c_j\big),
+\]</span></p>
+<p><em>Proof of Remark 5.4.1.</em><br />
+Recall <span class="math display">\[
+g1_{j}(d) \;=\; -\tfrac{1}{2}\,\theta(d)^\top P\,\theta(d) \;+\; \bar
+c_j^\top \theta(d),
+\quad
+\theta(d) \;=\; A(d)^{-1}\big(r + d\,\bar c_j\big),
+\quad
+A(d) = Q + dP,
+\]</span> and define <span class="math inline">\(V(d) := \bar c_j -
+P\,\theta(d)\)</span>.</p>
+<p>Differentiate using the chain rule: <span class="math display">\[
+\frac{d}{dd}\,g1_{j}(d)
+= \big(\bar c_j^\top - \theta(d)^\top P\big)\,\frac{d\theta}{dd}
+= V(d)^\top \frac{d\theta}{dd}.
+\]</span> With <span class="math inline">\(A&#39;(d)=P\)</span> and
+<span class="math inline">\(\theta(d) = A(d)^{-1}(r + d\,\bar
+c_j)\)</span>, <span class="math display">\[
+\frac{d\theta}{dd}
+= -A(d)^{-1} P\,\theta(d) + A(d)^{-1}\bar c_j
+= A(d)^{-1} V(d).
+\]</span> Substituting back yields the quadratic form <span class="math display">\[
+\frac{d}{dd}\,g1_{j}(d) = V(d)^\top A(d)^{-1} V(d).
+\]</span> Expanding <span class="math inline">\(V(d) = \bar c_j -
+P\,\theta(d)\)</span> and <span class="math inline">\(\theta(d) =
+A(d)^{-1}(r + d\,\bar c_j)\)</span> gives the implementation‑aligned
+form <span class="math display">\[
+\frac{d}{dd}\,g1_{j}(d)
+= V(d)^\top A(d)^{-1}\bar c_j
+- V(d)^\top A(d)^{-1} P\,A(d)^{-1}\big(r + d\,\bar c_j\big).
+\]</span> Evaluating at <span class="math inline">\(d=d^{*}_{1}\)</span>
+matches the table entry: <span class="math display">\[
+g1_{j}&#39;(d^{*}_{1})
+= V(d^{*}_{1})^\top A(d^{*}_{1})^{-1}\,\bar c_j
+- V(d^{*}_{1})^\top A(d^{*}_{1})^{-1} P\,A(d^{*}_{1})^{-1}\big(r +
+d^{*}_{1}\,\bar c_j\big)
+\]</span></p>
+<p>This completes the proof of Remark 5.4.1.</p>
+<p><strong>Remark 5.4.2.</strong><br />
+The derivative of the function <span class="math inline">\(g1_{j}(\cdot)\)</span> with respect to <span class="math inline">\(d\)</span> is non‑negative.</p>
+<p><em>Proof of Remark 5.4.2.</em><br />
+From Remark 5.4.1, the derivative admits the quadratic form <span class="math display">\[
+\frac{d}{dd}\,g1_{j}(d) \;=\; V(d)^\top A(d)^{-1} V(d),
+\quad
+A(d) = Q + dP,
+\quad
+V(d) = \bar c_j - P\,\theta(d).
+\]</span></p>
+<p>Since <span class="math inline">\(Q \succ 0\)</span> and <span class="math inline">\(P \succ 0\)</span>, we have <span class="math inline">\(A(d) = Q + dP \succ 0\)</span> for all <span class="math inline">\(d \in [\text{low}, \text{upp}]\)</span>, hence
+<span class="math inline">\(A(d)^{-1} \succ 0\)</span>. Therefore, for
+any <span class="math inline">\(d\)</span> in this interval, <span class="math display">\[
+V(d)^\top A(d)^{-1} V(d) \;\ge\; 0.
+\]</span></p>
+<p>This completes the proof of Remark 5.4.2.</p>
+<!-- \[ -->
+<!-- g2_{j}(d) -->
+<!-- = -->
+<!-- g1_{j}(d^{*}_{1}) -->
+<!-- \;+\; -->
+<!-- g'_{1j}(d^{*}_{1})\, (d - d^{*}_{1}). -->
+<!-- \] -->
+<p><strong>Remark 5.4.3.</strong><br />
+The function <span class="math inline">\(g1_{j}(\cdot)\)</span> is
+concave, and therefore <span class="math display">\[
+g1_{j}(d) \;\le\; g1_{j}(d^{*}_{1}) + g&#39;_{1j}(d^{*}_{1})\, (d -
+d^{*}_{1}).
+\]</span></p>
+<p><em>Proof of Remark 5.4.3.</em><br />
+Recall <span class="math display">\[
+g1_{j}(d) \;=\; -\tfrac{1}{2}\,\theta(d)^\top P\,\theta(d) \;+\; \bar
+c_j^\top \theta(d),
+\quad
+\theta(d) \;=\; A(d)^{-1}\big(r + d\,\bar c_j\big),
+\quad
+A(d) = Q + dP,
+\]</span> and define <span class="math inline">\(V(d) := \bar c_j -
+P\,\theta(d)\)</span>.</p>
+<p>From Remark 5.4.1, <span class="math display">\[
+\frac{d}{dd}\,g1_{j}(d) \;=\; V(d)^\top A(d)^{-1} V(d).
+\]</span> Differentiating once more using <span class="math inline">\(V&#39;(d) = -P\,A(d)^{-1}V(d)\)</span> and <span class="math inline">\((A^{-1})&#39;(d) = -A(d)^{-1} P\,
+A(d)^{-1}\)</span>, we obtain <span class="math display">\[
+\frac{d^2}{dd^2}\,g1_{j}(d)
+= -\,3\,V(d)^\top A(d)^{-1} P\,A(d)^{-1} V(d) \;\le\; 0,
+\]</span> since <span class="math inline">\(A(d)^{-1} \succ 0\)</span>
+and <span class="math inline">\(P \succ 0\)</span>. Hence <span class="math inline">\(g1_{j}\)</span> is concave on <span class="math inline">\([\text{low}, \text{upp}]\)</span>.</p>
+<p>By the supporting line inequality for concave functions, for any
+<span class="math inline">\(d\)</span>, <span class="math display">\[
+g1_{j}(d) \;\le\; g1_{j}(d^{*}_{1}) + g1_{j}&#39;(d^{*}_{1})\,(d -
+d^{*}_{1})
+= g1_{j}(d^{*}_{1}) + g&#39;_{1j}(d^{*}_{1})\, (d - d^{*}_{1}),
+\]</span> which is the stated result.</p>
+<p>This completes the proof of Remark 5.4.3.</p>
+<p><strong>Remark 5.4.4.</strong><br />
+<span class="math display">\[
+\text{lmc}_2 \;\text{and}\; \mathrm{lm\_log2} \;\text{are both
+non‑negative.}
+\]</span> <em>Proof of Remark 5.4.4.</em><br />
+From the constants table, <span class="math display">\[
+\mathrm{max\_low\_mean} \;=\; \mathrm{max\_upp} -
+g&#39;_{1j}(d^{*}_{1})\,(\text{upp} - \text{low}),
+\]</span> and <span class="math display">\[
+\text{lmc}_2 \;=\; \frac{\mathrm{max\_upp} -
+\mathrm{max\_low\_mean}}{\text{upp} - \text{low}}
+\;=\; \mathrm{m}_{g&#39;_{1}}.
+\]</span> Since each per‑face slope satisfies <span class="math inline">\(g&#39;_{1j}(d^{*}_{1})\, \ge 0\)</span>
+(Remark 2), their mean <span class="math inline">\(\mathrm{m}_{g&#39;_{1}} \ge 0\)</span>. Hence
+<span class="math inline">\(\text{lmc}_2 \ge 0\)</span>.</p>
+<p>Moreover, <span class="math display">\[
+\mathrm{lm\_log2} \;=\; \text{lmc}_2 \cdot d^{*}_{2},
+\qquad
+d^{*}_{2} \;=\; \frac{\text{upp} -
+\text{low}}{\log(\tfrac{\text{upp}}{\text{low}})}.
+\]</span></p>
+<p>With <span class="math inline">\(\text{upp} &gt; \text{low} &gt;
+0\)</span>, we have <span class="math inline">\(\log(\tfrac{\text{upp}}{\text{low}}) &gt;
+0\)</span>, so <span class="math inline">\(d^{*}_{2} &gt; 0\)</span>.
+Since <span class="math inline">\(\text{lmc}_2 \ge 0\)</span> and <span class="math inline">\(d^{*}_{2} &gt; 0\)</span>, it follows that <span class="math inline">\(\mathrm{lm\_log2} \ge 0\)</span>. This completes
+the proof of Remark 5.4.4.</p>
+<p><strong>Claim 5.4.5.</strong><br />
+<span class="math inline">\(\text{UB3A}_j(d) \ge 0\)</span>.</p>
+<p><em>Proof of Claim 5.4.5.</em><br />
+Recall the definitions <span class="math display">\[
+g1_{j}(d) = -\tfrac{1}{2}\big(\bar c^{-1}(\bar c_j,d)\big)^\top P\,\bar
+c^{-1}(\bar c_j,d) + \bar c_j^\top \bar c^{-1}(\bar c_j,d),
+\]</span></p>
+<p><span class="math display">\[
+g2_{j}(d)=
+g1_{j}(d^{*}_{1})\;+\;g&#39;_{1j}(d^{*}_{1})\, (d - d^{*}_{1}).
+\]</span></p>
+<p><span class="math display">\[
+g3_{j}(d) = \mathrm{lg\_prob\_factor1\_j} + \text{lmc}_1 +
+\text{lmc}_2\,d.
+\]</span> —</p>
+<p><strong>Step 1.</strong> By Remark 5.4.3, <span class="math inline">\(g1_{j}\)</span> is concave in <span class="math inline">\(d\)</span>. Therefore, its supporting line at
+<span class="math inline">\(d^{*}_{1}\)</span> dominates: <span class="math display">\[
+g1_{j}(d) \;\le\; g2_{j}(d), \qquad d \in [\text{low}, \text{upp}].
+\]</span></p>
+<hr />
+<!-- g_{2j}(\text{upp}) -->
+<!-- | **Per‑face shift (UB3A)** | $\begin{aligned} -->
+<!-- & \mathrm{lg\_prob\_factor1}_{j} = \\[4pt] -->
+<!-- & \max\Big\{\, g_{2j}(\text{upp}) - \mathrm{max\_upp}, \\[-2pt] -->
+<!-- & \qquad\;\; g_{2j}(\text{low}) - \mathrm{max\_low} \Big\} -->
+<p><strong>Step 2.</strong> Endpoint dominance of <span class="math inline">\(g3_j\)</span> over <span class="math inline">\(g2_j\)</span>.<br />
+At the dispersion endpoints, <span class="math display">\[
+g2_j(\text{low}) = \mathrm{thetabarconst\_low\_apprx}[j],
+\qquad
+g2_j(\text{upp}) = \mathrm{thetabarconst\_upp\_apprx}[j].
+\]</span></p>
+<p>By definition of the per‑face UB3A shift, <span class="math display">\[
+\mathrm{lg\_prob\_factor1}_j
+=
+\max\Big\{
+g2_j(\text{upp}) - \mathrm{max\_upp},\;
+g2_j(\text{low}) - \mathrm{max\_low}
+\Big\},
+\]</span> we have <span class="math display">\[
+\mathrm{lg\_prob\_factor1}_j
+\;\ge\;
+g2_j(\text{low}) - \mathrm{max\_low},
+\qquad
+\mathrm{lg\_prob\_factor1}_j
+\;\ge\;
+g2_j(\text{upp}) - \mathrm{max\_upp}.
+\]</span></p>
+<p>Using <span class="math display">\[
+g3_j(d)
+= \mathrm{lg\_prob\_factor1}_j + \mathrm{lmc}_1 + \mathrm{lmc}_2\, d,
+\]</span> together with the identities <span class="math display">\[
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{low} = \mathrm{max\_low},
+\qquad
+\mathrm{lmc}_1 + \mathrm{lmc}_2\,\text{upp} = \mathrm{max\_upp},
+\]</span> we obtain <span class="math display">\[
+g3_j(\text{low})
+= \mathrm{lg\_prob\_factor1}_j + \mathrm{max\_low}
+\;\ge\;
+g2_j(\text{low}),
+\]</span> <span class="math display">\[
+g3_j(\text{upp})
+= \mathrm{lg\_prob\_factor1}_j + \mathrm{max\_upp}
+\;\ge\;
+g2_j(\text{upp}).
+\]</span></p>
+<p>Thus <span class="math inline">\(g3_j\)</span> dominates <span class="math inline">\(g2_j\)</span> at both endpoints.</p>
+<!-- **Step 2.** Endpoint dominance of \(g3_{j}\) over \(g2_{j}\).   -->
+<!-- At the endpoints, -->
+<!-- \[ -->
+<!-- g2_{j}(\text{low}) = \mathrm{thetabarconst\_low\_apprx}[j], -->
+<!-- \qquad -->
+<!-- g2_{j}(\text{upp}) = \mathrm{thetabarconst\_upp\_apprx}[j]. -->
+<!-- \] -->
+<!-- By construction of $\mathrm{lg\_prob\_factor\_j}$, -->
+<!-- \[ -->
+<!-- \mathrm{lg\_prob\_factor\_j} \;\ge\; \mathrm{thetabarconst\_low\_apprx}[j] - \big(\text{lmc}_1 + \text{lmc}_2\,\text{low}\big), -->
+<!-- \] -->
+<!-- \[ -->
+<!-- \mathrm{lg\_prob\_factor\_j} \;\ge\; \mathrm{thetabarconst\_upp\_apprx}[j] - \big(\text{lmc}_1 + \text{lmc}_2\,\text{upp}\big). -->
+<!-- \] -->
+<!-- Hence, -->
+<!-- \[ -->
+<!-- g3_{j}(\text{low}) = \mathrm{lg\_prob\_factor\_j} + \text{lmc}_1 + \text{lmc}_2\,\text{low} \;\ge\; g2_{j}(\text{low}), -->
+<!-- \] -->
+<!-- \[ -->
+<!-- g3_{j}(\text{upp}) = \mathrm{lg\_prob\_factor\_j} + \text{lmc}_1 + \text{lmc}_2\,\text{upp} \;\ge\; g2_{j}(\text{upp}). -->
+<!-- \] -->
+<hr />
+<p><strong>Step 3.</strong> Since <span class="math inline">\(g2_{j}\)</span> is affine in <span class="math inline">\(d\)</span>, endpoint dominance implies <span class="math display">\[
+g3_{j}(d) \;\ge\; g2_{j}(d), \qquad d \in [\text{low}, \text{upp}].
+\]</span></p>
+<hr />
+<p><strong>Step 4.</strong> Combining Steps 1 and 3, <span class="math display">\[
+g3_{j}(d) \;\ge\; g2_{j}(d) \;\ge\; g1_{j}(d), \qquad d \in [\text{low},
+\text{upp}].
+\]</span></p>
+<p>Therefore, <span class="math display">\[
+\text{UB3A}_j(d) = g3_{j}(d) - g1_{j}(d) \;\ge\; 0.
+\]</span></p>
+<p>This completes the proof of Claim 5.4.5.</p>
+<p><strong>Claim 5.</strong><br />
+<span class="math inline">\(\text{UB3B}(d) \ge 0 \quad \text{for all } d
+\in [\text{low},\,\text{upp}]\)</span>.</p>
+<p><em>Proof of Claim 5.</em></p>
+<p>Define function <span class="math inline">\(f1(.)\)</span> and <span class="math inline">\(f2(.)\)</span></p>
+<p>by</p>
+<p><span class="math display">\[
+\begin{aligned}
+f1(d)
+&amp;= \big(\mathrm{max\_upp} - \mathrm{max\_LL\_log\_disp}\big) \\[6pt]
+&amp;\quad + \big(\mathrm{lm\_log1} + \mathrm{lm\_log2} \cdot \log d
+\big) \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - (\mathrm{lm\_log1} + \mathrm{lm\_log2}
+\cdot \log \text{upp}) \big) \\[6pt]
+&amp;\quad + \big(\mathrm{lm\_log1} + \mathrm{lm\_log2} \cdot \log d
+\big) \\[6pt]
+&amp;= \big(\mathrm{max\_upp}
+- (\text{lmc}_1 + \text{lmc}_2 \cdot d^{*}_{2} - \text{lmc}_2 \cdot
+\log(\text{upp})) \big) \\[6pt]
+&amp;\quad + \big(\text{lmc}_1 + \text{lmc}_2 \cdot d^{*}_{2} -
+\text{lmc}_2 \cdot \log(d^{*}_{2})
++ \text{lmc}_2 \cdot d^{*}_{2} \cdot \log d \big)
+\end{aligned}
+\]</span></p>
+<p>and</p>
+<p><span class="math display">\[
+\begin{aligned}
+f2(d) &amp;= \text{lmc}_1 + \text{lmc}_2 \cdot d \\[6pt]
+&amp;= \mathrm{max\_low\_mean} - \text{lmc}_2 \cdot \text{low} +
+\text{lmc}_2 \cdot d
+\end{aligned}
+\]</span></p>
+<p>so <span class="math inline">\(\text{UB3B}(d)  =f1(d)-f2(d)\)</span>.</p>
+<p>When <span class="math inline">\(d=\text{upp}\)</span>, we have</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{UB3B}(\text{upp})
+&amp;= f1(\text{upp}) - f2(\text{upp}) \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - \big(\mathrm{max\_low\_mean} +
+\text{lmc}_2 \cdot (\text{upp} - \text{low})\big)\big) \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - \big(\mathrm{max\_low\_mean}
+   + \tfrac{(\mathrm{max\_upp} - \mathrm{max\_low\_mean})}{(\text{upp} -
+\text{low})} \cdot (\text{upp} - \text{low})\big)\big) \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - \mathrm{max\_upp}\big) \\[6pt]
+&amp;= 0
+\end{aligned}
+\]</span></p>
+<p>so <span class="math inline">\(f1(upp)=f2(upp)\)</span>.</p>
+<p>Likewise, when <span class="math inline">\(d=\text{low}\)</span>, we
+have</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{UB3B}(\text{low})
+&amp;= f1(\text{low}) - f2(\text{low}) \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - \big(\mathrm{lm\_log2} \cdot
+(\log(\text{upp}) - \log(\text{low}))\big)\big) \\[6pt]
+&amp;\quad - \big(\mathrm{max\_low\_mean} + \text{lmc}_2 \cdot
+(\text{low} - \text{low})\big) \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - \big(\text{lmc}_2 \cdot d^{*}_{2} \cdot
+(\log(\text{upp}) - \log(\text{low}))\big)\big) \\[6pt]
+&amp;\quad - \mathrm{max\_low\_mean} \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - \tfrac{(\mathrm{max\_upp} -
+\mathrm{max\_low\_mean})}{(\text{upp} - \text{low})}
+   \cdot \tfrac{(\text{upp} -
+\text{low})}{\log(\tfrac{\text{upp}}{\text{low}})}
+   \cdot \log(\tfrac{\text{upp}}{\text{low}})\big) \\[6pt]
+&amp;\quad - \mathrm{max\_low\_mean} \\[6pt]
+&amp;= \big(\mathrm{max\_upp} - (\mathrm{max\_upp} -
+\mathrm{max\_low\_mean})\big) \\[6pt]
+&amp;\quad - \mathrm{max\_low\_mean} \\[6pt]
+&amp;= 0
+\end{aligned}
+\]</span></p>
+<p>so <span class="math inline">\(f1(low)=f2(low)\)</span>.</p>
+<p>From properties of the log and the result from Remark 4, that <span class="math inline">\(\mathrm{lm\_log2} \ge 0\)</span>, it follows that
+<span class="math inline">\(f1(\cdot)\)</span> is a concave
+function.</p>
+<p>Now, pick any <span class="math inline">\(t \in [0,1]\)</span>. It
+then follows that</p>
+<p><span class="math display">\[\begin{align} f1(\text{t} \cdot
+\text{low} +\text{(1-t)} \cdot \text{upp} ) &amp; \geq \text{t} \cdot
+f1(\text{low}) +\text{(1-t)} \cdot f1(\text{upp}) \\
+&amp; = \text{t} \cdot f2(\text{low}) +\text{(1-t)} \cdot f2(\text{upp})
+\\
+&amp; =  f2(\text{t} \cdot \text{low} +\text{(1-t)}\cdot \text{upp}).
+\end{align}\]</span></p>
+<p>Thus, for all <span class="math inline">\(d \in [\text{low},
+\text{upp}]\)</span>, <span class="math display">\[
+\text{UB3B}(d) = f1(d) - f2(d) \;\ge\; 0,
+\]</span> which completes the proof.</p>
+</div>
+<div id="claims-6-and-7" class="section level3">
+<h3>5.5 Claims 6 and 7</h3>
+<p>This section collects the notation and identities used to analyze the
+residual sum of squares along a face <span class="math inline">\(j\)</span> as a function of the dispersion <span class="math inline">\(d\)</span>, and to derive lower bounds and
+endpoint properties for the UB2 bound. We first introduce the notation
+and a set of remarks that support Claim 6 (about <span class="math inline">\(\mathrm{RSS}_j(\cdot)\)</span>), then state and
+prove Claim 6. We then introduce additional remarks for the UB2 analysis
+and use them to state and prove Claim 7.</p>
+<div id="notation-and-setup" class="section level4">
+<h4>5.5.1 Notation and setup</h4>
+<p>We work with the following global objects:</p>
+<ul>
+<li><span class="math inline">\(X \in \mathbb{R}^{n \times p}\)</span>:
+design matrix, with rows <span class="math inline">\(x_i^\top\)</span>.</li>
+<li><span class="math inline">\(W =
+\operatorname{diag}(w_1,\ldots,w_n)\)</span>: weight matrix.</li>
+<li><span class="math inline">\(y \in \mathbb{R}^n\)</span>: response
+vector.</li>
+<li><span class="math inline">\(\alpha \in \mathbb{R}^n\)</span>: offset
+vector.</li>
+</ul>
+<p>The residual sum of squares is <span class="math display">\[
+  \mathrm{RSS}(\beta)
+  = \sum_{i=1}^n w_i \bigl(y_i - x_i^\top \beta\bigr)^2.
+\]</span></p>
+<p>Let <span class="math display">\[
+  Q \;=\; X^{T} W X,
+\]</span> and let <span class="math inline">\(\hat{\beta}\)</span> be
+the weighted least squares (maximum likelihood) estimate: <span class="math display">\[
+  \hat{\beta} \;=\; \arg\min_{\beta} \mathrm{RSS}(\beta),
+  \qquad
+  \mathrm{RSS}_{ML} \;=\; \mathrm{RSS}(\hat{\beta}).
+\]</span></p>
+<p>For each face <span class="math inline">\(j\)</span>, let <span class="math inline">\(\bar{c}_j\)</span> denote the gradient value
+associated with that face, and let <span class="math display">\[
+  \beta_j(d) = c^{-1}(\bar{c}_j, d)
+\]</span> be the corresponding tangency point at dispersion <span class="math inline">\(d\)</span>. The face‑specific residual sum of
+squares is <span class="math display">\[
+  \mathrm{RSS}_j(d)
+  \;=\;
+  \sum_{i=1}^n w_i
+  \bigl(y_i - x_i^\top \beta_j(d)\bigr)^2.
+\]</span></p>
+<p>For each face <span class="math inline">\(j\)</span>, define the
+facewise minimum <span class="math display">\[
+  \mathrm{RSS}_{\min,j}
+  \;=\;
+  \min_{d \in [\mathrm{low},\,\mathrm{upp}]}
+  \mathrm{RSS}_j(d),
+\]</span> and the global lower bound <span class="math display">\[
+  \mathrm{RSS}_{\mathrm{Min}}
+  \;=\;
+  \min_j \mathrm{RSS}_{\min,j}.
+\]</span></p>
+<p>The UB2 bound for face <span class="math inline">\(j\)</span> at
+dispersion <span class="math inline">\(d\)</span> is defined by <span class="math display">\[
+  \mathrm{UB2}_j(d)
+  \;=\;
+  \frac{1}{2d}\bigl(\mathrm{RSS}_j(d) -
+\mathrm{RSS}_{\mathrm{Min}}\bigr).
+\]</span></p>
+<p>For the prior, let <span class="math inline">\(P \succ 0\)</span>
+denote the prior precision matrix and <span class="math inline">\(\mu\)</span> the prior mean. We will use the
+implementation‑style notation <span class="math display">\[
+  \mathrm{base\_A} \;=\; X^{T} W X \;=\; Q,
+  \qquad
+  \mathrm{base\_B0} \;=\; X^{T} W(\alpha - y).
+\]</span> For dispersion <span class="math inline">\(d\)</span>, define
+<span class="math display">\[
+  A(d) \;=\; P \;+\; \frac{\mathrm{base\_A}}{d},
+  \qquad
+  B_0(d) \;=\; \frac{\mathrm{base\_B0}}{d} \;+\; P\mu,
+\]</span> so that the tangency point satisfies <span class="math display">\[
+  \beta_j(d)
+  \;=\;
+  A(d)^{-1}\,\bigl(\bar{c}_j - B_0(d)\bigr).
+\]</span></p>
+<p>It is convenient to reparameterize dispersion via <span class="math display">\[
+  t \;=\; \frac{1}{d},
+  \qquad
+  t \in [t_{\min},\,t_{\max}]
+  \;=\;
+  [1/\mathrm{upp},\,1/\mathrm{low}],
+\]</span> and write <span class="math inline">\(\tilde{\beta}_j(t)\)</span> for <span class="math inline">\(\beta_j(d)\)</span> at <span class="math inline">\(t = 1/d\)</span>. We then define <span class="math display">\[
+  A(t) \;=\; P + tQ,
+  \qquad
+  \tilde{M}(t) \;=\; A(t)^{-1} Q\, A(t)^{-1}.
+\]</span></p>
+<p>Finally, define the face‑specific residual at <span class="math inline">\(\hat{\beta}\)</span> by <span class="math display">\[
+  r^{*}_j \;=\; \bar{c}_j \;-\; P\mu \;-\; P\hat{\beta}.
+\]</span></p>
+<hr />
+</div>
+<div id="remarks-for-claim-6" class="section level4">
+<h4>5.5.2 Remarks for Claim 6</h4>
+<p>We now collect a set of remarks that will be used in the proof of
+Claim 6.</p>
+<p><strong>Remark 5.5.1 (Exact RSS decomposition).</strong><br />
+For all <span class="math inline">\(\beta\)</span>, <span class="math display">\[
+  \mathrm{RSS}(\beta)
+  \;=\;
+  \mathrm{RSS}_{ML}
+  \;+\;
+  (\beta - \hat{\beta})^{T} Q (\beta - \hat{\beta}).
+\]</span></p>
+<p><em>Proof.</em> This is the standard quadratic expansion of the
+weighted least squares criterion around its minimizer <span class="math inline">\(\hat{\beta}\)</span>. Since <span class="math inline">\(\nabla \mathrm{RSS}(\hat{\beta}) = 0\)</span> and
+<span class="math inline">\(\nabla^2 \mathrm{RSS}(\beta) = 2Q\)</span>
+is constant, the Taylor expansion is exact. <span class="math inline">\(\square\)</span></p>
+<p><strong>Remark 5.5.2 (Facewise RSS via <span class="math inline">\(r^{*}_j\)</span> and <span class="math inline">\(\tilde{M}\)</span>).</strong><br />
+For each face <span class="math inline">\(j\)</span> and <span class="math inline">\(t = 1/d\)</span>, <span class="math display">\[
+  \tilde{\beta}_j(t) - \hat{\beta}
+  \;=\;
+  A(t)^{-1} r^{*}_j,
+\]</span> and hence <span class="math display">\[
+  \mathrm{RSS}_j(d)
+  \;=\;
+  \mathrm{RSS}_{ML}
+  \;+\;
+  (r^{*}_j)^{T} \tilde{M}(1/d)\, r^{*}_j.
+\]</span></p>
+<p><em>Proof.</em> From the definition of the tangency point in
+implementation notation, <span class="math display">\[
+  \beta_j(d)
+  =
+  A(d)^{-1}\,\bigl(\bar{c}_j - B_0(d)\bigr),
+\]</span> with <span class="math inline">\(A(d) = P +
+\mathrm{base\_A}/d\)</span> and <span class="math inline">\(B_0(d) =
+\mathrm{base\_B0}/d + P\mu.\)</span> Rewriting in terms of <span class="math inline">\(t = 1/d\)</span> and using <span class="math inline">\(A(t) = P + tQ\)</span>, <span class="math inline">\(B_0(t) = t\,\mathrm{base\_B0} + P\mu\)</span>, we
+obtain <span class="math display">\[
+  \tilde{\beta}_j(t)
+  =
+  A(t)^{-1}\,\bigl(\bar{c}_j - B_0(t)\bigr).
+\]</span> Subtracting <span class="math inline">\(\hat{\beta}\)</span>
+and regrouping terms yields <span class="math display">\[
+  \tilde{\beta}_j(t) - \hat{\beta}
+  =
+  A(t)^{-1}\,\bigl(\bar{c}_j - P\mu - P\hat{\beta}\bigr)
+  =
+  A(t)^{-1} r^{*}_j.
+\]</span> Substituting this into the exact decomposition of Remark 5.5.1
+with <span class="math inline">\(\beta = \beta_j(d)\)</span> and <span class="math inline">\(t = 1/d\)</span> gives <span class="math display">\[
+  \mathrm{RSS}_j(d)
+  =
+  \mathrm{RSS}_{ML}
+  +
+  (\beta_j(d) - \hat{\beta})^{T} Q (\beta_j(d) - \hat{\beta})
+  =
+  \mathrm{RSS}_{ML}
+  +
+  (r^{*}_j)^{T} \tilde{M}(1/d)\, r^{*}_j.
+\]</span> <span class="math inline">\(\square\)</span></p>
+<p><strong>Remark 5.5.3 (Monotonicity in <span class="math inline">\(d\)</span> and endpoint minimum).</strong><br />
+For each face <span class="math inline">\(j\)</span> and all <span class="math inline">\(d \in [\mathrm{low},\,\mathrm{upp}]\)</span>,
+<span class="math display">\[
+  (r^{*}_j)^{T} \tilde{M}(1/d)\, r^{*}_j
+  \;\ge\;
+  (r^{*}_j)^{T} \tilde{M}(1/\mathrm{low})\, r^{*}_j,
+\]</span> and hence <span class="math display">\[
+  \min_{d \in [\mathrm{low},\,\mathrm{upp}]}
+  \mathrm{RSS}_j(d)
+  \;=\;
+  \mathrm{RSS}_j(\mathrm{low}).
+\]</span></p>
+<p><em>Proof.</em> For <span class="math inline">\(t &gt; 0\)</span>, we
+have <span class="math inline">\(A(t) = P + tQ \succ tQ\)</span> in the
+Loewner order, so <span class="math inline">\(A(t)^{-1} \prec
+(tQ)^{-1}\)</span>. Therefore <span class="math display">\[
+  \tilde{M}(t)
+  =
+  A(t)^{-1} Q A(t)^{-1}
+  \prec
+  (tQ)^{-1} Q (tQ)^{-1}
+  =
+  t^{-2} Q^{-1}.
+\]</span> As <span class="math inline">\(d\)</span> increases, <span class="math inline">\(t = 1/d\)</span> decreases, and the ordering of
+<span class="math inline">\(\tilde{M}(t)\)</span> in <span class="math inline">\(t\)</span> implies that <span class="math inline">\((r^{*}_j)^{T} \tilde{M}(1/d)\, r^{*}_j\)</span> is
+minimized at the largest value of <span class="math inline">\(t\)</span>, i.e. at <span class="math inline">\(t
+= 1/\mathrm{low}\)</span>. Thus <span class="math display">\[
+  (r^{*}_j)^{T} \tilde{M}(1/d)\, r^{*}_j
+  \;\ge\;
+  (r^{*}_j)^{T} \tilde{M}(1/\mathrm{low})\, r^{*}_j
+\]</span> for all <span class="math inline">\(d \in
+[\mathrm{low},\,\mathrm{upp}]\)</span>. Combining this with Remark 5.5.2
+gives <span class="math display">\[
+  \mathrm{RSS}_j(d)
+  \;\ge\;
+  \mathrm{RSS}_j(\mathrm{low}),
+\]</span> so the minimum over <span class="math inline">\(d\)</span> is
+attained at <span class="math inline">\(d = \mathrm{low}\)</span>. <span class="math inline">\(\square\)</span></p>
+<hr />
+</div>
+<div id="claim-6-rss-decomposition-and-lower-bound" class="section level4">
+<h4>5.5.3 Claim 6: RSS decomposition and lower bound</h4>
+<p><strong>Claim 6.</strong><br />
+For each face <span class="math inline">\(j\)</span> and dispersion
+<span class="math inline">\(d \in
+[\mathrm{low},\,\mathrm{upp}]\)</span>, <span class="math display">\[
+  \mathrm{RSS}_j(d)
+  \;=\;
+  \mathrm{RSS}_{ML}
+  \;+\;
+  (\beta_j(d) - \hat{\beta})^{T} Q (\beta_j(d) - \hat{\beta}),
+\]</span> and the minimum over <span class="math inline">\(d\)</span> is
+attained at the lower endpoint: <span class="math display">\[
+  \min_{d \in [\mathrm{low},\,\mathrm{upp}]}
+  \mathrm{RSS}_j(d)
+  \;=\;
+  \mathrm{RSS}_j(\mathrm{low}).
+\]</span></p>
+<p><em>Proof of Claim 6.</em><br />
+The identity follows immediately from Remark 5.5.1 by substituting <span class="math inline">\(\beta = \beta_j(d)\)</span>. The endpoint property
+follows from Remark 5.5.3, which shows that <span class="math inline">\(\mathrm{RSS}_j(d)\)</span> is minimized at <span class="math inline">\(d=\mathrm{low}\)</span>. <span class="math inline">\(\square\)</span></p>
+<hr />
+</div>
+<div id="remarks-for-claim-7" class="section level4">
+<h4>5.5.4 Remarks for Claim 7</h4>
+<p>We now collect additional remarks used in the analysis of the UB2
+bound and in the proof of Claim 7.</p>
+<p>For the derivative analysis, introduce the standardized matrices
+<span class="math display">\[
+  K \;=\; Q^{-1/2} P Q^{-1/2},
+  \qquad
+  v_j \;=\; Q^{-1/2} r^{*}_j,
+\]</span> and the reparameterized function <span class="math display">\[
+  \tilde{\mathrm{UB2}}_j(t)
+  \;:=\;
+  \mathrm{UB2}_j(1/t),
+  \qquad
+  t \in [1/\mathrm{upp},\,1/\mathrm{low}].
+\]</span> Let <span class="math display">\[
+  \Delta
+  \;=\;
+  \mathrm{RSS}_{\mathrm{Min}} - \mathrm{RSS}_{ML}
+  \;\ge\; 0.
+\]</span></p>
+<p><strong>Remark 5.5.4 (UB2 in <span class="math inline">\(t\)</span>–form).</strong><br />
+Using Remark 5.5.2 and the definitions above, we can write <span class="math display">\[
+  \tilde{\mathrm{UB2}}_j(t)
+  \;=\;
+  \frac{t}{2}\bigl(g_j(t) - \Delta\bigr),
+\]</span> where <span class="math display">\[
+  g_j(t) = v_j^{T}(K+tI)^{-2}v_j.
+\]</span></p>
+<p><em>Proof.</em> From Remark 5.5.2 and the definition of <span class="math inline">\(\mathrm{UB2}_j(d)\)</span>, <span class="math display">\[
+  \mathrm{UB2}_j(d)
+  =
+  \frac{1}{2d}
+  \Bigl(
+    \mathrm{RSS}_{ML}
+    + (r^{*}_j)^{T} \tilde{M}(1/d)\, r^{*}_j
+    - \mathrm{RSS}_{\mathrm{Min}}
+  \Bigr).
+\]</span> Writing <span class="math inline">\(t = 1/d\)</span> and using
+<span class="math inline">\(\tilde{M}(t) = Q^{-1/2}(K +
+tI)^{-2}Q^{-1/2}\)</span>, we obtain <span class="math display">\[
+  (r^{*}_j)^{T} \tilde{M}(t)\, r^{*}_j
+  =
+  v_j^{T}(K + tI)^{-2}v_j = g_j(t),
+\]</span> and hence <span class="math display">\[
+  \tilde{\mathrm{UB2}}_j(t)
+  =
+  \frac{t}{2}\bigl(g_j(t) - \Delta\bigr).
+\]</span> <span class="math inline">\(\square\)</span></p>
+<p><strong>Remark 5.5.5 (Derivatives of <span class="math inline">\(g_j\)</span> and <span class="math inline">\(\tilde{\mathrm{UB2}}_j\)</span>).</strong><br />
+For all <span class="math inline">\(t &gt; 0\)</span>, <span class="math display">\[
+  g_j&#39;(t) = -2\, v_j^{T}(K+tI)^{-3} v_j,
+  \qquad
+  g_j&#39;&#39;(t) = 6\, v_j^{T}(K+tI)^{-4} v_j,
+\]</span> and <span class="math display">\[
+  \tilde{\mathrm{UB2}}_j&#39;(t)
+  = \frac{1}{2}\bigl(g_j(t) - \Delta\bigr)
+    + \frac{t}{2}\,g_j&#39;(t),
+  \qquad
+  \tilde{\mathrm{UB2}}_j&#39;&#39;(t)
+  = g_j&#39;(t) + \frac{t}{2}\,g_j&#39;&#39;(t).
+\]</span></p>
+<p><em>Proof.</em> Differentiating <span class="math inline">\((K+tI)^{-2}\)</span> yields <span class="math inline">\(\frac{d}{dt}(K+tI)^{-2} = -2(K+tI)^{-3}\)</span>,
+and differentiating once more gives <span class="math inline">\(\frac{d^2}{dt^2}(K+tI)^{-2} =
+6(K+tI)^{-4}\)</span>. Applying these formulas inside the quadratic form
+<span class="math inline">\(v_j^{T}(\cdot)v_j\)</span> gives the
+derivatives of <span class="math inline">\(g_j(t)\)</span>, and
+differentiating the expression in Remark 5.5.4 yields the formulas for
+<span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;(t)\)</span> and
+<span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;&#39;(t)\)</span>.
+<span class="math inline">\(\square\)</span></p>
+<p><strong>Remark 5.5.6 (Eigenvalue weighted‑average
+identity).</strong><br />
+Let <span class="math inline">\(\mu_i = \lambda_i + t\)</span> denote
+the eigenvalues of <span class="math inline">\(K + tI\)</span>, where
+<span class="math inline">\(\lambda_i\)</span> are the eigenvalues of
+<span class="math inline">\(K\)</span>. Then <span class="math display">\[
+  \frac{
+    v_j^{T}(K+tI)^{-2}v_j
+  }{
+    v_j^{T}(K+tI)^{-3}v_j
+  }
+  \;=\;
+  \sum_i \rho_i \mu_i,
+\]</span> where <span class="math inline">\(\rho_i \ge 0\)</span> and
+<span class="math inline">\(\sum_i \rho_i = 1\)</span>. In particular,
+the ratio is a weighted average of the <span class="math inline">\(\mu_i\)</span> and therefore lies in the interval
+<span class="math inline">\([\min_i \mu_i,\,\max_i \mu_i]\)</span>.</p>
+<p><em>Proof.</em> In the eigenbasis of <span class="math inline">\(K+tI\)</span>, write <span class="math inline">\(v_j\)</span> in coordinates <span class="math inline">\(v_j = \sum_i \sqrt{w_i} e_i\)</span> with <span class="math inline">\(w_i \ge 0\)</span> and <span class="math inline">\(\sum_i w_i =
+\|v_j\|^2\)</span>. Then <span class="math display">\[
+  v_j^{T}(K+tI)^{-2}v_j = \sum_i w_i \mu_i^{-2},
+  \qquad
+  v_j^{T}(K+tI)^{-3}v_j = \sum_i w_i \mu_i^{-3}.
+\]</span> Hence <span class="math display">\[
+  \frac{
+    v_j^{T}(K+tI)^{-2}v_j
+  }{
+    v_j^{T}(K+tI)^{-3}v_j
+  }
+  =
+  \frac{\sum_i w_i \mu_i^{-2}}{\sum_i w_i \mu_i^{-3}}
+  =
+  \frac{\sum_i (w_i \mu_i^{-3})\,\mu_i}{\sum_i w_i \mu_i^{-3}}
+  =
+  \sum_i \rho_i \mu_i,
+\]</span> with <span class="math inline">\(\rho_i = \frac{w_i
+\mu_i^{-3}}{\sum_k w_k \mu_k^{-3}}
+  \ge 0\)</span> and <span class="math inline">\(\sum_i \rho_i =
+1\)</span>. <span class="math inline">\(\square\)</span></p>
+<p><strong>Remark 5.5.7 (Critical points of <span class="math inline">\(\tilde{\mathrm{UB2}}_j\)</span>).</strong> Suppose
+<span class="math inline">\(\Delta &gt; 0\)</span> and <span class="math inline">\(r^{*}_j \neq 0\)</span>. If <span class="math inline">\(t^{*} &gt; 0\)</span> is a critical point of <span class="math inline">\(\tilde{\mathrm{UB2}}_j(t)\)</span>, i.e. <span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;(t^{*}) = 0\)</span>,
+then: <span class="math display">\[
+  t^{*}
+  =
+  \frac{
+    v_j^{T}(K + t^{*}I)^{-2}v_j - \Delta
+  }{
+    2\, v_j^{T}(K + t^{*}I)^{-3}v_j
+  },
+\]</span> and <span class="math inline">\(t^{*}\)</span> lies strictly
+below the smallest eigenvalue of <span class="math inline">\(K\)</span>:
+<span class="math display">\[
+  t^{*} I \;\prec\; K,
+  \qquad
+  t^{*} &lt; \lambda_{\min}(K).
+\]</span></p>
+<p><em>Proof.</em> From Remark 5.5.4 and Remark 5.5.5, <span class="math display">\[
+  \tilde{\mathrm{UB2}}_j&#39;(t)
+  = \frac{1}{2}\bigl(g_j(t) - \Delta\bigr)
+    + \frac{t}{2}\,g_j&#39;(t),
+\]</span> so <span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;(t^{*}) = 0\)</span>
+implies <span class="math display">\[
+  g_j(t^{*}) - \Delta
+  = -\,t^{*} g_j&#39;(t^{*})
+  = 2 t^{*}\, v_j^{T}(K + t^{*}I)^{-3} v_j,
+\]</span> and hence <span class="math display">\[
+  t^{*}
+  =
+  \frac{
+    g_j(t^{*}) - \Delta
+  }{
+    2\, v_j^{T}(K + t^{*}I)^{-3} v_j
+  }
+  =
+  \frac{
+    v_j^{T}(K + t^{*}I)^{-2}v_j - \Delta
+  }{
+    2\, v_j^{T}(K + t^{*}I)^{-3}v_j
+  }.
+\]</span></p>
+<p>By Remark 5.5.6, we can write <span class="math display">\[
+  \frac{
+    v_j^{T}(K+t^{*}I)^{-2}v_j
+  }{
+    v_j^{T}(K+t^{*}I)^{-3}v_j
+  }
+  =
+  \sum_i \rho_i \mu_i,
+  \qquad
+  \mu_i = \lambda_i + t^{*},
+\]</span> where <span class="math inline">\(\lambda_i\)</span> are the
+eigenvalues of <span class="math inline">\(K\)</span> and <span class="math inline">\(\rho_i\)</span> form a probability vector. Since
+<span class="math inline">\(\Delta &gt; 0\)</span>, we have <span class="math display">\[
+  \frac{
+    v_j^{T}(K+t^{*}I)^{-2}v_j
+  }{
+    v_j^{T}(K+t^{*}I)^{-3}v_j
+  }
+  &gt;
+  2t^{*},
+\]</span> so <span class="math display">\[
+  \sum_i \rho_i \mu_i
+  &gt;
+  2t^{*}.
+\]</span> Using <span class="math inline">\(\mu_i = \lambda_i +
+t^{*}\)</span>, this implies <span class="math display">\[
+  \sum_i \rho_i \lambda_i
+  &gt;
+  t^{*}.
+\]</span> Since <span class="math inline">\(\lambda_{\min}(K) \le \sum_i
+\rho_i \lambda_i\)</span>, we obtain <span class="math display">\[
+  \lambda_{\min}(K)
+  \le
+  \sum_i \rho_i \lambda_i
+  &gt;
+  t^{*},
+\]</span> so <span class="math inline">\(t^{*} &lt;
+\lambda_{\min}(K)\)</span> and hence <span class="math inline">\(t^{*} I
+\prec K\)</span>. <span class="math inline">\(\square\)</span></p>
+<hr />
+<p><strong>Remark 5.5.8 (Inflection points of <span class="math inline">\(\tilde{\mathrm{UB2}}_j\)</span>).</strong> Suppose
+<span class="math inline">\(r^{*}_j \neq 0\)</span>. If <span class="math inline">\(t^{*} &gt; 0\)</span> is an inflection point of
+<span class="math inline">\(\tilde{\mathrm{UB2}}_j(t)\)</span>,
+i.e. <span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;&#39;(t^{*})
+= 0\)</span>, then <span class="math display">\[
+  t^{*}
+  =
+  \frac{2}{3}\sum_i \alpha_i \mu_i,
+\]</span> for some weights <span class="math inline">\(\alpha_i \ge
+0\)</span> with <span class="math inline">\(\sum_i \alpha_i =
+1\)</span>, where <span class="math inline">\(\mu_i = \lambda_i +
+t^{*}\)</span> are the eigenvalues of <span class="math inline">\(K +
+t^{*}I\)</span>. In particular, <span class="math display">\[
+  t^{*} \;\ge\; 2\,\lambda_{\min}(K).
+\]</span></p>
+<p><em>Proof.</em> From Remark 5.5.5, <span class="math display">\[
+  \tilde{\mathrm{UB2}}_j&#39;&#39;(t)
+  = g_j&#39;(t) + \frac{t}{2}\,g_j&#39;&#39;(t)
+  = -2\, v_j^{T}(K+tI)^{-3} v_j
+    + 3t\, v_j^{T}(K+tI)^{-4} v_j.
+\]</span> Writing this in the eigenbasis of <span class="math inline">\(K+tI\)</span>, let <span class="math inline">\(\mu_i = \lambda_i + t\)</span> denote the
+eigenvalues of <span class="math inline">\(K+tI\)</span> and write <span class="math display">\[
+  v_j^{T}(K+tI)^{-3} v_j
+  = \sum_i w_i \mu_i^{-3},
+  \qquad
+  v_j^{T}(K+tI)^{-4} v_j
+  = \sum_i w_i \mu_i^{-4},
+\]</span> for some weights <span class="math inline">\(w_i \ge
+0\)</span> (not all zero). Then <span class="math display">\[
+  \tilde{\mathrm{UB2}}_j&#39;&#39;(t)
+  = \sum_i w_i\Bigl(-2\,\mu_i^{-3} + 3t\,\mu_i^{-4}\Bigr)
+  = \sum_i w_i \mu_i^{-4}\,\bigl(-2\mu_i + 3t\bigr).
+\]</span> At an inflection point <span class="math inline">\(t^{*}\)</span>, we have <span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;&#39;(t^{*}) =
+0\)</span>, so <span class="math display">\[
+  0
+  = \sum_i w_i \mu_i^{-4}\,\bigl(-2\mu_i + 3t^{*}\bigr).
+\]</span> Define normalized weights <span class="math display">\[
+  \alpha_i
+  =
+  \frac{w_i \mu_i^{-4}}{\sum_k w_k \mu_k^{-4}},
+  \qquad
+  \alpha_i \ge 0,\quad \sum_i \alpha_i = 1.
+\]</span> Dividing by <span class="math inline">\(\sum_k w_k \mu_k^{-4}
+&gt; 0\)</span> gives <span class="math display">\[
+  0
+  = \sum_i \alpha_i\,\bigl(-2\mu_i + 3t^{*}\bigr)
+  = -2\sum_i \alpha_i \mu_i + 3t^{*},
+\]</span> so <span class="math display">\[
+  3t^{*} = 2\sum_i \alpha_i \mu_i
+  \quad\Longrightarrow\quad
+  t^{*}
+  = \frac{2}{3}\sum_i \alpha_i \mu_i.
+\]</span> In particular, <span class="math display">\[
+  \sum_i \alpha_i \mu_i
+  \;\ge\;
+  \min_i \mu_i
+  = \lambda_{\min}(K) + t^{*},
+\]</span> so <span class="math display">\[
+  t^{*}
+  = \frac{2}{3}\sum_i \alpha_i \mu_i
+  \;\ge\;
+  \frac{2}{3}\bigl(\lambda_{\min}(K) + t^{*}\bigr).
+\]</span> Rearranging, <span class="math display">\[
+  t^{*} - \frac{2}{3}t^{*}
+  \;\ge\;
+  \frac{2}{3}\lambda_{\min}(K)
+  \quad\Longrightarrow\quad
+  \frac{1}{3}t^{*} \;\ge\; \frac{2}{3}\lambda_{\min}(K)
+  \quad\Longrightarrow\quad
+  t^{*} \;\ge\; 2\,\lambda_{\min}(K),
+\]</span> which proves the claimed lower bound. <span class="math inline">\(\square\)</span></p>
+</div>
+<div id="claim-7-ub2-derivatives-and-endpoint-minimization" class="section level4">
+<h4>5.5.5 Claim 7: UB2 derivatives and endpoint minimization</h4>
+<p>We now state the main result about the shape of <span class="math inline">\(\tilde{\mathrm{UB2}}_j(t)\)</span> and the
+location of its minima.</p>
+<p><strong>Claim 7.</strong><br />
+Suppose <span class="math inline">\(\Delta &gt; 0\)</span> and <span class="math inline">\(r^{*}_j \neq 0\)</span>. Then:</p>
+<ol style="list-style-type: decimal">
+<li><p>Any critical point <span class="math inline">\(t^{*} &gt;
+0\)</span> of <span class="math inline">\(\tilde{\mathrm{UB2}}_j(t)\)</span> satisfies <span class="math display">\[
+  t^{*}
+  =
+  \frac{
+    v_j^{T}(K + t^{*}I)^{-2}v_j - \Delta
+  }{
+    2\, v_j^{T}(K + t^{*}I)^{-3}v_j
+  },
+\]</span> and lies strictly below the smallest eigenvalue of <span class="math inline">\(K\)</span>: <span class="math display">\[
+  t^{*} I \;\prec\; K,
+  \qquad
+  t^{*} &lt; \lambda_{\min}(K).
+\]</span></p></li>
+<li><p>Any inflection point <span class="math inline">\(t^{*} &gt;
+0\)</span> (where <span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;&#39;(t^{*}) =
+0\)</span>) satisfies <span class="math display">\[
+  2\,\lambda_{\min}(K)
+  \;\le\;
+  t^{*},
+\]</span> i.e. <span class="math inline">\(t^{*}\)</span> is at least
+twice the smallest eigenvalue of <span class="math inline">\(K\)</span>.</p></li>
+<li><p>Consequently, any critical point lies strictly below any
+inflection point, in the region where <span class="math inline">\(\tilde{\mathrm{UB2}}_j\)</span> is concave, and
+over any interval <span class="math inline">\(t \in
+[1/\mathrm{upp},\,1/\mathrm{low}]\)</span> the minimum of <span class="math inline">\(\tilde{\mathrm{UB2}}_j(t)\)</span> must occur at
+one of the endpoints. Equivalently, the minimum of <span class="math inline">\(\mathrm{UB2}_j(d)\)</span> over <span class="math inline">\(d \in [\mathrm{low},\,\mathrm{upp}]\)</span>
+occurs at <span class="math inline">\(d = \mathrm{low}\)</span> or <span class="math inline">\(d = \mathrm{upp}\)</span>.</p></li>
+</ol>
+<p><em>Proof of Claim 7.</em><br />
+Part 1 follows directly from Remark 5.5.7: at any critical point <span class="math inline">\(t^{*}\)</span> of <span class="math inline">\(\tilde{\mathrm{UB2}}_j(t)\)</span> with <span class="math inline">\(\Delta &gt; 0\)</span> and <span class="math inline">\(r^{*}_j \neq 0\)</span>, we have the stated
+implicit equation and the strict inequality <span class="math inline">\(t^{*} &lt; \lambda_{\min}(K)\)</span>.</p>
+<p>Part 2 follows from Remark 5.5.8: at any inflection point <span class="math inline">\(t^{*}\)</span>, <span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;&#39;(t^{*}) =
+0\)</span> implies <span class="math inline">\(t^{*} \ge
+2\,\lambda_{\min}(K)\)</span>.</p>
+<p>For part 3, combine these bounds with the sign pattern of <span class="math inline">\(\tilde{\mathrm{UB2}}_j&#39;&#39;(t)\)</span>
+implied by Remark 5.5.5. The function is strictly concave for <span class="math inline">\(t &lt; \lambda_{\min}(K)\)</span> and convex for
+<span class="math inline">\(t \ge 2\,\lambda_{\min}(K)\)</span>, so any
+critical point must lie in the concave region strictly below any
+inflection point. Over any compact interval <span class="math inline">\([1/\mathrm{upp},\,1/\mathrm{low}]\)</span>, a
+function that is concave around any interior critical point and
+eventually convex must attain its minimum at an endpoint of the
+interval, and hence the minimum of <span class="math inline">\(\tilde{\mathrm{UB2}}_j(t)\)</span> occurs at one
+of the endpoints. The equivalent statement for <span class="math inline">\(\mathrm{UB2}_j(d)\)</span> follows from the
+reparameterization <span class="math inline">\(t = 1/d\)</span>. <span class="math inline">\(\square\)</span></p>
+</div>
+</div>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

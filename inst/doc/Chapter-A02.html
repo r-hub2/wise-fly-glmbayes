@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A02: Overview of Estimation Procedures</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A02: Overview of Estimation
+Procedures</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span></code></pre></div>
+<div id="chapter-a02-overview-of-estimation-procedures" class="section level1">
+<h1>Chapter A02: Overview of Estimation Procedures</h1>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This vignette describes the computational architecture used by the
+glmbayes package to generate independent and identically distributed
+(iid) samples from Bayesian generalized linear models (GLMs). The
+central idea is that posterior simulation is handled by a small set of
+low-level simulation functions (“simfunctions”) that implement either
+conjugate sampling formulas or envelope-based accept-reject methods.
+These simfunctions are called by higher-level modeling functions such as
+<code>glmb()</code> and <code>lmb()</code>, which provide formula
+interfaces, model frames, and S3 methods.</p>
+<p>The simfunctions implement both classical conjugate Bayesian updating
+and the likelihood-subgradient envelope methods of <span class="citation">(K. N. Nygren and Nygren 2006)</span>. Companion
+vignettes document coefficient envelopes <span class="citation">(K.
+Nygren 2025a)</span>, Gamma-family dispersion envelopes <span class="citation">(K. Nygren 2025b)</span>, and joint envelopes for
+Gaussian regression with independent Normal–Gamma priors <span class="citation">(K. Nygren 2025c)</span>.</p>
+<p>This chapter begins by describing the role of <code>rglmb()</code>,
+<code>rlmb()</code>and the <code>pfamily</code> system, which together
+determine which simfunction is used for a given model. Later sections
+describe the simfunctions themselves, the mapping between likelihood
+families and prior families, and the C++ routines used for envelope
+construction and sampling.</p>
+</div>
+<div id="rglmbrlmb-pfamilies-and-the-simulation-architecture" class="section level2">
+<h2>1. rglmb/rlmb, pfamilies, and the Simulation Architecture</h2>
+<p>The functions <code>rglmb()</code> and <code>rlmb()</code>are the
+minimalistic engines for Bayesian GLM simulation. They are called
+internally by <code>glmb()</code> and <code>lmb()</code> respectively,
+which provides formula-based interfaces similar to <code>glm()</code>
+and <code>lm()</code> respectively. In contrast, <code>rglmb()</code>
+and <code>rlmb()</code>works directly with numeric inputs and avoids the
+overhead of model frames, formulas, and method dispatches. Their main
+purpose is to generate iid posterior draws given:</p>
+<ul>
+<li>a response vector <code>y</code></li>
+<li>a design matrix <code>x</code></li>
+<li>a likelihood family (e.g., <code>gaussian()</code>,
+<code>poisson()</code>, <code>binomial()</code>)</li>
+<li>a prior family (<code>pfamily</code>)</li>
+<li>optional weights, offsets, and envelope controls</li>
+</ul>
+<p>Unlike <code>glmb()</code>and
+<code>lmb(),</code>rglmb()<code>and</code>rlmb()` do not compute fitted
+values, residuals, or diagnostics. They simply dispatche to the correct
+simfunctions and return the resulting posterior draws. The lower
+overhead associated with these functions make them a good choice when
+calling the estimation procedures repeatedly (say as part of Gibbs
+sampling procedures).</p>
+<div id="how-glmb-and-lmb-use-rglmb-and-rlmb-respectively" class="section level3">
+<h3>1.1 How glmb and lmb use rglmb and rlmb respectively</h3>
+<p>The functions <code>glmb()</code> and <code>lmb()</code> are the
+high-level modeling interface. They:</p>
+<ul>
+<li>parse formulas</li>
+<li>construct model frames</li>
+<li>handle missing data</li>
+<li>attach S3 methods for printing, summarizing, predicting, and
+extracting diagnostics</li>
+</ul>
+<p>Once the model frames are constructed, <code>glmb()</code> and
+<code>lmb()</code>call <code>rglmb()</code> and
+<code>rlmb()</code>respectively to generate the posterior samples.</p>
+<p>Thus:</p>
+<p>glmb() –&gt; rglmb() –&gt; simfunction –&gt; posterior draws</p>
+<p>and</p>
+<p>lmb() –&gt; rlmb() –&gt; simfunction –&gt; posterior draws</p>
+<p>respectively.</p>
+<p>This separation mirrors the classical distinction between
+<code>glm()</code>/ <code>lm()</code>and the underlying IRLS
+routines.</p>
+</div>
+<div id="pfamilies-the-bayesian-analogue-of-family" class="section level3">
+<h3>1.2 pfamilies: the Bayesian analogue of family()</h3>
+<p>In classical GLMs, the <code>family</code> object determines the
+likelihood and link. In glmbayes, the <code>pfamily</code> object plays
+the same role for priors. Each pfamily object:</p>
+<ul>
+<li>names the prior family (<code>pfamily$pfamily</code>)</li>
+<li>stores the prior hyperparameters
+(<code>pfamily$prior_list</code>)</li>
+<li>records the likelihood families it supports
+(<code>pfamily$okfamilies</code>)</li>
+<li>provides a function for the allowable links
+(<code>pfamily$plinks</code>)</li>
+<li>embeds the simulation function to call
+(<code>pfamily$simfun</code>)</li>
+</ul>
+<p>This design mirrors the structure of <code>glm()</code>:<br />
+<code>family</code> determines the likelihood, and <code>pfamily</code>
+determines the prior and the sampling method. The combination
+<code>(family, pfamily)</code> uniquely determines which simfunction is
+used.</p>
+<p>To utilize pfamilies when calling the higher level
+<code>glmb()</code> and <code>lmb()</code> or the lower level
+<code>rglmb()</code> and <code>rlmb()</code> functions, users must
+provide the hyperparameters needed to populate the
+<code>pfamily$prior_list</code>. These hyperparameters vary across
+pfamilies largely based on whether the prior specified sets a prior for
+regression coefficients, dispersion parameters, or both jointly.</p>
+<p>The pfamilies currently implemented in glmbayes differ primarily in
+whether they place priors on regression coefficients, dispersion
+parameters, or both. The table below summarizes the hyperparameters
+associated with each pfamily.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">pfamily name Prior components in prior_list</td>
+</tr>
+</tbody>
+</table>
+<p>dNormal mu: prior mean vector for coefficients Sigma: prior
+covariance matrix dispersion: fixed dispersion (if applicable)</p>
+<p>dGamma shape: shape parameter for Gamma prior on precision rate: rate
+parameter for Gamma prior on precision beta: regression coefficients
+(used when updating dispersion separately) max_disp_perc: percentile
+used to truncate the posterior dispersion distribution disp_lower,
+disp_upper: optional user-specified truncation bounds</p>
+<p>dNormal_Gamma mu: prior mean vector for coefficients Sigma_0: prior
+covariance on precision-weighted scale shape: shape parameter for Gamma
+prior on precision rate: rate parameter for Gamma prior on precision
+(<code>prior_list</code> still uses component name
+<code>Sigma</code>.)</p>
+<p>dIndependent_Normal_Gamma mu: prior mean vector for coefficients
+Sigma: prior covariance matrix shape: shape parameter for Gamma prior on
+precision rate: rate parameter for Gamma prior on precision
+max_disp_perc: percentile used to truncate the posterior dispersion
+distribution disp_lower, disp_upper: optional user-specified truncation
+bounds</p>
+<hr />
+<p>These pfamilies determine which simfunction is used. For example:</p>
+<ul>
+<li>dNormal selects rNormal_reg</li>
+<li>dGamma selects rGamma_reg</li>
+<li>dNormal_Gamma selects rNormalGamma_reg</li>
+<li>dIndependent_Normal_Gamma selects rindepNormalGamma_reg</li>
+</ul>
+<p>Because each pfamily embeds its own simulation function,
+<code>rglmb()</code> and <code>rlmb()</code> do not need to contain any
+special-case logic. Once the user supplies a pfamily object, the correct
+simfunction is already encoded inside it. This design mirrors the
+classical GLM architecture, where the family object determines the
+likelihood and link, but extends it to the Bayesian setting by allowing
+the prior to determine the sampling algorithm.</p>
+<p>As setting the prior parameters required for each pfamily can be a
+bit involved, the package provides the <code>Prior_Setup()</code>
+function which be used to extract default prior settings for these
+parameters while also allowing tailoring of the prior specification.
+Some of our earlier vignettes already covered this in details so it
+won’t be discussed further here.</p>
+</div>
+<div id="the-uniform-simfunction-interface" class="section level3">
+<h3>1.3 The uniform simfunction interface</h3>
+<p>All simfunctions in <code>simfunctions.R</code> share the same
+signature:</p>
+<p>simfun(n, y, x, prior_list, offset = NULL, weights = 1, family =
+gaussian(), Gridtype = 2, n_envopt = NULL, use_parallel = TRUE,
+use_opencl = FALSE, verbose = FALSE)</p>
+<p>This uniform interface allows <code>rglmb()</code> and
+<code>rlmb()</code> to dispatch to any simfunction without special-case
+logic. It also allows users to change priors or likelihoods without
+altering their workflow, and it makes the simfunctions suitable for use
+inside Gibbs samplers or other custom algorithms.</p>
+</div>
+<div id="how-rglmb-and-rlmb-select-the-simfunction" class="section level3">
+<h3>1.4 How rglmb and rlmb select the simfunction</h3>
+<p>The internal logic of <code>rglmb()</code> is:</p>
+<ol style="list-style-type: decimal">
+<li>The user supplies a likelihood <code>family</code> and a prior
+<code>pfamily</code>.</li>
+<li><code>Prior_Setup()</code> constructs a <code>prior_list</code>
+containing the hyperparameters.</li>
+<li><code>rglmb()</code> extracts from the <code>pfamily</code> object:
+<ul>
+<li>the allowed likelihood families (<code>okfamilies</code>)</li>
+<li>the allowed links (<code>plinks</code>)</li>
+<li>the prior hyperparameters (<code>prior_list</code>)</li>
+<li>the simulation function (<code>simfun</code>)</li>
+</ul></li>
+<li>It checks that the requested likelihood family and link are
+compatible with the pfamily.</li>
+<li>It constructs a list of arguments to pass to the simfunction.</li>
+<li>It calls the simfunction, which performs the actual sampling.</li>
+<li>It attaches metadata (the pfamily, the simfunction call, and the
+arguments) and returns the result.</li>
+</ol>
+<p>The simfunction performs the actual sampling, either by conjugate
+formulas or by envelope-based accept-reject methods.</p>
+</div>
+<div id="the-four-core-simfunctions" class="section level3">
+<h3>1.5 The four core simfunctions</h3>
+<p>The pfamily system dispatches to one of four simfunctions:</p>
+<ul>
+<li><code>rNormal_reg</code></li>
+<li><code>rNormalGamma_reg</code></li>
+<li><code>rindepNormalGamma_reg</code></li>
+<li><code>rGamma_reg</code></li>
+</ul>
+<p>These functions implement the sampling algorithms described in
+Appendices A2, A5, A6, and A7. The next section provides tables showing
+how likelihood families and pfamilies map to these simfunctions.</p>
+</div>
+<div id="inspecting-the-simulation-function-used-the-simfunction-generic" class="section level3">
+<h3>1.6 Inspecting the Simulation Function Used: the
+<code>simfunction()</code> Generic</h3>
+<p>The glmbayes package provides an S3 interface for inspecting which
+low-level simulation function (“simfunction”) was used during a call to
+<code>rglmb()</code> or <code>rlmb()</code>. This interface is accessed
+through the exported generic:</p>
+<pre><code>simfunction(object, ...)</code></pre>
+<p>When applied to an <code>rglmb</code> or <code>rlmb</code> result,
+this function returns an object of class <code>&quot;simfunction&quot;</code>
+containing:</p>
+<ul>
+<li>the name of the simfunction used (e.g.,
+<code>rNormal_reg</code>)</li>
+<li>the call used to invoke the simfunction</li>
+<li>the arguments passed to it, including the <code>prior_list</code>
+and <code>family</code> objects</li>
+</ul>
+<p>This provides a transparent view of the internal mechanics of the
+simulation step, which is useful for debugging, reproducibility, and
+understanding how pfamilies dispatch to specific simfunctions.</p>
+<p>For example:</p>
+<pre><code>fit &lt;- rglmb(n = 10, y = y, x = X,
+             family = gaussian(),
+             pfamily = dNormal(mu, Sigma))
+
+simfunction(fit)</code></pre>
+<p>prints the simfunction name, the call, and all arguments used during
+sampling.</p>
+<p>The <code>print.simfunction()</code> method formats this information
+in a readable way, including a recursive display of the prior
+hyperparameters stored in <code>prior_list</code>. This interface is
+intentionally lightweight: it does not re-run the simfunction or modify
+the model object. It simply reports the simulation metadata recorded
+during the original call.</p>
+</div>
+<div id="summary" class="section level3">
+<h3>1.7 Summary</h3>
+<p>The combination of <code>glmb()</code>/<code>lmb()</code>,
+<code>rglmb()</code>/<code>rlmb()</code>, the pfamily system, and the
+simfunctions forms a flexible and extensible framework for Bayesian GLM
+simulation. The high-level modeling functions handle formula parsing and
+model construction, while the low-level simfunctions implement efficient
+posterior sampling using either conjugate formulas or envelope-based
+methods.</p>
+<p>The next section provides detailed mapping tables showing how
+families and pfamilies determine the appropriate simfunction and
+sampling method.</p>
+</div>
+</div>
+<div id="mapping-families-and-pfamilies-to-simulation-functions" class="section level2">
+<h2>2. Mapping Families and Pfamilies to Simulation Functions</h2>
+<div id="mappings-to-simulation-functions" class="section level3">
+<h3>2.1 Mappings to Simulation Functions</h3>
+<p>The table below summarizes how likelihood families, link functions,
+and pfamilies map to the simulation functions in
+<code>simfunctions.R</code>. The tables also indicates whether the
+sampling is conjugate or envelope-based.</p>
+<table style="width:97%;">
+<colgroup>
+<col width="15%" />
+<col width="15%" />
+<col width="21%" />
+<col width="21%" />
+<col width="19%" />
+<col width="3%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Likelihood Family</strong></td>
+<td><strong>Link</strong></td>
+<td><strong>Pfamily</strong></td>
+<td><strong>Simfunction</strong></td>
+<td><strong>Method</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Gaussian</td>
+<td>identity</td>
+<td>dNormal</td>
+<td>rNormal_reg</td>
+<td colspan="2">Conjugate MVN [C++]</td>
+</tr>
+<tr class="odd">
+<td>Gaussian</td>
+<td>identity</td>
+<td>dGamma</td>
+<td>rGamma_reg</td>
+<td>Conjugate Gamma [R]</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Gaussian</td>
+<td>identity</td>
+<td>dNormal_Gamma</td>
+<td>rNormalGamma_reg</td>
+<td>Conjugate Normal-Gamma [R]</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Gaussian</td>
+<td>identity</td>
+<td>dIndependent_Normal_Gamma</td>
+<td>rindepNormalGamma_reg</td>
+<td>Envelope-based joint sampler [C++]</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Poisson</td>
+<td>log</td>
+<td>dNormal</td>
+<td>rNormal_reg</td>
+<td>Envelope-based [C++]</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Quasi-Poisson</td>
+<td>log</td>
+<td>dNormal</td>
+<td>rNormal_reg</td>
+<td>Envelope-based [C++]</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Binomial</td>
+<td>logit, probit, cloglog</td>
+<td>dNormal</td>
+<td>rNormal_reg</td>
+<td>Envelope-based [C++]</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Quasi-Binomial</td>
+<td>logit, probit, cloglog</td>
+<td>dNormal</td>
+<td>rNormal_reg</td>
+<td>Envelope-based [C++]</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Gamma</td>
+<td>log</td>
+<td>dNormal</td>
+<td>rNormal_reg</td>
+<td>Envelope-based [C++]</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Gamma</td>
+<td>log</td>
+<td>dGamma</td>
+<td>rGamma_reg</td>
+<td>Envelope-based [C++]</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="mapping-simulation-functions-to-primary-c-routines" class="section level3">
+<h3>2.2 Mapping Simulation Functions to Primary C++ Routines</h3>
+<p>The table below lists the simulation functions that call C++ code,
+the likelihood families for which the C++ path is used, and the specific
+C++ source files and function names invoked. Only the primary simulation
+routines are shown here; envelope construction routines are documented
+separately in Appendices A5, A6, and A7.</p>
+<table style="width:97%;">
+<colgroup>
+<col width="19%" />
+<col width="19%" />
+<col width="19%" />
+<col width="36%" />
+<col width="2%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>Simfunction</strong></td>
+<td><strong>Family</strong></td>
+<td><strong>C++ File</strong></td>
+<td><strong>C++ Function(s) Called</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>rNormal_reg</td>
+<td>Gaussian</td>
+<td>rNormalReg.cpp</td>
+<td>rNormalReg_cpp_export</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>rNormal_reg</td>
+<td>All non-Gaussian</td>
+<td>rNormalGLM.cpp</td>
+<td>rNormalGLM_cpp_export</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>rindepNormalGamma_reg</td>
+<td>Gaussian</td>
+<td colspan="3">rIndepNormalGammaReg.cpp |
+rIndepNormalGammaReg_std_cpp_export | |
+rIndepNormalGammaReg_std_parallel_cpp_export</td>
+</tr>
+<tr class="odd">
+<td>rGamma_reg</td>
+<td>Gaussian</td>
+<td>(none)</td>
+<td>(uses R-level rgamma or ctrgamma)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>rGamma_reg</td>
+<td>Gamma</td>
+<td>(none)</td>
+<td>(uses R-level ctrgamma)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Notes: - <code>rNormal_reg</code> uses different C++ backends
+depending on whether the likelihood is Gaussian or non-Gaussian. -
+<code>rindepNormalGamma_reg</code> always uses C++ for the joint
+sampler. - <code>rGamma_reg</code> does not call a dedicated C++
+simulation routine, but it does use the R-level <code>ctrgamma</code>
+function for truncated Gamma proposals. - Envelope construction routines
+(<code>EnvelopeBuild</code>, <code>EnvelopeDispersionBuild_cpp</code>,
+etc.) are documented separately and are not included in this table.</p>
+</div>
+</div>
+<div id="conjugate-vs.-envelope-based-sampling" class="section level2">
+<h2>3. Conjugate vs. Envelope-Based Sampling</h2>
+<div id="conjugate-cases" class="section level3">
+<h3>3.1 Conjugate Cases</h3>
+<p>Several combinations of likelihood family and prior lead to
+closed-form posterior distributions:</p>
+<ul>
+<li>Gaussian likelihood with Normal prior on beta</li>
+<li>Gaussian likelihood with Normal-Gamma prior on (beta, tau)</li>
+<li>Gaussian likelihood with Gamma prior on tau</li>
+<li>Gamma likelihood with Gamma prior on tau (conjugate path)</li>
+</ul>
+<p>In these cases, the simfunctions use direct sampling from
+multivariate normal or gamma distributions. No envelope construction is
+required.</p>
+</div>
+<div id="envelope-based-cases" class="section level3">
+<h3>3.2 Envelope-Based Cases</h3>
+<p>When the posterior is not available in closed form, the simfunctions
+use the likelihood subgradient approach of Nygren and Nygren (2006).
+These cases include:</p>
+<ul>
+<li>All non-Gaussian GLMs with Normal priors</li>
+<li>Gaussian regression with independent Normal-Gamma priors</li>
+<li>Gamma regression with Gamma prior on precision (non-conjugate
+path)</li>
+</ul>
+<p>The envelope-based samplers rely on:</p>
+<ul>
+<li>Likelihood subgradient densities (JASA 2006)</li>
+<li>Mixture envelopes (Appendix A5)</li>
+<li>Dispersion envelopes (Appendix A6)</li>
+<li>Joint envelopes for (beta,phi) (Appendix A7)</li>
+</ul>
+<p>These methods guarantee iid sampling even in high dimensions and for
+non-conjugate models.</p>
+</div>
+</div>
+<div id="theoretical-foundations-and-cross-references" class="section level2">
+<h2>4. Theoretical Foundations and Cross-References</h2>
+<p>The simulation functions are grounded in the following theoretical
+results:</p>
+<ul>
+<li><p><span class="citation">(K. N. Nygren and Nygren 2006)</span>:
+likelihood-subgradient densities and bounds on acceptance
+rates.</p></li>
+<li><p><span class="citation">(K. Nygren 2025a)</span>:
+implementation-oriented companion (this series, Chapter A05) for
+likelihood-subgradient samplers and the <code>.rNormalGLM_cpp</code>
+pipeline.</p></li>
+<li><p><span class="citation">(K. Nygren 2025b)</span>: accept–reject
+sampling for dispersion in Gamma regression
+(<code>rGamma_reg</code>).</p></li>
+<li><p><span class="citation">(K. Nygren 2025c)</span>: joint sampling
+for Gaussian regression with independent Normal–Gamma priors
+(<code>rindepNormalGamma_reg</code>).</p></li>
+</ul>
+<p>Together these provide the mathematical and implementation
+justification for the envelope-based methods in the simfunctions.</p>
+</div>
+<div id="overview-of-each-simulation-function" class="section level2">
+<h2>5. Overview of Each Simulation Function</h2>
+<p>As noted above, the function signatures for the simulation functions
+are the same. However, the functions differ in terms of the specific
+familes/links supported and in terms of the set of prior parameters
+required as part of the prior_list argument. Here we provide a summary
+view of the families/links supported by each function and then a more
+detailed overview of each function.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">Simfunction Supported Families and Links</td>
+</tr>
+</tbody>
+</table>
+<p>rNormal_reg gaussian(identity) poisson(log) quasipoisson(log)
+binomial(logit, probit, cloglog) quasibinomial(logit, probit, cloglog)
+Gamma(log)</p>
+<p>rNormalGamma_reg gaussian(identity)</p>
+<p>rindepNormalGamma_reg gaussian(identity)</p>
+<p>rGamma_reg gaussian(identity) Gamma(log)</p>
+<hr />
+<div id="rnormal_reg" class="section level3">
+<h3>5.1 rNormal_reg</h3>
+<p><strong>Purpose:</strong><br />
+Generates iid samples of regression coefficients beta for GLMs with
+Normal priors.</p>
+<p>Function signature: rNormal_reg(n, y, x, prior_list, offset = NULL,
+weights = 1, family = gaussian(), Gridtype = 2, n_envopt = NULL,
+use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)</p>
+<p>Required prior_list components (from dNormal): - mu: prior mean
+vector for coefficients - Sigma: prior covariance matrix - dispersion:
+fixed dispersion (if applicable)</p>
+<p><strong>Conjugate case:</strong><br />
+Gaussian likelihood with Normal prior.<br />
+Sampling uses direct multivariate normal draws via
+<code>.rNormalReg_cpp</code>.</p>
+<p><strong>Envelope-based case:</strong><br />
+All non-Gaussian GLMs.<br />
+Uses <code>.rNormalGLM_cpp</code> and <code>EnvelopeBuild</code> to
+construct a likelihood-subgradient envelope.</p>
+<p><strong>Implementation sketch:</strong><br />
+1. Compute posterior mode using <code>optim</code> (non-Gaussian) or
+<code>lm.fit</code> (Gaussian).<br />
+2. Standardize model using <code>glmb_Standardize_Model</code>.<br />
+3. Build envelope using <code>EnvelopeBuild</code>.<br />
+4. Generate iid samples using accept-reject sampling.</p>
+<p><strong>References:</strong><br />
+<span class="citation">(K. N. Nygren and Nygren 2006)</span>; <span class="citation">(K. Nygren 2025a)</span>.</p>
+</div>
+<div id="rnormalgamma_reg" class="section level3">
+<h3>5.2 rNormalGamma_reg</h3>
+<p><strong>Purpose:</strong><br />
+Conjugate Normal-Gamma regression for Gaussian likelihoods.</p>
+<p>Function signature: rNormalGamma_reg(n, y, x, prior_list, offset =
+NULL, weights = 1, family = gaussian(), Gridtype = 2, n_envopt = NULL,
+use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)</p>
+<p>Required prior_list components (from dNormal_Gamma): - mu: prior mean
+vector for coefficients - Sigma: prior covariance matrix - shape: shape
+parameter for Gamma prior on precision - rate: rate parameter for Gamma
+prior on precision</p>
+<p><strong>Method:</strong><br />
+Closed-form posterior for (beta, tau).<br />
+Draw tau from Gamma, then draw beta from conditional Normal.</p>
+<p><strong>Implementation sketch:</strong><br />
+1. Fit weighted least squares to obtain Btilde, IR, and S.<br />
+2. Compute posterior Gamma parameters for tau.<br />
+3. Draw tau and then beta = Btilde + IR %<em>% rnorm </em>
+sqrt(dispersion).</p>
+<p><strong>References:</strong><br />
+Conjugate Normal–Gamma regression <span class="citation">(Raiffa and
+Schlaifer 1961; O’Hagan and Forster 2004)</span>; see also <span class="citation">(Lindley and Smith 1972)</span>.</p>
+</div>
+<div id="rindepnormalgamma_reg" class="section level3">
+<h3>5.3 rindepNormalGamma_reg</h3>
+<p><strong>Purpose:</strong><br />
+Joint sampling of (beta, phi) for Gaussian regression with independent
+Normal-Gamma priors.</p>
+<p>Function signature: rindepNormalGamma_reg(n, y, x, prior_list, offset
+= NULL, weights = 1, family = gaussian(), Gridtype = 2, n_envopt = NULL,
+use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)</p>
+<p>Required prior_list components (from dIndependent_Normal_Gamma): -
+mu: prior mean vector for coefficients - Sigma: prior covariance matrix
+- shape: shape parameter for Gamma prior on precision - rate: rate
+parameter for Gamma prior on precision - max_disp_perc: percentile used
+to truncate dispersion support - disp_lower, disp_upper: optional
+user-specified truncation bounds</p>
+<p><strong>Method:</strong><br />
+Envelope-based joint sampler using a shared envelope over beta and
+dispersion bounds.</p>
+<p><strong>Backend:</strong><br />
+- <code>.rIndepNormalGammaReg_std_cpp</code><br />
+- <code>EnvelopeDispersionBuild_cpp</code><br />
+- <code>EnvelopeBuild</code></p>
+<p><strong>Implementation sketch:</strong><br />
+1. Iteratively anchor dispersion using repeated Gaussian fits.<br />
+2. Standardize model and compute posterior mode.<br />
+3. Build coefficient envelope (EnvelopeBuild).<br />
+4. Build dispersion envelope (EnvelopeDispersionBuild_cpp).<br />
+5. Sample jointly from the standardized model.<br />
+6. Transform back to original scale.</p>
+<p><strong>References:</strong><br />
+<span class="citation">(K. Nygren 2025c)</span>; <span class="citation">(Griffin and Brown 2010)</span>.</p>
+</div>
+<div id="rgamma_reg" class="section level3">
+<h3>5.4 rGamma_reg</h3>
+<p><strong>Purpose:</strong><br />
+Simulates dispersion parameters for Gaussian and Gamma families.</p>
+<p>Function signature: rGamma_reg(n, y, x, prior_list, offset = NULL,
+weights = 1, family = gaussian(), Gridtype = 2, n_envopt = NULL,
+use_parallel = TRUE, use_opencl = FALSE, verbose = FALSE)</p>
+<p>Required prior_list components (from dGamma): - shape: shape
+parameter for Gamma prior on precision - rate: rate parameter for Gamma
+prior on precision - beta: regression coefficients (used when updating
+dispersion separately) - max_disp_perc: percentile used to truncate
+dispersion support - disp_lower, disp_upper: optional user-specified
+truncation bounds</p>
+<p><strong>Gaussian case:</strong><br />
+Conjugate Gamma posterior for precision tau.<br />
+Uses direct sampling or truncated sampling via
+<code>ctrgamma</code>.</p>
+<p><strong>Gamma family case:</strong><br />
+Non-conjugate.<br />
+Uses the A6 envelope-based sampler with a tangent envelope for the
+precision.</p>
+<p><strong>Backend:</strong><br />
+- <code>ctrgamma</code><br />
+- A6 routines<br />
+- log-space utilities <code>logdiffexp</code></p>
+<p><strong>Implementation sketch:</strong><br />
+1. Compute posterior mode for precision.<br />
+2. Build Gamma surrogate and tangency point.<br />
+3. Construct bounding function log_h.<br />
+4. Accept-reject sampling for precision.<br />
+5. Transform to dispersion.</p>
+<p><strong>References:</strong><br />
+<span class="citation">(K. Nygren 2025b)</span>.</p>
+</div>
+</div>
+<div id="use-in-gibbs-samplers-and-custom-algorithms" class="section level2">
+<h2>6. Use in Gibbs Samplers and Custom Algorithms</h2>
+<p>The simfunctions are designed to be lightweight and fast. They avoid
+the overhead of:</p>
+<ul>
+<li>Model frames</li>
+<li>Formulas</li>
+<li>S3 objects</li>
+<li>Diagnostic structures</li>
+</ul>
+<p>This makes them ideal for:</p>
+<ul>
+<li>Gibbs sampling</li>
+<li>Blocked MCMC</li>
+<li>Variational approximations</li>
+<li>Simulation studies</li>
+<li>Algorithm prototyping</li>
+</ul>
+<p>They return only the essential components needed for further
+computation: coefficients, dispersion draws, posterior modes, envelopes,
+and iteration counts.</p>
+</div>
+<div id="source-code-and-file-structure" class="section level2">
+<h2>7. Source Code and File Structure</h2>
+<p>The core simulation routines are implemented in:</p>
+<ul>
+<li><code>simfunctions.R</code></li>
+</ul>
+<p>This file contains the four primary simfunctions
+(<code>rNormal_reg</code>, <code>rNormalGamma_reg</code>,
+<code>rindepNormalGamma_reg</code>, <code>rGamma_reg</code>) and the
+R-level logic that interfaces with the C/C++ backends.</p>
+<div id="c-and-c-backends-used-by-the-simfunctions" class="section level3">
+<h3>7.1 C and C++ Backends Used by the Simfunctions</h3>
+<p>Several simfunctions rely on optimized C/C++ routines for envelope
+construction, posterior mode evaluation, and sampling. These routines
+are located in the following source files:</p>
+<p><strong>Coefficient samplers (Normal priors):</strong> -
+<code>rNormalReg.cpp</code><br />
+Backend for Gaussian–Normal conjugate sampling. -
+<code>rNormalGLM.cpp</code><br />
+Backend for non-Gaussian Normal-prior envelope sampling.</p>
+<p><strong>Joint Normal–Gamma samplers:</strong> -
+<code>rIndepNormalGammaReg.cpp</code><br />
+Standard joint sampler for independent Normal–Gamma priors. -
+<code>rIndepNormalGammaReg.cpp</code><br />
+Parallelized version of the joint sampler.</p>
+<p><strong>Envelope construction routines:</strong> -
+<code>EnvelopeBuild_c.cpp</code><br />
+Coefficient envelopes (Appendix A5). -
+<code>EnvelopeDispersionBuild_cpp.cpp</code><br />
+Dispersion envelopes for Gamma-family models (Appendix A7).</p>
+<p><strong>Model standardization:</strong> -
+<code>glmb_Standardize_Model.R</code><br />
+R-level preprocessing used by all envelope-based samplers.</p>
+</div>
+<div id="utility-functions" class="section level3">
+<h3>7.2 Utility Functions</h3>
+<p>The simfunctions also rely on several numerically robust utility
+routines:</p>
+<ul>
+<li><code>ctrgamma</code><br />
+Truncated Gamma sampler used in <code>rGamma_reg</code>.</li>
+<li><code>logdiffexp</code><br />
+Stable computation of log(exp(a) - exp(b)).</li>
+<li><code>p_inv_gamma</code>, <code>q_inv_gamma</code>,
+<code>r_invgamma</code><br />
+Inverse-Gamma CDF, quantile, and random-generation utilities.</li>
+</ul>
+<p>These utilities support the envelope-based samplers, truncated
+distributions, and dispersion updates used throughout the package.</p>
+</div>
+</div>
+<div id="summary-1" class="section level2">
+<h2>8. Summary</h2>
+<p>The simulation functions described in this chapter form the
+computational backbone of the glmbayes package. They implement both
+classical conjugate sampling and modern envelope-based iid sampling.
+They are the recommended interface for custom samplers, Gibbs sampling,
+and research applications requiring direct access to the underlying
+algorithms.</p>
+<p>For further details, see the JASA paper and Appendices A5, A6, and
+A7.</p>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-GriffinBrown2010" class="csl-entry">
+Griffin, Jim E., and Philip J. Brown. 2010. <span>“Inference with
+Normal-Gamma Prior Distributions in Regression Problems.”</span>
+<em>Bayesian Analysis</em> 5 (1): 171–88. <a href="https://doi.org/10.1214/10-BA507">https://doi.org/10.1214/10-BA507</a>.
+</div>
+<div id="ref-LindleySmith1972" class="csl-entry">
+Lindley, D. V., and A. F. M. Smith. 1972. <span>“Bayes Estimates for the
+Linear Model.”</span> <em>Journal of the Royal Statistical Society.
+Series B (Methodological)</em> 34 (1): 1–41. <a href="https://doi.org/10.1111/j.2517-6161.1972.tb00899.x">https://doi.org/10.1111/j.2517-6161.1972.tb00899.x</a>.
+</div>
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+<div id="ref-glmbayesSimmethods" class="csl-entry">
+Nygren, Kjell. 2025a. <span>“Chapter A05: Simulation Methods –
+Likelihood Subgradient Densities.”</span> Vignette in the glmbayes R
+package.
+</div>
+<div id="ref-glmbayesGammaVignette" class="csl-entry">
+———. 2025b. <span>“Gamma Dispersion Sampling in Glmbayes.”</span>
+Vignette in the glmbayes R package.
+</div>
+<div id="ref-glmbayesIndNormGammaVignette" class="csl-entry">
+———. 2025c. <span>“Independent Normal–Gamma Regression Sampler.”</span>
+Vignette in the glmbayes R package.
+</div>
+<div id="ref-OHaganForster2004" class="csl-entry">
+O’Hagan, Anthony, and Jonathan Forster. 2004. <em>Kendall’s Advanced
+Theory of Statistics, Volume 2B: Bayesian Inference</em>. Arnold.
+</div>
+<div id="ref-Raiffa1961" class="csl-entry">
+Raiffa, Howard, and R. Schlaifer. 1961. <em><span>Applied Statistical
+Decision Theory</span></em>. Boston: Clinton Press, Inc.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A05: Simulation Methods - Likelihood Subgradient Densities</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A05: Simulation Methods -
+Likelihood Subgradient Densities</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span></code></pre></div>
+<div id="introduction" class="section level2">
+<h2>1. Introduction</h2>
+<p>Many of the key models implemented in the <code>glmbayes</code>
+package make use of independent and identically distributed (iid)
+sampling procedures for models with log-concave likelihoods and
+multivariate normal priors. The implementation is based on <span class="citation">(K. N. Nygren and Nygren 2006)</span>; the envelope
+function map and call graph are summarized in <span class="citation">(K.
+Nygren 2025)</span>.</p>
+<p>The objective of this vignette is to provide a detailed overview of
+the implementation of these simulation methods. To that end, this
+vignette contains the following:</p>
+<ol style="list-style-type: lower-roman">
+<li><p>An overview of the structure of the main <code>.cpp</code>
+function (<code>.rNormalGLM_cpp</code>) that serves as the “director of
+traffic” for the simulation pipeline and its connection to the
+underlying theory.</p></li>
+<li><p>A detailed discussion of input validation and preprocessing
+steps, including dimension checks, dispersion adjustment, and offset
+transformation.</p></li>
+<li><p>An overview of the posterior optimization routine, including the
+use of user-supplied log-posterior and gradient functions, the BFGS
+method, and Hessian estimation.</p></li>
+<li><p>A discussion of how models are transformed into a standardized
+form suitable for envelope construction and simulation, with a deep dive
+into the <code>glmb_Standardize_Model()</code> function.</p></li>
+<li><p>A discussion of options for sizing the envelope functions and
+densities used during sampling, including computational implications and
+a deep dive into how the <code>EnvelopeOpt()</code> function determines
+envelope size.</p></li>
+<li><p>A deep dive into envelope construction with theoretical
+connections to the Nygren &amp; Nygren (2006) paper, including the role
+of GPU acceleration for large models.</p></li>
+<li><p>A discussion of how simulation is performed, including the use of
+parallel sampling to accelerate computation.</p></li>
+<li><p>A discussion of how simulation output is converted back into the
+original model scale for use in higher-level functions.</p></li>
+</ol>
+<p>This structure is designed to guide users through both the
+theoretical foundations and practical implementation of the simulation
+routines in <code>glmbayes</code>.</p>
+</div>
+<div id="overview-of-the-main-simulation-function-.rnormalglm_cpp" class="section level2">
+<h2>2. Overview of the Main Simulation Function:
+<code>.rNormalGLM_cpp</code></h2>
+<p>The core simulation engine in the <code>glmbayes</code> package is
+the <code>.rNormalGLM_cpp</code> function, implemented in C++ via Rcpp.
+This function orchestrates the entire simulation pipeline, from
+preprocessing inputs to generating posterior samples. It serves as the
+“director of traffic,” coordinating optimization, standardization,
+envelope sizing, envelope construction, and sampling. Below is a
+breakdown of its key components:</p>
+<ol style="list-style-type: lower-roman">
+<li><p><strong>Input Validation and Preprocessing</strong><br />
+Ensures consistency in dimensions across inputs (<code>x</code>,
+<code>y</code>, <code>mu</code>, <code>P</code>, <code>offset</code>,
+<code>wt</code>).<br />
+Adjusts weights for dispersion and initializes key variables.<br />
+Transforms the model so that the prior mean is zero, simplifying
+subsequent optimization.</p></li>
+<li><p><strong>Posterior Optimization</strong><br />
+Uses the <code>optim()</code> function with user-supplied negative
+log-posterior (<code>f2</code>) and corresponding gradient
+(<code>f3</code>) functions. Applies the BFGS method to find the
+posterior mode.<br />
+Computes an approximate Hessian matrix at the mode, which is used in
+standardization.</p></li>
+<li><p><strong>Model Standardization</strong><br />
+Calls <code>glmb_Standardize_Model()</code> to transform the model into
+a standardized form.<br />
+Outputs include transformed design matrix, prior precision, posterior
+mode, and matrices for undoing the transformation.</p></li>
+<li><p><strong>Envelope Sizing</strong><br />
+Determines the appropriate size of the envelope used for sampling.<br />
+Balances computational cost with sampling efficiency.<br />
+Uses heuristics and diagnostics to guide envelope width and grid
+resolution.</p></li>
+<li><p><strong>Envelope Construction</strong><br />
+Constructs an envelope for the standardized model using
+<code>EnvelopeBuild_c()</code>.<br />
+The envelope facilitates efficient sampling from the posterior.<br />
+Supports OpenCL acceleration for large models and grid sorting for small
+sample sizes.</p></li>
+<li><p><strong>Simulation Execution</strong><br />
+Chooses between serial and parallel sampling based on
+<code>use_parallel</code> and sample size <code>n</code>.<br />
+Executes the standardized sampler via <code>.rNormalGLM_std_cpp()</code>
+to generate samples. Verbose mode provides diagnostic
+timestamps.</p></li>
+<li><p><strong>Post-Processing and Output</strong><br />
+Applies reverse transformation to undo standardization.<br />
+Adds back the prior mean to the simulated coefficients.<br />
+Constructs the output list with coefficients, posterior mode, prior
+info, and envelope.</p></li>
+</ol>
+<p>This function encapsulates the full simulation workflow, making it a
+central component of the package. Its modular design allows for
+flexibility in model specification, optimization routines, and
+computational acceleration.</p>
+</div>
+<div id="input-validation-and-preprocessing" class="section level2">
+<h2>3. Input Validation and Preprocessing</h2>
+<p>The first step in the simulation pipeline ensures that all inputs are
+consistent and properly formatted. This includes:</p>
+<ol style="list-style-type: lower-roman">
+<li><p><strong>Dimension Checks</strong><br />
+Verifies that the number of rows and columns in <code>x</code>,
+<code>y</code>, <code>mu</code>, <code>P</code>, <code>offset</code>,
+and <code>wt</code> are compatible. Any mismatch triggers an
+error.</p></li>
+<li><p><strong>Dispersion Adjustment</strong><br />
+If the model family is Poisson or Binomial, the dispersion is set to 1.
+Otherwise, the user-supplied dispersion is used to scale the
+weights.</p></li>
+<li><p><strong>Offset Transformation</strong><br />
+Computes the transformed offset vector
+<code>alpha = x %*% mu + offset</code>, which is used to shift the model
+so that the prior mean becomes zero.</p></li>
+<li><p><strong>Initialization</strong><br />
+Sets up the starting values for optimization and prepares the input
+structures for subsequent steps.</p></li>
+</ol>
+<p>This preprocessing step ensures that the model is well-posed and that
+the optimization routine receives clean, consistent inputs.</p>
+</div>
+<div id="posterior-optimization" class="section level2">
+<h2>4. Posterior Optimization</h2>
+<p>Once the inputs are validated, the function proceeds to estimate the
+posterior mode using numerical optimization:</p>
+<ol style="list-style-type: lower-roman">
+<li><p><strong>Objective and Gradient Functions</strong><br />
+The user supplies two functions — <code>f2</code> for the
+<strong>negative</strong> log-posterior and <code>f3</code> for the
+corresponding gradient — which are passed to the <code>optim()</code>
+routine.</p></li>
+<li><p><strong>Optimization Method</strong><br />
+The BFGS algorithm is used to minimize the negative log-posterior. The
+starting point is <code>start - mu</code>, reflecting the zero-centered
+prior.</p></li>
+<li><p><strong>Hessian Estimation</strong><br />
+The <code>optim()</code> function returns an approximate Hessian matrix
+at the mode. This matrix is used in the standardization step to
+transform the model into a form suitable for envelope
+construction.</p></li>
+<li><p><strong>Convergence Check</strong><br />
+If the optimizer fails to converge, the function halts with an error
+message.</p></li>
+</ol>
+<p>This step identifies the most probable parameter configuration under
+the posterior by minimizing its negative log-density, and prepares the
+curvature information needed for standardization.</p>
+</div>
+<div id="model-standardization-with-theoretical-underpinnings-glmb_standardize_model" class="section level2">
+<h2>5. Model Standardization with Theoretical Underpinnings:
+<code>glmb_Standardize_Model()</code></h2>
+<p>The theoretical results and formulas in the Nygren and Nygren (2006)
+paper assume that models are in a standardized form. The paper contains
+the following key definitions and remarks:</p>
+<ol style="list-style-type: lower-roman">
+<li><strong>Definition 3</strong>: A probability model with a
+multivariate normal prior and log-concave likelihood function is in
+standard form if:</li>
+</ol>
+<ul>
+<li>The prior variance–covariance matrix is the identity matrix.<br />
+</li>
+<li>The Hessian of the log-posterior density evaluated at the posterior
+mode is a diagonal matrix.</li>
+</ul>
+<ol start="2" style="list-style-type: lower-roman">
+<li><p><strong>Remark 11</strong>: If the log-likelihood function is
+concave and twice continuously differentiable, then a Cholesky
+decomposition of the posterior precision at the unique posterior mode
+(which always exists) can be used to reparameterize a model into one for
+which the posterior precision at the posterior mode is a diagonal
+matrix.</p></li>
+<li><p><strong>Remark 12</strong>: Let <code>P</code> be a positive
+definite matrix. Then there exists a positive definite diagonal matrix
+<code>D</code> such that <code>P - D</code> also is a positive definite
+matrix.</p></li>
+<li><p><strong>Remark 13</strong>: Let <code>P</code> and <code>D</code>
+be as in the previous remark. It then follows that the following two
+models have the same posterior density:</p></li>
+</ol>
+<ul>
+<li><p>A model with prior mean vector <span class="math inline">\(\mu\)</span>, prior precision matrix <span class="math inline">\(P\)</span>, and log-likelihood function <span class="math inline">\(LL(\theta)\)</span>.</p></li>
+<li><p>A model with prior mean vector <span class="math inline">\(\mu\)</span>, prior precision matrix <span class="math inline">\(D\)</span>, and log-likelihood function<br />
+<span class="math display">\[
+LL^{*}(\theta) = -0.5\,(\theta - \mu)^{T}(P - D)(\theta - \mu) +
+LL(\theta).
+\]</span></p></li>
+</ul>
+<ol start="22" style="list-style-type: lower-alpha">
+<li><strong>Remark 14</strong>: Suppose that a model has a multivariate
+normal prior with a diagonal variance–covariance matrix. Also assume
+that the posterior precision at the posterior mode is a diagonal matrix.
+Then the model can be reparameterized into a model in standard
+form.</li>
+</ol>
+<ol start="6" style="list-style-type: lower-roman">
+<li><strong>Remark 15</strong>: If a probability model with a
+multivariate normal prior and log-concave likelihood function has a
+twice continuously differentiable log-likelihood function, then it can
+be reparameterized into a model in standard form.</li>
+</ol>
+<p>In addition to this standardized form, we further require that the
+prior mean vector is zero, which simplifies some of our formulas and
+implementation steps.</p>
+<hr />
+<div id="implementation-details-glmb_standardize_model" class="section level3">
+<h3>Implementation Details: <code>glmb_Standardize_Model()</code></h3>
+<p>The function <code>glmb_Standardize_Model()</code> implements this
+transformation in practice. It performs two key eigenvalue
+decompositions:</p>
+<ol style="list-style-type: lower-roman">
+<li><p>The first decomposition diagonalizes the Hessian of the
+log-posterior at the posterior mode. This yields a transformation matrix
+<code>L2</code> that is used to normalize the posterior precision. The
+transformed design matrix and prior precision are updated
+accordingly.</p></li>
+<li><p>The second decomposition identifies a diagonal matrix <span class="math inline">\(\varepsilon\)</span> such that the difference
+<span class="math inline">\(P - \varepsilon\)</span> remains positive
+definite. This ensures that the transformed model has a diagonal prior
+precision and can be reparameterized into standard form. A scaling loop
+is used to find the largest possible <span class="math inline">\(\varepsilon\)</span> that satisfies this
+condition.</p></li>
+</ol>
+<p>The function then applies a second transformation <code>L3</code> to
+finalize the standardization. This results in a model where both the
+prior and the data precision matrices are diagonal and that the prior
+precision matrix is the identity matrix, satisfying the theoretical
+conditions for standard form.</p>
+<p>The output includes:</p>
+<ul>
+<li>Transformed posterior mode (<code>bstar2</code>)<br />
+</li>
+<li>Transformed design matrix (<code>x2</code>)<br />
+</li>
+<li>Prior contribution to the modified log-likelihood (<code>P2</code>):
+the part of the prior precision that is shifted to the
+log-likelihood<br />
+</li>
+<li>Transformed prior mean (<code>mu2</code>, typically zero)<br />
+</li>
+<li>Precision matrix for standardized data (<code>A</code>)<br />
+</li>
+<li>Inverse transformation matrices (<code>L2Inv</code>,
+<code>L3Inv</code>) for undoing the standardization</li>
+</ul>
+<p>This implementation ensures that the model satisfies the theoretical
+conditions for standard form, enabling efficient envelope construction
+and posterior sampling. It also provides a modular and transparent
+framework for debugging and extending the standardization process in
+future versions of the package.</p>
+</div>
+</div>
+<div id="envelope-sizing" class="section level2">
+<h2>6. Envelope Sizing</h2>
+<p>The envelope sizing logic is governed by the <code>Gridtype</code>
+parameter, which controls how the grid points are selected for each
+dimension.</p>
+<p><strong>Gridtype Logic (Nygren &amp; Nygren 2006)</strong></p>
+<p>Let <span class="math inline">\(a_i\)</span> be the <strong>data
+precision</strong> for dimension <span class="math inline">\(i\)</span>
+(i.e., <span class="math inline">\(A2[i,i]\)</span>).<br />
+In a standardized model, the prior precision is the identity matrix, so
+the <strong>posterior precision</strong> becomes <span class="math inline">\(1 + a_i\)</span>.<br />
+Let <span class="math inline">\(\omega_i\)</span> be the width parameter
+computed below.</p>
+<div id="gridtype-1-static-threshold-test" class="section level3">
+<h3>1. Gridtype 1: Static Threshold Test</h3>
+<ul>
+<li><p>If <span class="math inline">\(\sqrt{1 + a_i} \leq
+\frac{2}{\sqrt{\pi}} \approx 1.128379\)</span>, then the expected number
+of candidate draws per accepted sample under a single tangent envelope
+is less than the limiting upper bound provided by the three-tangent
+envelope.<br />
+Therefore, building more points does not meaningfully reduce
+rejections.</p>
+<ul>
+<li>Use a single-point envelope at the mode:<br />
+<span class="math inline">\(G2[i] = \{\theta_i^{\ast}\}\)</span>, <span class="math inline">\(GIndex1[i] = \{4\}\)</span></li>
+</ul></li>
+<li><p>Else: build a three-point envelope at<br />
+<span class="math inline">\(\{\theta_i^{\ast} - \omega_i,\
+\theta_i^{\ast},\ \theta_i^{\ast} + \omega_i\}\)</span>,<br />
+<span class="math inline">\(GIndex1[i] = \{1,2,3\}\)</span></p></li>
+</ul>
+</div>
+<div id="gridtype-2-dynamic-envelope-via-envelopeopta-n" class="section level3">
+<h3>2. Gridtype 2: Dynamic Envelope via
+<code>EnvelopeOpt(a, n)</code></h3>
+<ul>
+<li><p>Rather than a fixed-bound test, this approach solves (per
+dimension) the cost tradeoff between:</p>
+<ul>
+<li><span class="math inline">\(T_{\text{build}}(g_i) \propto
+g_i\)</span> (linear grid-construction cost)<br />
+</li>
+<li><span class="math inline">\(T_{\text{sample}}(n, \text{acc}_i(g_i))
+\propto n / \text{acc}_i(g_i)\)</span>, where <span class="math inline">\(\text{acc}_i(g_i)\)</span> is the approximate
+acceptance rate given <span class="math inline">\(g_i\)</span> grid
+points</li>
+</ul></li>
+<li><p><code>EnvelopeOpt</code> returns <span class="math inline">\(\text{gridindex}[i] \in \{1, 3\}\)</span> by
+minimizing <span class="math inline">\(T_{\text{build}} +
+T_{\text{sample}}\)</span> under approximations from subgradient
+theory.</p></li>
+<li><p>This allows more envelope points up front when <span class="math inline">\(n\)</span> is large, because reduced rejections
+during sampling more than pay for the extra build cost.</p></li>
+</ul>
+</div>
+<div id="gridtype-3-always-three-point-grid" class="section level3">
+<h3>3. Gridtype 3: Always Three-Point Grid</h3>
+<p>We now consider the sampling performance using the foregoing approach
+when the data are multivariate normal with a diagonal precision matrix
+given by <code>NP</code> for a positive definite diagonal matrix
+<code>P</code> and positive scalar <code>N</code>.</p>
+<p><strong>Theorem 3</strong>: Consider a <code>k</code>-dimensional
+multivariate normal data model in standard form with precision as above,
+and let <span class="math inline">\(\tilde{a}^*(N)\)</span> denote the
+value of <span class="math inline">\(\tilde{a}\)</span> at
+<code>N</code>; then<br />
+<span class="math display">\[
+\lim_{N \to \infty} \tilde{a}^*(N) = \left( \frac{2}{\sqrt{\pi}}
+\right)^k
+\]</span></p>
+<p><strong>Proof</strong>: This follows immediately from Theorem 2 in
+Nygren &amp; Nygren (2006).</p>
+</div>
+<div id="gridtype-4-always-single-point-grid-mode-only" class="section level3">
+<h3>4. Gridtype 4: Always Single-Point Grid (Mode Only)</h3>
+<p>Following Example 1 in Nygren &amp; Nygren (2006), the expected
+number of candidate draws per accepted draw in the multivariate normal
+case is:<br />
+<span class="math display">\[
+\prod_{i=1}^{k} \sqrt{1 + a_i}
+\]</span></p>
+<p>where <code>k</code> is the number of dimensions. More generally, if
+the data are “normal-like,” then we expect similar acceptance rates even
+for other generalized linear models.</p>
+<hr />
+</div>
+<div id="deep-dive-gridtype-1-static-threshold-envelope" class="section level3">
+<h3>Deep Dive: Gridtype 1 — Static Threshold Envelope</h3>
+<p>Gridtype 1 uses a simple threshold test to decide whether a
+single-point or three-point envelope should be constructed for each
+dimension. The key quantity is the posterior precision <span class="math inline">\(1 + a_i\)</span>, and the threshold <span class="math inline">\(\frac{2}{\sqrt{\pi}} \approx 1.128379\)</span>
+arises from bounding the expected number of candidate draws per accepted
+sample.</p>
+<p>If <span class="math inline">\(\sqrt{1 + a_i} \leq
+\frac{2}{\sqrt{\pi}}\)</span>, then the expected number of candidate
+draws per accepted sample under a single tangent envelope is less than
+the limiting upper bound provided by the three-tangent envelope. This
+implies that adding more grid points does not meaningfully reduce
+rejection rates, and a single tangent at the mode suffices.</p>
+<p>This logic is especially useful for low-variance dimensions, where
+the posterior is sharply peaked and additional tangents offer little
+marginal benefit. The resulting envelope is minimal and fast to
+construct:</p>
+<ul>
+<li>Grid: <span class="math inline">\(\{\theta_i^{\ast}\}\)</span><br />
+</li>
+<li>Index: <span class="math inline">\(\{4\}\)</span> (single tangent at
+the mode)</li>
+</ul>
+<p>If the threshold is exceeded, a symmetric three-point grid is
+used:</p>
+<ul>
+<li>Grid: <span class="math inline">\(\{\theta_i^{\ast} - \omega_i,\
+\theta_i^{\ast},\ \theta_i^{\ast} + \omega_i\}\)</span><br />
+</li>
+<li>Index: <span class="math inline">\(\{1, 2, 3\}\)</span> (left,
+center, right tangents)</li>
+</ul>
+<p>The width parameter <span class="math inline">\(\omega_i\)</span> is
+derived from the local curvature of the log-likelihood at the posterior
+mode. Specifically:</p>
+<p><span class="math display">\[
+\omega_i := \frac{ \sqrt{2} - \exp\left( -1.20491 - 0.7321 \sqrt{0.5 +
+a_i} \right) }{ \sqrt{1 + a_i} }
+\]</span></p>
+<p>Since <span class="math inline">\(\sqrt{1 + a_i}\)</span> is the
+square root of the precision for dimension <code>i</code>, the inverse
+is essentially the standard deviation. When <span class="math inline">\(a_i\)</span> is large, the second term approaches
+zero, so:</p>
+<p><span class="math display">\[
+\omega_i \approx \frac{ \sqrt{2} }{ \sqrt{1 + a_i} }
+\]</span></p>
+<p>and hence is essentially proportional to the standard deviation.</p>
+<hr />
+</div>
+<div id="deep-dive-gridtype-2-adaptive-envelope-via-envelopeopt" class="section level3">
+<h3>Deep Dive: Gridtype 2 — Adaptive Envelope via
+<code>EnvelopeOpt()</code></h3>
+<p>Gridtype 2 uses a dynamic strategy to select the number of grid
+points per dimension based on a cost-benefit analysis. The goal is to
+minimize total runtime by balancing envelope construction cost against
+sampling efficiency.</p>
+<p>The tradeoff is formalized as:</p>
+<ul>
+<li><p><span class="math inline">\(T_{\text{build}}(g_i) \propto
+g_i\)</span>: cost of building <span class="math inline">\(g_i\)</span>
+tangents in dimension <span class="math inline">\(i\)</span></p></li>
+<li><p><span class="math inline">\(T_{\text{sample}}(n,
+\text{acc}_i(g_i)) \propto n / \text{acc}_i(g_i)\)</span>: cost of
+drawing <span class="math inline">\(n\)</span> samples given acceptance
+rate <span class="math inline">\(\text{acc}_i(g_i)\)</span></p></li>
+</ul>
+<p>The function <code>EnvelopeOpt(a_i, n)</code> solves this tradeoff
+using approximations from subgradient theory. Dimensions are ranked by
+decreasing posterior standard deviation — equivalently, by increasing
+values of <span class="math inline">\(1 / (1 + a_i)\)</span>. Dimensions
+with larger <code>a_i</code> (i.e., sharper curvature) are more likely
+to benefit from additional tangents.</p>
+<p>The algorithm proceeds as follows:</p>
+<ol style="list-style-type: decimal">
+<li>Rank dimensions by <span class="math inline">\(1 / (1 +
+a_i)\)</span></li>
+<li>For each possible number of three-point dimensions (from 0 to
+<code>l1</code>):
+<ul>
+<li>Assign three-point grids to the top-ranked dimensions</li>
+<li>Estimate total build cost and sampling cost</li>
+<li>Compute total evaluation cost:
+<code>evalest = T_build + T_sample</code></li>
+</ul></li>
+<li>Select the configuration with minimal <code>evalest</code></li>
+</ol>
+<p>This results in a vector <code>dimcount</code> where each entry is
+either <code>1</code> (single-point) or <code>3</code> (three-point),
+depending on the optimal tradeoff.</p>
+<p>This adaptive logic allows the simulation routine to scale
+efficiently across models of varying size and complexity, and reflects
+the theoretical insights from Nygren &amp; Nygren (2006) on envelope
+efficiency.</p>
+<p>In the implementation of <code>EnvelopeOpt()</code>, the line</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>intest[i] <span class="ot">&lt;-</span> <span class="dv">3</span><span class="sc">^</span>(i<span class="dv">-1</span>)</span></code></pre></div>
+<p>represents the <strong>grid construction cost</strong> at iteration
+<em>i</em>. This term estimates the number of log‑likelihood and
+gradient evaluations required to build the envelope as more dimensions
+are promoted from single‑point to three‑point tangents:</p>
+<ul>
+<li>At the start (<span class="math inline">\(i = 1\)</span>), all
+dimensions use single‑point tangents, so the build cost is
+minimal.<br />
+</li>
+<li>Each time a new dimension is switched to a three‑point tangent, the
+number of required evaluations grows multiplicatively.<br />
+</li>
+<li>The factor <span class="math inline">\(3^{\,i-1}\)</span> captures
+this exponential growth: with each additional three‑point dimension, the
+grid size triples, and so does the number of evaluations needed to
+construct the envelope.</li>
+</ul>
+<p>In addition to the build cost term <code>intest[i]</code>, the
+function also tracks the <strong>expected sampling cost</strong> through
+the quantity</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>slopeest[i] <span class="ot">&lt;-</span> <span class="fu">prod</span>(scaleest[i,])</span></code></pre></div>
+<p>This term represents the <strong>expected number of
+likelihood/gradient (slope) evaluations</strong> required to obtain a
+valid draw under the current grid configuration:</p>
+<ul>
+<li><p>At initialization, <code>scaleest[1,] &lt;- sqrt(1 + a1)</code>,
+so<br />
+<span class="math display">\[
+\text{slopeest}[1] \;=\; \prod_j \sqrt{1 + a_j},
+\]</span><br />
+which corresponds to the baseline rejection burden when all dimensions
+use single‑point tangents.</p></li>
+<li><p>Each time a dimension is promoted to a three‑point tangent, its
+entry in <code>scaleest</code> is replaced by the constant<br />
+<span class="math display">\[
+\tfrac{2}{\sqrt{\pi}},
+\]</span><br />
+reflecting the improved acceptance bound for that dimension.</p></li>
+<li><p>Consequently, as more dimensions are switched to three‑point
+tangents, the product<br />
+<span class="math display">\[
+\prod_j \text{scaleest}[i,j]
+\]</span><br />
+decreases, lowering the expected number of slope evaluations per
+accepted draw.</p></li>
+</ul>
+<p>Thus, <code>slopeest[i]</code> captures the <strong>sampling
+efficiency</strong> of the envelope:</p>
+<ul>
+<li><strong>Large</strong> <code>slopeest</code> values → more
+rejections, higher per‑draw cost.<br />
+</li>
+<li><strong>Smaller</strong> <code>slopeest</code> values → fewer
+rejections, more efficient sampling.</li>
+</ul>
+<p>Together with the build cost term <code>intest[i]</code>, the total
+evaluation cost is</p>
+<p><span class="math display">\[
+\text{evalest}[i] \;=\; \underbrace{3^{\,i-1}}_{\text{build cost}} \;+\;
+\underbrace{n \cdot \text{slopeest}[i]}_{\text{sampling cost}}.
+\]</span></p>
+<p>This balance ensures that the algorithm adaptively chooses the grid
+size that minimizes the <strong>combined cost</strong> of envelope
+construction and sampling.</p>
+<ul>
+<li><strong>Build cost</strong> grows rapidly as more dimensions are
+promoted.<br />
+</li>
+<li><strong>Sampling cost</strong> decreases because acceptance rates
+improve with additional tangents.</li>
+</ul>
+<p>The optimizer selects the configuration that minimizes this total.
+Intuitively:</p>
+<ul>
+<li>For <strong>small sample sizes</strong> (<span class="math inline">\(n\)</span> small), the build cost dominates, so
+the algorithm favors fewer three‑point tangents.<br />
+</li>
+<li>For <strong>large sample sizes</strong> (<span class="math inline">\(n\)</span> large), the sampling cost dominates, so
+the algorithm invests more in upfront grid construction to reduce
+rejections later.</li>
+</ul>
+<p>When GPU acceleration is available through OpenCL, the Grid
+construction can be performed in parallel, reducing the amount of time
+that components takes. To that end, we modify the call to the function
+to reflect the lower Grid contruction cost by passing a scaled up sample
+size (which yields the same optimization result).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>  <span class="dt">int</span> core_CNT<span class="op">=</span>get_opencl_core_count<span class="op">();</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  </span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="cf">if</span> <span class="op">(</span>verbose<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    Rcpp<span class="op">::</span>Rcout <span class="op">&lt;&lt;</span> <span class="st">&quot;[INFO] OpenCL core count = &quot;</span> <span class="op">&lt;&lt;</span> core_CNT <span class="op">&lt;&lt;</span> <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  </span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="co">// Second row in G1b here is the posterior mode</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  </span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  </span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  </span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  NumericVector gridindex<span class="op">(</span>l1<span class="op">);</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  </span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>  <span class="cf">if</span><span class="op">(</span>Gridtype<span class="op">==</span><span class="dv">2</span><span class="op">){</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>    <span class="co">// Temporarily scale n to encourage richer envelopes when GPU parallelism is available</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>    <span class="dt">int</span> scaled_n <span class="op">=</span> <span class="bu">std::</span>max<span class="op">(</span><span class="dv">1</span><span class="op">,</span> n <span class="op">*</span> core_CNT<span class="op">);</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>    </span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>verbose<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>      Rcpp<span class="op">::</span>Rcout <span class="op">&lt;&lt;</span> <span class="st">&quot;[INFO] Scaling n from &quot;</span> <span class="op">&lt;&lt;</span> n <span class="op">&lt;&lt;</span> <span class="st">&quot; to &quot;</span> <span class="op">&lt;&lt;</span> scaled_n</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>                  <span class="op">&lt;&lt;</span> <span class="st">&quot; for envelope optimization.</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">;</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>    </span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>    gridindex <span class="op">=</span> EnvelopeOpt<span class="op">(</span>a_2<span class="op">,</span> scaled_n<span class="op">);</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>    </span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>    <span class="co">//gridindex=EnvelopeOpt(a_2,n);</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a>  <span class="op">}</span></span></code></pre></div>
+</div>
+</div>
+<div id="building-the-envelope" class="section level2">
+<h2>6. Building the Envelope</h2>
+<p>The implementation of <code>EnvelopeBuild</code> follows the envelope
+construction in Nygren &amp; Nygren (2006) for models in standard form
+(see Section 3–3.3). The outline below captures the process when each
+dimension involves three-point tangents. If some dimensions involve only
+one-point tangents, only the mid-point is used and the intervals become
+the full real-number line.</p>
+<div id="compute-width-parameters-omega_i-from-the-diagonal-precision-matrix" class="section level3">
+<h3>1. Compute width parameters <span class="math inline">\(\omega_i\)</span> from the diagonal precision
+matrix</h3>
+<p>Let <span class="math inline">\(\theta^{\ast}\)</span> denote the
+unique posterior mode. For each dimension <span class="math inline">\(i\)</span>, define:</p>
+<p><span class="math display">\[
+\omega_{i} := \frac{\sqrt{2} - \exp\left(-1.20491 - 0.7321 \sqrt{0.5 -
+\frac{\partial^{2} \log f(\theta^{\ast} \mid y)}{\partial
+\theta_{i}^{2}}} \right)}{\sqrt{1 - \frac{\partial^{2} \log
+f(\theta^{\ast} \mid y)}{\partial \theta_{i}^{2}}}}
+\]</span></p>
+<p>The widths <span class="math inline">\(\omega_i\)</span> are derived
+from the local curvature of the log-likelihood at the posterior mode.
+This ensures that the three-interval construction per dimension yields
+an envelope whose efficiency does not deteriorate with sample size.</p>
+</div>
+<div id="construct-intervals-around-the-posterior-mode-thetastar" class="section level3">
+<h3>2. Construct intervals around the posterior mode <span class="math inline">\(\theta^\star\)</span></h3>
+<p>Set:</p>
+<p><span class="math display">\[
+\ell_{i,1} = \theta^{\ast}_{i} - 0.5\,\omega_{i}, \quad
+\ell_{i,2} = \theta^{\ast}_{i} + 0.5\,\omega_{i}
+\]</span></p>
+<p>Then define three intervals per dimension:</p>
+<p><span class="math display">\[
+A_{i,1} = (-\infty,\ell_{i,1}), \quad
+A_{i,2} = [\ell_{i,1},\ell_{i,2}], \quad
+A_{i,3} = (\ell_{i,2},\infty)
+\]</span></p>
+<p>Let <span class="math inline">\(J_{i} = \{1,2,3\}\)</span> and define
+<span class="math inline">\(J = \prod_{i=1}^{p} J_{i}\)</span>, which
+has <span class="math inline">\(3^{p}\)</span> elements. Each <span class="math inline">\(j \in J\)</span> is a vector <span class="math inline">\((j_{1},\ldots,j_{p})\)</span>, and we define:</p>
+<p><span class="math display">\[
+A^{\ast}_{j} = \prod_{i=1}^{p} A_{i,j_{i}}
+\]</span></p>
+<p>The collection <span class="math inline">\(A^{\ast} = \{A^{\ast}_{j}
+: j \in J\}\)</span> forms a partition of <span class="math inline">\(\Theta\)</span>.</p>
+</div>
+<div id="select-tangency-points-thetastar-pm-omega_i" class="section level3">
+<h3>3. Select tangency points <span class="math inline">\(\theta^\star
+\pm \omega_i\)</span></h3>
+<p>For each <span class="math inline">\(j \in J\)</span>, define index
+sets:</p>
+<p><span class="math display">\[
+C_{j1} = \{i : j_{i} = 1\}, \quad
+C_{j2} = \{i : j_{i} = 2\}, \quad
+C_{j3} = \{i : j_{i} = 3\}
+\]</span></p>
+<p>Tangency points <span class="math inline">\(\bar{\theta}_{j}\)</span>
+are defined componentwise by:</p>
+<p><span class="math display">\[
+\bar{\theta}_{j,i} =
+\begin{cases}
+\theta^{\ast}_{i} - \omega_{i}, &amp; i \in C_{j1} \\
+\theta^{\ast}_{i},              &amp; i \in C_{j2} \\
+\theta^{\ast}_{i} + \omega_{i}, &amp; i \in C_{j3}
+\end{cases}
+\]</span></p>
+<p>These tangency points ensure the envelope touches the log-likelihood
+at representative points in each interval, guaranteeing dominance and
+tightness.</p>
+</div>
+<div id="build-the-full-grid-of-tangency-points" class="section level3">
+<h3>4. Build the full grid of tangency points</h3>
+<p>The Cartesian product of per-dimension partitions yields the <span class="math inline">\(3^p\)</span> restricted densities described in the
+paper, ensuring coverage of the full parameter space.</p>
+</div>
+<div id="evaluate-negative-log-likelihood-and-gradients-at-each-grid-point" class="section level3">
+<h3>5. Evaluate negative log-likelihood and gradients at each grid
+point</h3>
+<p>This step constructs the likelihood subgradient densities and
+facilitates accept–reject sampling. The subgradients <span class="math inline">\(c(\bar{\theta})\)</span> are part of the
+definitions of likelihood subgradient densities (see Definition 2). Both
+subgradients and negative log-likelihoods (via <span class="math inline">\(h_{\bar{\theta}}(.)\)</span>) are used during the
+accept–reject procedure.</p>
+<ul>
+<li>On CPU: via <code>f2_*</code> and <code>f3_*</code> routines<br />
+</li>
+<li>On GPU: via <code>f2_f3_opencl</code>, which computes both
+together</li>
+</ul>
+</div>
+<div id="call-set_grid_c2_pointwise-to-evaluate-restricted-multivariate-normal-log-densities" class="section level3">
+<h3>6. Call <code>Set_Grid_C2_pointwise</code> to evaluate restricted
+multivariate normal log-densities</h3>
+<p>(Claim 2; Remark 5)<br />
+Each restricted density corresponds to a subset of the partition,
+normalized as in Remark 5.</p>
+</div>
+<div id="call-setlogp_c2-to-compute-component-log-probabilities-and-constants" class="section level3">
+<h3>7. Call <code>setlogP_C2</code> to compute component
+log-probabilities and constants</h3>
+<p>(Remark 6)<br />
+The constants <span class="math inline">\(\tilde{a}\)</span> and mixture
+weights <span class="math inline">\(\tilde{p}_i\)</span> are computed
+explicitly as in Remark 6, ensuring proper normalization of the mixture
+envelope.</p>
+</div>
+<div id="normalize-probabilities-plsd-and-optionally-sort-grid-components" class="section level3">
+<h3>8. Normalize probabilities (<code>PLSD</code>) and optionally sort
+grid components</h3>
+<p>(Claim 2)<br />
+Normalization ensures the mixture of restricted densities forms a valid
+dominating density for the posterior. Sorting improves sampling
+efficiency.</p>
+</div>
+</div>
+<div id="simulation-execution" class="section level2">
+<h2>7. Simulation Execution</h2>
+<p>The standardized sampler called through
+<code>.rNormalGLM_std_cpp()</code> uses the envelope to generate
+posterior samples via rejection sampling. This routine is called
+internally by <code>.rNormalGLM_cpp()</code>, which in turn is invoked
+by the user-facing function <code>rNormal_reg()</code>. Together, these
+routines implement envelope-based sampling for generalized linear models
+with log-concave likelihood functions and multivariate normal
+priors.</p>
+<p>The envelope provides a mixture of restricted likelihood–subgradient
+densities, each defined over a region <span class="math inline">\(A_i\)</span>, with associated mixture weights
+<span class="math inline">\(\tilde{p}_i\)</span> stored in
+<code>PLSD</code>. The sampling proceeds as follows:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Draw a region index.</strong><br />
+A region index <span class="math inline">\(J(i)\)</span> is drawn from
+the discrete distribution defined by <code>PLSD</code>.</p></li>
+<li><p><strong>Draw a candidate from the restricted
+density.</strong><br />
+A candidate <span class="math inline">\(\theta_i\)</span> is drawn from
+the restricted density <span class="math inline">\(q^{\bar{\theta}_{J(i)}}_{A_{J(i)}}\)</span>, using
+the normal CDF bounds <code>loglt</code> and <code>logrt</code>, and
+subgradient vector <code>cbars</code>. Simulation for each dimension
+uses the internal C++ function <code>ctrnorm_cpp()</code>, which
+explicitly uses these inputs.</p></li>
+<li><p><strong>Compute the log-likelihood at the
+candidate.</strong><br />
+The log-likelihood <span class="math inline">\(\log f(y \mid
+\theta_i)\)</span> is computed and stored in <code>testll[0]</code>
+using the appropriate likelihood function <code>f2</code>.</p></li>
+</ol>
+<p>The acceptance test is performed using the inequality <span class="math display">\[
+\log(U_2) \le \mathrm{LLconst}[J(i)] + \mathrm{cbars}[J(i), ]^{T}
+\theta_i + \log f(y \mid \theta_i),
+\]</span> which is equivalent to <span class="math display">\[
+\log(U_2) \le \log f(y \mid \theta_i) - \left( \log f(y \mid
+\bar{\theta}_{J(i)}) - c(\bar{\theta}_{J(i)})^{T}(\theta_i -
+\bar{\theta}_{J(i)}) \right).
+\]</span></p>
+<p>Where: - <strong><code>LLconst[J(i)]</code>:</strong> stores the
+precomputed quantity <span class="math display">\[
+  -\log f(y \mid \bar{\theta}_{J(i)}) - c(\bar{\theta}_{J(i)})^{T}
+\bar{\theta}_{J(i)},
+  \]</span> computed during envelope construction via
+<code>setlogP_C2()</code>. -
+<strong><code>cbars[J(i), ]</code>:</strong> the precomputed subgradient
+vector <span class="math inline">\(c(\bar{\theta}_{J(i)})\)</span>,
+extracted via <code>cbars(J(i), _)</code>. It defines the exponential
+tilt direction used to evaluate the envelope. -
+<strong><code>testll[0]</code>:</strong> the log-likelihood at the
+candidate draw <span class="math inline">\(\theta_i\)</span>, evaluated
+using the model specified by <code>family</code> and <code>link</code>.
+- <strong><span class="math inline">\(-\log(U_2)\)</span>:</strong> the
+threshold from a uniform draw <span class="math inline">\(U_2 \sim
+\mathrm{Unif}(0,1)\)</span>.</p>
+<p>The right-hand side of this inequality is always non-positive, and
+equals zero when <span class="math inline">\(\theta_i =
+\bar{\theta}_{J(i)}\)</span>. This reflects the fact that the envelope
+is tangent to the log-likelihood at each <span class="math inline">\(\bar{\theta}_j\)</span>, and lies above it
+elsewhere.</p>
+<p>This procedure guarantees that accepted samples are drawn from the
+posterior <span class="math inline">\(\pi(\theta \mid y)\)</span>. The
+envelope ensures bounded rejection probability, and the mixture
+structure allows efficient sampling across regions. The output
+<code>out</code> contains accepted draws, and <code>draws</code> records
+the number of attempts per sample.</p>
+<p>The components returned by <code>EnvelopeBuild()</code> are used in
+specific steps of the sampling procedure as follows:</p>
+<ul>
+<li><strong><code>PLSD</code></strong>: used to randomly select a region
+index <span class="math inline">\(J(i)\)</span> from the envelope
+mixture.<br />
+</li>
+<li><strong><code>loglt</code> and <code>logrt</code></strong>: define
+the truncated normal bounds for each dimension, used together with
+<code>cbars</code> to generate candidate values <span class="math inline">\(\theta_i\)</span>.<br />
+</li>
+<li><strong><code>cbars</code></strong>: provides the subgradient
+vectors <span class="math inline">\(c(\bar{\theta}_j)\)</span> used both
+for candidate generation and for computing the acceptance test.<br />
+</li>
+<li><strong><code>LLconst</code></strong>: stores precomputed constants
+used in the acceptance inequality, avoiding recomputation of posterior
+terms at tangency points.<br />
+</li>
+<li><strong><code>logU</code></strong>: stores the per-dimension
+log-density contributions for each region, computed during envelope
+setup. These values are summed to produce <code>logP</code>, which
+determines the mixture weights <code>PLSD</code>.<br />
+</li>
+<li><strong><code>logP</code></strong>: contains the total
+log-probabilities for each grid component, which are normalized to form
+the mixture weights <code>PLSD</code>.<br />
+</li>
+<li><strong><code>thetabars</code></strong>: stores the tangency points
+<span class="math inline">\(\bar{\theta}_j\)</span> used to define
+subgradients and region-specific densities.<br />
+</li>
+<li><strong><code>GridIndex</code></strong>: encodes the sampling type
+(tail, center, line) used for each dimension and region, guiding how
+each coordinate is simulated.</li>
+</ul>
+</div>
+<div id="post-processing-and-output" class="section level2">
+<h2>8. Post-Processing and Output</h2>
+<p>This section documents the exact reverse transformations applied to
+sampled draws and the structure of the object returned by
+<code>.rNormalGLM_cpp</code>.</p>
+<div id="reverse-transformation-pipeline" class="section level3">
+<h3>8.1 Reverse-transformation pipeline</h3>
+<ul>
+<li><strong>Undo L3 transform</strong>: left-multiply the matrix of
+standardized draws by <code>L3Inv</code>.<br />
+</li>
+<li><strong>Undo L2 transform</strong>: left-multiply the result by
+<code>L2Inv</code>.<br />
+</li>
+<li><strong>Restore prior mean</strong>: add the original prior mean
+vector <code>mu</code> to every draw.<br />
+</li>
+<li><strong>Optional diagnostics</strong>: recompute the user-supplied
+log-posterior at the transformed draws when requested.</li>
+</ul>
+</div>
+<div id="returned-object-fields-you-can-rely-on" class="section level3">
+<h3>8.2 Returned object (fields you can rely on)</h3>
+<ul>
+<li><strong>coefficients</strong>: n × k matrix of posterior draws on
+the original parameter scale (returned as <code>trans(out2)</code> in
+the C++ routing function).<br />
+</li>
+<li><strong>coef.mode</strong>: k-vector containing the posterior mode
+on the original scale (optimizer output + <code>mu</code>).<br />
+</li>
+<li><strong>dispersion</strong>: final dispersion used (1 for
+Poisson/Binomial; user value otherwise).<br />
+</li>
+<li><strong>Prior</strong>: list with components <strong>mean</strong>
+and <strong>Precision</strong> (original <code>mu</code> and
+<code>P</code>).<br />
+</li>
+<li><strong>offset</strong>: offset vector passed through.<br />
+</li>
+<li><strong>prior.weights</strong>: original weights (before dispersion
+scaling).<br />
+</li>
+<li><strong>y</strong>, <strong>x</strong>: data echoed for
+convenience.<br />
+</li>
+<li><strong>fit</strong>: the full <code>optim()</code> return list used
+to obtain the posterior mode and Hessian.<br />
+</li>
+<li><strong>iters</strong>: integer vector of attempts per accepted draw
+(sampler output).<br />
+</li>
+<li><strong>Envelope</strong>: envelope artifact returned by
+<code>EnvelopeBuild_c</code> (mixture weights, tangency points,
+<code>LLconst</code>, <code>cbars</code>, <code>loglt</code>,
+<code>logrt</code>, <code>GridIndex</code>, etc.).</li>
+</ul>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+<div id="ref-glmbayesChapterA08" class="csl-entry">
+Nygren, Kjell. 2025. <span>“Chapter A08: Overview of Envelope Related
+Functions.”</span> Vignette in the glmbayes R package.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

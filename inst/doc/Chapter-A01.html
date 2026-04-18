@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A01: A detailed overview of the glmbayes package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A01: A detailed overview of the
+glmbayes package</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The <em>glmbayes</em> package produces iid samples for Bayesian
+Linear Models and Bayesian Genereralized Linear Models by providing
+Bayesian versions of the <em>lmb</em> and <em>glm</em> functions for
+classical models. Extensive efforts have been made to make the new
+functions, <em>lmb</em> and <em>glmb</em>, as similar as possible to
+their classical cousins. To that end, the functions add a single
+required argument (pfamily) and one optional argument (n) to those
+typically used by the classical functions. The Bayesian functions also
+generally inherit and/or provide implemented methods for nearly all of
+the methods available for the <em>lm</em> and <em>glm</em> functions so
+that the same type of outputs as from the classical functions can be
+readily produced.</p>
+<p>This vignette is designed to provide users a detailed overview of the
+package and the various functionalities available. In the rest of this
+introduction, we briefly touch on the basics of loading the package and
+accessings various help resources and demos (which we recommend as a
+next step for users after they read this vignette). The next section
+then gives an overview of all the core functions that most users are
+likely to use. This includes the two aforementioned functions, functions
+used to specify and check prior distributions, and methods available for
+the two functions. Most users can likely stop after that section and can
+then turn to either the help pages or the next set of vignettes that go
+into a more detailed comparisons of how the methods are used for these
+Bayesian functions vs. for their classical cousins.</p>
+<p>For advanced users who are interested in implementing Block-Gibbs
+sampling procedures or in doing simulation for other more complex
+models, we recommend continuing on to the third section in this vignette
+that covers the two functions <em>rlmb</em> and <em>rglmb</em> and are
+designed for implementation of precisely that type of sampling. The
+third section discusses how those functions can be called, references
+some examples/demos where they are used, and describes how to use the
+output from the functions to access similar output to that produced by
+the <em>lmb</em> and <em>glmb</em> functions.</p>
+<p>For users who are interested in the details of how the simulation is
+performed there is the final section that contains a discussion of the
+various simulation functions that are used to sample from the posterior
+distributions. This includes a discussion of three core function that
+simulate for the currently implemented prior families and a couple of
+functions related to what we call the Central Normal distribution (the
+normal distribution between a lower and an upper bound). It also
+includes a discussion of a set of functions that are used in order to
+utilize the enveloping functions needed to get iid samples for some of
+the posterior distributions. That material is rather technical; the
+likelihood-subgradient foundation is given by <span class="citation">(K.
+N. Nygren and Nygren 2006)</span>, with estimation architecture
+summarized in <span class="citation">(K. Nygren 2025a)</span> and
+envelope details in <span class="citation">(K. Nygren 2025b)</span>.</p>
+<table>
+<colgroup>
+<col width="40%" />
+<col width="29%" />
+<col width="29%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function Type</th>
+<th>Functions</th>
+<th>Vignettes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Prior Setup function</strong></td>
+<td><strong>Prior_Setup</strong></td>
+<td>Chapter 01 — Getting Started with glmbayes</td>
+</tr>
+<tr class="even">
+<td><strong>Main Model Interfaces (GLM / LM)</strong></td>
+<td><strong>glmb</strong></td>
+<td>Chapter 01 — Getting Started with glmbayes</td>
+</tr>
+<tr class="odd">
+<td><strong>Methods</strong></td>
+<td><strong>print.glmb</strong></td>
+<td>Chapter 01 — Getting Started with glmbayes</td>
+</tr>
+<tr class="even">
+<td><strong>pfamilies</strong></td>
+<td><strong>dNormal</strong></td>
+<td>Chapter 02 — Estimating Bayesian Linear Models</td>
+</tr>
+<tr class="odd">
+<td><strong>Main Model Interfaces (GLM / LM)</strong></td>
+<td><strong>lmb</strong></td>
+<td>Chapter 02 — Estimating Bayesian Linear Models</td>
+</tr>
+<tr class="even">
+<td><strong>Methods</strong></td>
+<td><strong>summary.lmb</strong></td>
+<td>Chapter 02 — Estimating Bayesian Linear Models</td>
+</tr>
+<tr class="odd">
+<td><strong>Prior Setup function</strong></td>
+<td><strong>Prior_Setup</strong></td>
+<td>Chapter 03 — Tailoring Priors - Leveraging the Prior_Setup Function;
+Chapter A12 — Technical Derivations for Priors Returned by
+Prior_Setup</td>
+</tr>
+<tr class="even">
+<td><strong>Methods</strong></td>
+<td><strong>print.PriorSetup</strong></td>
+<td>Chapter 03 - Tailoring Priors - Leveraging the Prior_Setup
+Function</td>
+</tr>
+<tr class="odd">
+<td><strong>Methods</strong></td>
+<td><strong>predict.glmb, residuals.glmb, extractAIC.glmb</strong></td>
+<td>Chapter 04 — Predictions, Deviance Residuals, Model Statistics</td>
+</tr>
+<tr class="even">
+<td><strong>Main Model Interfaces (GLM / LM)</strong></td>
+<td><strong>glmb</strong></td>
+<td>Chapter 06 — Estimating Bayesian Generalized Linear Models</td>
+</tr>
+<tr class="odd">
+<td><strong>Methods</strong></td>
+<td><strong>summary.glmb</strong></td>
+<td>Chapter 06 — Estimating Bayesian Generalized Linear Models</td>
+</tr>
+<tr class="even">
+<td><strong>Main Model Interfaces (GLM / LM)</strong></td>
+<td><strong>glmb</strong></td>
+<td>Chapter 07 — Models for the Binomial Family</td>
+</tr>
+<tr class="odd">
+<td><strong>Main Model Interfaces (GLM / LM)</strong></td>
+<td><strong>glmb</strong></td>
+<td>Chapter 08 — Models for the Poisson Family</td>
+</tr>
+<tr class="even">
+<td><strong>Main Model Interfaces (GLM / LM)</strong></td>
+<td><strong>glmb</strong></td>
+<td>Chapter 09 — Models for the Gamma Family</td>
+</tr>
+<tr class="odd">
+<td><strong>Lower-Level Interfaces (GLM / LM)</strong></td>
+<td><strong>rlmb</strong></td>
+<td>Chapter 13 — Hierarchical Linear Models</td>
+</tr>
+<tr class="even">
+<td><strong>Lower-Level Interfaces (GLM / LM)</strong></td>
+<td><strong>rglmb</strong></td>
+<td>Chapter 14 — Hierarchical Generalized Linear Models</td>
+</tr>
+<tr class="odd">
+<td><strong>Model-Specific Simulation Functions</strong></td>
+<td><strong>rNormal_reg, rGamma_reg, rNormal_Gamma_reg,
+rindependent_norm_gamma_reg</strong></td>
+<td>Chapter A02: Overview of Estimation Procedures</td>
+</tr>
+<tr class="even">
+<td><strong>pfamilies</strong></td>
+<td><strong>dGamma, dNormal_Gamma,
+dIndependent_Normal_Gamma</strong></td>
+<td>Chapter 11 — Estimating Models with Unknown Dispersion
+Parameters</td>
+</tr>
+<tr class="odd">
+<td><strong>Methods</strong></td>
+<td><strong>Various method functions for glmbayes</strong></td>
+<td>Chapter A03 — Methods Available in glmbayes</td>
+</tr>
+<tr class="even">
+<td><strong>Envelope Related Functions</strong></td>
+<td>Various Functions</td>
+<td>Chapter A08 — Overview of Envelope Related Functions</td>
+</tr>
+<tr class="odd">
+<td><strong>Parallel Simulation Related Functions</strong></td>
+<td>Various Functions</td>
+<td>Chapter A09: Parallel Sampling Implementation using
+RcppParallel</td>
+</tr>
+<tr class="even">
+<td><strong>Accelerated EnvelopedBuild Related Functions</strong></td>
+<td>Various Functions</td>
+<td>Chapter A10: Accelerated EnvelopeBuild Implementation using
+OpenCL</td>
+</tr>
+<tr class="odd">
+<td><strong>Utilities</strong></td>
+<td>add_to_libpath_linux, add_to_path, add_to_path_linux,
+add_to_path_windows</td>
+<td>Chapter 00 — Introduction<br>Chapter 01 — Getting Started</td>
+</tr>
+<tr class="even">
+<td><strong>Datasets</strong></td>
+<td>AMI, carinsca, Cleveland</td>
+<td>Chapter 01 — Getting Started</td>
+</tr>
+</tbody>
+</table>
+<div id="loading-the-package" class="section level2">
+<h2>Loading the package</h2>
+<p>The package curently requires the MASS package so it also needs to be
+installed and gets loaded as part of the loading of the glmbayes package
+(see below).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span></code></pre></div>
+</div>
+<div id="accessing-package-information-general-documentation-and-demos" class="section level2">
+<h2>Accessing package information, general documentation, and demos</h2>
+<p>To access information for the package outside of the information
+contained in these vignettes, we suggest users review three sets of help
+pages. A call to help(glmbayes) yields a page with a detailed discussion
+of the package with an example at the bottom. Calling
+help(package=“glmbayes”) brings the user to a list of Help pages for
+specific functions as well as links to a general description file, code
+demos, and these vignettes. Part of the objective of this vignette is to
+provide more organized layout of the functions than the general list of
+help pages provided on the documentation page.</p>
+<p>A call to demo(package=“glmbayes”), finally, brings up a list of
+available demos for the package. A useful start for users might be to go
+through the specific demos as they are set up to illustrate the
+functionality of the package.</p>
+<ul>
+<li>help(glmbayes)</li>
+<li>help(package=“glmbayes”)</li>
+<li>demo(package=“glmbayes”)</li>
+<li>data(package=“glmbayes)</li>
+</ul>
+</div>
+</div>
+<div id="using-the-lmb-and-glmb-functions-and-their-methods" class="section level1">
+<h1>Using the <em>lmb</em> and <em>glmb</em> functions and their
+methods</h1>
+<p>As noted above, the <em>lmb</em> and <em>glmb</em> functions are the
+two core functions in this package. More detailed side-by-side
+comparisons of the use of methods for these functions and their
+classical cousins are provided in the next two vignettes. Here we
+provide a brief overview of supporting functions available to facilitate
+the use of the core functions. In the first subsection, we show how the
+core functions are called (and how this compares to calls for the
+classical functions). We then give a brief discussion of how priors are
+specified and some related functions designed to assist with that task
+as well as with the task of viewiw prior specifications after the
+modeling is completed.</p>
+<div id="the-lmb-and-glmb-functions" class="section level2">
+<h2>The <em>lmb</em> and <em>glmb</em> functions</h2>
+<p>The code snippets below illustrates how model specification for these
+models can be done by simply providind an additional argument, a
+pfamily, that provides information on the type of prior distribution
+that has been selected and the parameter values that are desired. A
+separate vignette is provided to give guidance to users on how to select
+appropriate prior parameters (and some standardization steps that may be
+useful as part of that).</p>
+<p>[NEED TO MODIFY Prior_Setup PRINT FUNCTION AND HOW IT HANDLES CASE
+WHERE X IS MISSING] [MAY ALSO WANT TO HAVE IT INITIALIZE SHAPE AND RATE
+PARAMETERS]</p>
+<p><em>Calling lm vs. calling lmb</em></p>
+<p>Here is the call for the lmb function and how it compares to the call
+to the classical lm function. The recommended prior here is the
+dNormal_Gamma pfamily which requires four parameters (2 for he Normal
+component, and 2 for the Gamma component).</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Annette Dobson (1990) &quot;An Introduction to Generalized Linear Models&quot;.</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="do">## Page 9: Plant Weight Data.</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>ctl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">4.17</span>,<span class="fl">5.58</span>,<span class="fl">5.18</span>,<span class="fl">6.11</span>,<span class="fl">4.50</span>,<span class="fl">4.61</span>,<span class="fl">5.17</span>,<span class="fl">4.53</span>,<span class="fl">5.33</span>,<span class="fl">5.14</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">4.81</span>,<span class="fl">4.17</span>,<span class="fl">4.41</span>,<span class="fl">3.59</span>,<span class="fl">5.87</span>,<span class="fl">3.83</span>,<span class="fl">6.03</span>,<span class="fl">4.89</span>,<span class="fl">4.32</span>,<span class="fl">4.69</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>group <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Ctl&quot;</span>,<span class="st">&quot;Trt&quot;</span>))</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>weight <span class="ot">&lt;-</span> <span class="fu">c</span>(ctl, trt)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="do">##Classical model-call</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>lm.D9 <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> group)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Bayesian Prior Setup and Call-Prior Should Generally be Customized</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>p_info<span class="ot">=</span><span class="fu">Prior_Setup</span>(weight<span class="sc">~</span>group, <span class="at">family=</span><span class="fu">gaussian</span>())</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.01 (low-d default).</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>mu1<span class="ot">=</span>p_info<span class="sc">$</span>mu    </span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>Sigma1<span class="ot">=</span>p_info<span class="sc">$</span>Sigma</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#lmb.D9 &lt;- lmb(weight ~ group,pfamily=dNormal_Gamma(mu1,Sigma1,shape=4,rate=0.1))</span></span></code></pre></div>
+<p><em>Calling glm vs. calling glmb</em></p>
+<p>The call for the glmb function is quite similar and is here compared
+to the corresponding call for the glm function. For the binomial and
+Poisson families, the recommended prior here is the dNormal pfamily
+which requires 2 parameters (a prior mean vector and a prior
+Variance-Covariance matrix).</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="do">## Dobson (1990) Page 93: Randomized Controlled Trial :</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>counts <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">18</span>,<span class="dv">17</span>,<span class="dv">15</span>,<span class="dv">20</span>,<span class="dv">10</span>,<span class="dv">20</span>,<span class="dv">25</span>,<span class="dv">13</span>,<span class="dv">12</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>outcome <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">9</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>treatment <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="dv">3</span>,<span class="dv">3</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="do">##Classical model-call</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>glm.D93 <span class="ot">&lt;-</span> <span class="fu">glm</span>(counts <span class="sc">~</span> outcome <span class="sc">+</span> treatment, <span class="at">family =</span> <span class="fu">poisson</span>())</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># Bayesian Prior Setup and Call-Prior Should Generally be Customized</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>p_info2<span class="ot">=</span><span class="fu">Prior_Setup</span>(counts <span class="sc">~</span> outcome <span class="sc">+</span> treatment,<span class="at">family=</span><span class="fu">poisson</span>())</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.01 (low-d default).</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>mu2<span class="ot">=</span>p_info2<span class="sc">$</span>mu    </span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>Sigma2<span class="ot">=</span>p_info2<span class="sc">$</span>Sigma</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>glmb.D93<span class="ot">&lt;-</span><span class="fu">glmb</span>(counts <span class="sc">~</span> outcome <span class="sc">+</span> treatment, <span class="at">family =</span> <span class="fu">poisson</span>(),<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>mu2,<span class="at">Sigma=</span>Sigma2))</span></code></pre></div>
+</div>
+<div id="specifying-priors" class="section level2">
+<h2>Specifying Priors</h2>
+<div id="prior-family-functions" class="section level3">
+<h3>Prior Family Functions</h3>
+<p>The <em>pfamily</em> arguments described above are actually functions
+that provide needed information to the <em>lmb</em> and <em>glmb</em>
+functions. Since they are are functions, they can also be called
+directly, as seen below, where they return lists with items related to
+the prior (see documentation of these pfamily functions for details).
+These functions are also discussed in more detail in a latter
+chapter.</p>
+<p>While the current package only provides 3 implemented pfamiles, this
+is actually not a severe limitations as users easily can write their own
+prior families and pass those to the <em>lmb</em> and <em>glmb</em>
+functions. One of our exaxmple includes an illustration of this and this
+approach is discussed more extensively in one of our other vignettes.
+Below, we simply illustrate how the functions can be called
+directly.</p>
+<p>NOTE: IMPLEMENT THE EXAMPLE DISCUSSED ABOVE AND WRITE A SEPARATE
+VIGNETTE TO ACCOMPANY THE EXAMPLE.</p>
+<p><em>Calling the dNormal prior family</em></p>
+<p>This prior is typically used as a prior for the Poisson and Binomial
+families when calling either the <em>glmb</em> or <em>rglm</em>
+functions. Calling it directly provides a list with, among other items,
+the prior specification. the documentation for the <em>pfamilies</em>
+provides additional information on what the returned list contains and
+what required and optional arguments are.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">dNormal</span>(<span class="at">mu=</span>mu2,<span class="at">Sigma=</span>Sigma2,<span class="at">dispersion=</span><span class="cn">NULL</span>)</span></code></pre></div>
+<p>*Calling the dNormal_Gamma prior family</p>
+<p>This prior is typically used as a prior when calling either the
+<em>lmb</em> or <em>rglmb</em> functions or when using the
+<em>gaussian()</em> family in the <em>glm</em> and <em>rglmb</em>
+functions. Calling it directly</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">dNormal_Gamma</span>(<span class="at">mu=</span>mu1,<span class="at">Sigma_0=</span>Sigma1,<span class="at">shape=</span><span class="dv">4</span>,<span class="at">rate=</span><span class="fl">0.1</span>)</span></code></pre></div>
+<p>*Calling the dGamma prior family</p>
+<p>This prior is typically used when giving a prior for the dispersion
+parameter in the <em>lmb</em>, <em>rlmb</em>, <em>glmb</em>, and
+<em>rglmb</em> functions (in the latter case for the <em>gaussian()</em>
+and <em>Gamma()</em> families). Typicall this would be done as part of
+Block-Gibbs sampling where the regression coefficients are updated in a
+separate block.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>b <span class="ot">&lt;-</span> p_info<span class="sc">$</span>coefficients</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">dGamma</span>(<span class="at">shape=</span><span class="dv">4</span>,<span class="at">rate=</span><span class="fl">0.1</span>,<span class="at">beta=</span>b)</span></code></pre></div>
+</div>
+<div id="other-prior-related-functions" class="section level3">
+<h3>Other Prior Related Functions</h3>
+<p>Three additional functions relate to the prior specification and are
+useful when either specifying the prior or when extracting the
+information about the prior used by an existing model object.</p>
+<p>*The Prior_Setup function</p>
+<p>This function can be used to set up the prior arguments so they have
+the correct dimensions and so that the various dimensions have names
+that correspond to those in the model. In addition to initialized prior
+structures, these functions also return the model frame and the model
+matrix as a reference (the latter when it was requested from the
+underlying model). It is worth noting that this function is intended as
+a tool for initializing the prior objects and not for setting them to
+the final values used in the estimation. How to populate the arguments
+with sensible values is discussed in a separate vignette.</p>
+<p>NOTE: ADD A PRINT METHOD FOR THIS FUNCTION SO THAT THE OUTPUT CAN BE
+CONTROLLED</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">Prior_Setup</span>(weight <span class="sc">~</span> group,<span class="at">family=</span><span class="fu">gaussian</span>())</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.01 (low-d default).</span></span></code></pre></div>
+<p>*The Prior_Check function</p>
+<p>The Prior Check function provides a utility for checking whether the
+data appears to be consistent with the prior. Essentially, consistency
+here means that the maximum likelihood estimate are within the credible
+intervals implied by the prior. If the data appears inconsistent with
+the data, it is possible that the data was generated from a different
+process than that implied by the model or that the prior was not well
+thought out. Specifying a good prior is usually important and we
+dedicate a separate vignette to this topic.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>glm.D93 <span class="ot">&lt;-</span> <span class="fu">glm</span>(counts <span class="sc">~</span> outcome <span class="sc">+</span> treatment, <span class="at">family =</span> <span class="fu">poisson</span>())</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">Prior_Check</span>(counts <span class="sc">~</span> outcome <span class="sc">+</span> treatment, <span class="at">family =</span> <span class="fu">poisson</span>(),<span class="fu">dNormal</span>(mu2,Sigma2))</span></code></pre></div>
+<p>*The pfamily function</p>
+<p>This function can be used to extract a pfamily object from an
+existing object and is useful post-modeling in order to verify the prior
+used in the modeling process. It is also used by some of the methods
+during post-processing to extract information about the prior.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">pfamily</span>(glmb.D93)</span></code></pre></div>
+</div>
+</div>
+<div id="method-functions" class="section level2">
+<h2>Method functions</h2>
+<p>The <em>lm</em> and <em>glm</em> functions come with an extensive set
+of method functions that can be used to conduct supplemental analysis
+(typically during the post-modeling phase). Because the <em>lmb</em> and
+<em>glmb</em> functions are structured to return many of the same items
+as the classical functions and because they inherit methods from
+<em>glm</em> and <em>lm</em>, many of the methods available for the
+classical functions are directly available for the <em>glmb</em> and
+<em>lmb</em> functions. As some of the output does tend to be different
+(in particular, coefficients are returned as random draws as opposed to
+a single maximum likelihood estimate), we have implemented specific
+methods for the “glmb” and “lmb” classes of objects. The current set of
+methods for all four classes of objects are displayed below.</p>
+<p>Two separate vignettes illustrate how calls to these methods can be
+used to replicate the output from the classical models. It is worth
+noting that a smaller subset of the classical methods are not yet
+implemented (although plans are in place to replicate some of those as
+well). Those are discussed in the separate vignette’s as well. Here we
+provide lists of the methods available for classical <em>lm</em> and
+<em>glm</em> functions (many of which are inherited by <em>lmb</em> and
+<em>glmb</em>) as well as methods that have been developed specifically
+for <em>glmb</em> and <em>rglmb</em>.</p>
+<p>[NOTE: AS NEEDED, ADD ADDITIONAL METHODS FOR lmb. THE LIST OF METHODS
+FOR glmb SHOULD BE FAIRLY COMPLETE]</p>
+<p><em>Methods for class=“lm”</em></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">methods</span>(<span class="at">class=</span><span class="st">&quot;lm&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt;  [1] add1           addterm        alias          anova          boxcox        </span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt;  [6] case.names     coerce         confint        cooks.distance deviance      </span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt; [11] dfbeta         dfbetas        drop1          dropterm       dummy.coef    </span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; [16] effects        extractAIC     family         formula        hatvalues     </span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; [21] influence      initialize     kappa          labels         logLik        </span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; [26] logtrans       model.frame    model.matrix   nobs           plot          </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; [31] predict        print          proj           qr             residuals     </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; [36] rstandard      rstudent       show           simulate       slotsFromS3   </span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; [41] summary        variable.names vcov          </span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; see &#39;?methods&#39; for accessing help and source code</span></span></code></pre></div>
+<p><em>Methods for class=“glm”</em></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">methods</span>(<span class="at">class=</span><span class="st">&quot;glm&quot;</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt;  [1] add1           addterm        anova          coerce         confint       </span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt;  [6] cooks.distance deviance       drop1          dropterm       effects       </span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; [11] extractAIC     family         formula        gamma.shape    influence     </span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; [16] initialize     logLik         model.frame    nobs           predict       </span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; [21] print          profile        residuals      rstandard      rstudent      </span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; [26] show           sigma          slotsFromS3    summary        vcov          </span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt; [31] weights       </span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; see &#39;?methods&#39; for accessing help and source code</span></span></code></pre></div>
+<p><em>Methods for class=“glmb”</em></p>
+<p>While most of the methods for the <em>glm</em> class (when it has its
+own method) or the <em>lm</em> class (when it does not) work properly
+for objects of class <em>glmb</em>, some methods do not. For that
+reason, we have implemented the below methods specifically for the
+<em>glmb</em> class of objects. Future enhancements to this package may
+enhance these methods. There are also additional methods for <em>lm</em>
+and/or <em>glm</em> that do not currently have functioning methods for
+the <em>glmb</em> class. This includes the <em>add1</em>,
+<em>drop1</em>, and <em>dropterm</em> functions (which should be
+implementable fairly easily) and the various influence.measure methods
+(influence, rstandard, rstudent, dfbeta, dfbetas, cooks.distance, and
+hatvalues) which may require more work. Plans do exist to add the former
+and perhaps the latter (which likely would look at influence on
+posterior modes and not on posterior means).</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">methods</span>(<span class="at">class=</span><span class="st">&quot;glmb&quot;</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt;  [1] anova          case.names     confint        cooks.distance dfbetas       </span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt;  [6] dummy.coef     extractAIC     influence      logLik         plot          </span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; [11] predict        print          residuals      rstandard      rstudent      </span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; [16] simulate       summary        variable.names vcov          </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; see &#39;?methods&#39; for accessing help and source code</span></span></code></pre></div>
+<p>NOTE: CHECK WHICH METHODS FOR lmb that are inherited and functions
+vs. those that may require additional development.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">methods</span>(<span class="at">class=</span><span class="st">&quot;lmb&quot;</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="co">#&gt; [1] print     residuals</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#&gt; see &#39;?methods&#39; for accessing help and source code</span></span></code></pre></div>
+</div>
+</div>
+<div id="the-rlmb-and-rglmb-functions-and-their-summary-functions" class="section level1">
+<h1>The <em>rlmb</em> and <em>rglmb</em> functions and their summary
+functions</h1>
+<p>Because the functions <em>lmb</em> and <em>glmb</em> are set up to
+mirror their corresponding classical cousins, they include a great deal
+of overhead for pre and post processing that are unsuitable if the
+functions need to be called repetitively (say during Block-Gibbs
+sampling). To faciliate Block-Gibbs sampling and other simulation, we
+provide more minimalistic interfaces to the simulation procedures in the
+form of the corresponding functions <em>rlmb</em> and
+<em>rglmb</em>.</p>
+<p>These functions are called internally by <em>lmb</em> and
+<em>glmb</em> in much the same way that <em>lm.fit</em> and
+<em>glm.fit</em> are called by the <em>lm</em> and <em>glm</em>
+functions so in a way they are Bayesian versions of those functions. We
+choose the r prefix for these functions to symbolize that they also
+represent random draws from probability distributions in much the same
+way that <em>rnorm</em>, <em>rgamma</em>, and other functions in the
+<em>stats</em> package do.</p>
+<div id="calling-the-rlmb-and-rglmb-functions" class="section level2">
+<h2>Calling the <em>rlmb</em> and <em>rglmb</em> functions</h2>
+<p>Instead of passing a formula to these functions, the user instead
+passes the dependent and independent variables as a dependent variable
+vector <em>y</em> and as an independent variable design matrix
+<em>x</em> respectively. A useful approach that can help the user
+specify the design matrix involves sequential calls to
+<em>model.frame</em> and <em>model.matrix</em> as seen below.</p>
+<p>NOTE 1: SHORTEN THIS CODE NOTE 2: The SUMMARY FUNCTION IS CURRENTLY
+NOT WORKING FOR rlmb</p>
+<p><em>Calling the rlmb function</em></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="do">## Annette Dobson (1990) &quot;An Introduction to Generalized Linear Models&quot;.</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="do">## Page 9: Plant Weight Data.</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>ctl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">4.17</span>,<span class="fl">5.58</span>,<span class="fl">5.18</span>,<span class="fl">6.11</span>,<span class="fl">4.50</span>,<span class="fl">4.61</span>,<span class="fl">5.17</span>,<span class="fl">4.53</span>,<span class="fl">5.33</span>,<span class="fl">5.14</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">4.81</span>,<span class="fl">4.17</span>,<span class="fl">4.41</span>,<span class="fl">3.59</span>,<span class="fl">5.87</span>,<span class="fl">3.83</span>,<span class="fl">6.03</span>,<span class="fl">4.89</span>,<span class="fl">4.32</span>,<span class="fl">4.69</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>group <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="dv">2</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&quot;Ctl&quot;</span>,<span class="st">&quot;Trt&quot;</span>))</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>weight <span class="ot">&lt;-</span> <span class="fu">c</span>(ctl, trt)</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="do">## Classical call</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>lm.D9 <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> group,<span class="at">x=</span><span class="cn">TRUE</span>,<span class="at">y=</span><span class="cn">TRUE</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>lm_summary<span class="ot">=</span><span class="fu">summary</span>(lm.D9)</span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="do">## Bayesian Call</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>n<span class="ot">&lt;-</span><span class="dv">10000</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>y<span class="ot">&lt;-</span>lm.D9<span class="sc">$</span>y</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#x&lt;-as.matrix(lm.D9$x)</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="do">### Set old regression and dispersion coefficients</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a>b_old<span class="ot">=</span>lm.D9<span class="sc">$</span>coefficients</span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a>v_old<span class="ot">=</span>lm_summary<span class="sc">$</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="do">#### Set up for rGamma_reg</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a>n0<span class="ot">=</span><span class="fl">0.1</span></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a>shape<span class="ot">=</span>n0<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a>rate<span class="ot">=</span>shape<span class="sc">*</span>v_old</span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a></span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a>rate<span class="sc">/</span>(shape<span class="dv">-1</span>)</span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a>rate<span class="sc">/</span>shape</span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a></span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="co">#a1&lt;-shape+n1/2</span></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="co">#b1&lt;-rate+sum(SS)/2</span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a></span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="co">#out&lt;-1/rgamma(n,shape=a1,rate=b1)</span></span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="do">## v0=sum(SS)/n1 ~ (2*rate+sum(SS))/(2*shape+n1)=[(2*rate+sum(SS))/2]/((2*shape+n1)/2) </span></span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a>n1<span class="ot">=</span><span class="fu">length</span>(y)</span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a>SS<span class="ot">=</span>v_old<span class="sc">*</span>n1</span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a>n1 <span class="co"># This is equal to 20</span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a></span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a>n0<span class="ot">=</span><span class="dv">2</span> <span class="co"># Prior observations</span></span>
+<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a>v_prior<span class="ot">=</span>v_old  <span class="co"># Prior point estimate for variance (the mean of (1/dispersion=1/v_prior))</span></span>
+<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a>wt0<span class="ot">=</span>(n0<span class="sc">/</span>n1)  </span>
+<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a></span>
+<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a><span class="do">## set shape=0.01*(n1/2)</span></span>
+<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a><span class="do">## set rate= 0.01*SS/2</span></span>
+<span id="cb14-46"><a href="#cb14-46" tabindex="-1"></a></span>
+<span id="cb14-47"><a href="#cb14-47" tabindex="-1"></a>shape<span class="ot">=</span>wt0<span class="sc">*</span>(n1<span class="sc">/</span><span class="dv">2</span>)   <span class="do">###  Shape is prior observations /2</span></span>
+<span id="cb14-48"><a href="#cb14-48" tabindex="-1"></a>rate<span class="ot">=</span>shape<span class="sc">*</span>v_prior  <span class="do">### rate is essentiall prior SS - V in rmultireg should be this</span></span>
+<span id="cb14-49"><a href="#cb14-49" tabindex="-1"></a>rate<span class="sc">/</span>shape <span class="do">## Should match v_prior (currently also v_old)</span></span>
+<span id="cb14-50"><a href="#cb14-50" tabindex="-1"></a></span>
+<span id="cb14-51"><a href="#cb14-51" tabindex="-1"></a>mu<span class="ot">&lt;-</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)</span>
+<span id="cb14-52"><a href="#cb14-52" tabindex="-1"></a>mu<span class="ot">=</span>b_old  <span class="do">### For testing purposes, set prior=b_old</span></span>
+<span id="cb14-53"><a href="#cb14-53" tabindex="-1"></a>P<span class="ot">&lt;-</span><span class="fl">0.1</span><span class="sc">*</span><span class="fu">diag</span>(<span class="dv">2</span>)</span>
+<span id="cb14-54"><a href="#cb14-54" tabindex="-1"></a><span class="co"># Bayesian Prior Setup and Call-Prior Should Generally be Customized</span></span>
+<span id="cb14-55"><a href="#cb14-55" tabindex="-1"></a>p_info<span class="ot">=</span><span class="fu">Prior_Setup</span>(weight<span class="sc">~</span>group)</span>
+<span id="cb14-56"><a href="#cb14-56" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.01 (low-d default).</span></span>
+<span id="cb14-57"><a href="#cb14-57" tabindex="-1"></a>x<span class="ot">=</span>p_info<span class="sc">$</span>x</span>
+<span id="cb14-58"><a href="#cb14-58" tabindex="-1"></a>outtemp4<span class="ot">=</span><span class="fu">rlmb</span>(<span class="at">n=</span><span class="dv">1000</span>,<span class="at">y=</span>y,<span class="at">x=</span>x,<span class="at">pfamily=</span><span class="fu">dNormal_Gamma</span>(<span class="at">mu=</span>mu,<span class="at">Sigma_0=</span><span class="fu">solve</span>(P),<span class="at">shape=</span>shape,<span class="at">rate=</span>rate))</span>
+<span id="cb14-59"><a href="#cb14-59" tabindex="-1"></a></span>
+<span id="cb14-60"><a href="#cb14-60" tabindex="-1"></a><span class="co">#summary(outtemp4)</span></span></code></pre></div>
+<p><em>Calling the rglmb function</em></p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">data</span>(menarche,<span class="at">package=</span><span class="st">&quot;MASS&quot;</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>Age2<span class="ot">=</span>menarche<span class="sc">$</span>Age<span class="dv">-13</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>y<span class="ot">=</span>menarche<span class="sc">$</span>Menarche<span class="sc">/</span>menarche<span class="sc">$</span>Total</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>wt<span class="ot">=</span>menarche<span class="sc">$</span>Total</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="do">## Use model.frame and model.matrix to derive x</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#mf=model.frame(formula)</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#x=model.matrix(formula,mf)</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>x<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="fu">as.numeric</span>(<span class="fl">1.0</span>),<span class="at">nrow=</span><span class="fu">length</span>(Age2),<span class="at">ncol=</span><span class="dv">2</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a>x[,<span class="dv">2</span>]<span class="ot">=</span>Age2</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="do">## Modify Prior_Setup so it can take a model matrix as well as an model object</span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>mu<span class="ot">&lt;-</span><span class="fu">matrix</span>(<span class="fu">as.numeric</span>(<span class="fl">0.0</span>),<span class="at">nrow=</span><span class="dv">2</span>,<span class="at">ncol=</span><span class="dv">1</span>)</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a>V1<span class="ot">&lt;-</span><span class="dv">1</span><span class="sc">*</span><span class="fu">diag</span>(<span class="fu">as.numeric</span>(<span class="fl">2.0</span>))</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a>mu[<span class="dv">2</span>,<span class="dv">1</span>]<span class="ot">=</span>(<span class="fu">log</span>(<span class="fl">0.9</span><span class="sc">/</span><span class="fl">0.1</span>)<span class="sc">-</span><span class="fu">log</span>(<span class="fl">0.5</span><span class="sc">/</span><span class="fl">0.5</span>))<span class="sc">/</span><span class="dv">3</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co"># 2 standard deviations for prior estimate at age 13 between 0.1 and 0.9</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="do">## Specifies uncertainty around the point estimates</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a>V1[<span class="dv">1</span>,<span class="dv">1</span>]<span class="ot">&lt;-</span>((<span class="fu">log</span>(<span class="fl">0.9</span><span class="sc">/</span><span class="fl">0.1</span>)<span class="sc">-</span><span class="fu">log</span>(<span class="fl">0.5</span><span class="sc">/</span><span class="fl">0.5</span>))<span class="sc">/</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span> </span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a>V1[<span class="dv">2</span>,<span class="dv">2</span>]<span class="ot">=</span>(<span class="dv">3</span><span class="sc">*</span>mu[<span class="dv">2</span>,<span class="dv">1</span>]<span class="sc">/</span><span class="dv">2</span>)<span class="sc">^</span><span class="dv">2</span>  <span class="co"># Allows slope to be up to 3 times as large as point estimate </span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a>out<span class="ot">&lt;-</span><span class="fu">rglmb</span>(<span class="at">n =</span> <span class="dv">1000</span>, <span class="at">y=</span>y, <span class="at">x=</span>x, <span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>mu,<span class="at">Sigma=</span>V1), <span class="at">weights =</span> wt, </span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a>           <span class="at">family =</span> <span class="fu">binomial</span>(logit)) </span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a></span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="fu">summary</span>(out)</span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a><span class="co">#&gt; Call</span></span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a><span class="co">#&gt; rglmb(n = 1000, y = y, x = x, family = binomial(logit), pfamily = dNormal(mu = mu, </span></span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="co">#&gt;     Sigma = V1), weights = wt)</span></span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a><span class="co">#&gt; Expected Deviance Residuals:</span></span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a><span class="co">#&gt;        Min         1Q     Median         3Q        Max </span></span>
+<span id="cb15-35"><a href="#cb15-35" tabindex="-1"></a><span class="co">#&gt; -2.0366078 -0.9914432 -0.4935485  0.7856652  1.3736456 </span></span>
+<span id="cb15-36"><a href="#cb15-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-37"><a href="#cb15-37" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with Standard Deviations</span></span>
+<span id="cb15-38"><a href="#cb15-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-39"><a href="#cb15-39" tabindex="-1"></a><span class="co">#&gt;    Prior Mean Prior.sd Max Like. Like.sd</span></span>
+<span id="cb15-40"><a href="#cb15-40" tabindex="-1"></a><span class="co">#&gt; V1    0.00000  1.09861  -0.01081   0.063</span></span>
+<span id="cb15-41"><a href="#cb15-41" tabindex="-1"></a><span class="co">#&gt; V2    0.73241  1.09861   1.63197   0.059</span></span>
+<span id="cb15-42"><a href="#cb15-42" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-43"><a href="#cb15-43" tabindex="-1"></a><span class="co">#&gt; Bayesian Estimates Based on 1000 iid draws</span></span>
+<span id="cb15-44"><a href="#cb15-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-45"><a href="#cb15-45" tabindex="-1"></a><span class="co">#&gt;    Post.Mode Post.Mean  Post.Sd MC Error Pr(tail)    </span></span>
+<span id="cb15-46"><a href="#cb15-46" tabindex="-1"></a><span class="co">#&gt; V1  -0.01070  -0.01091  0.06213    0.002 0.453546    </span></span>
+<span id="cb15-47"><a href="#cb15-47" tabindex="-1"></a><span class="co">#&gt; V2   1.62939   1.63458  0.05910    0.002 0.000999 ***</span></span>
+<span id="cb15-48"><a href="#cb15-48" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb15-49"><a href="#cb15-49" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb15-50"><a href="#cb15-50" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-51"><a href="#cb15-51" tabindex="-1"></a><span class="co">#&gt; Distribution Percentiles</span></span>
+<span id="cb15-52"><a href="#cb15-52" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-53"><a href="#cb15-53" tabindex="-1"></a><span class="co">#&gt;         1.0%      2.5%      5.0%    Median     95.0%     97.5% 99.0%</span></span>
+<span id="cb15-54"><a href="#cb15-54" tabindex="-1"></a><span class="co">#&gt; V1 -0.153331 -0.135695 -0.119186 -0.007623  0.087051  0.108196 0.129</span></span>
+<span id="cb15-55"><a href="#cb15-55" tabindex="-1"></a><span class="co">#&gt; V2  1.499630  1.522888  1.538088  1.633473  1.728534  1.754152 1.782</span></span>
+<span id="cb15-56"><a href="#cb15-56" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-57"><a href="#cb15-57" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 1.96733 </span></span>
+<span id="cb15-58"><a href="#cb15-58" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 28.67274 </span></span>
+<span id="cb15-59"><a href="#cb15-59" tabindex="-1"></a><span class="co">#&gt; DIC: 114.6919 </span></span>
+<span id="cb15-60"><a href="#cb15-60" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-61"><a href="#cb15-61" tabindex="-1"></a><span class="co">#&gt; Expected Mean dispersion: 1 </span></span>
+<span id="cb15-62"><a href="#cb15-62" tabindex="-1"></a><span class="co">#&gt; Sq.root of Expected Mean dispersion: 1 </span></span>
+<span id="cb15-63"><a href="#cb15-63" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-64"><a href="#cb15-64" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 1.281</span></span></code></pre></div>
+</div>
+<div id="methods-for-the-rlmb-rglmb-and-their-summary-functions" class="section level2">
+<h2>Methods for The <em>rlmb</em>, <em>rglmb</em>, and their summary
+functions</h2>
+<p>To allow for the output from the rglmb and rlmb functions to benefit
+from the wide range of methods available for their <em>lmb</em> and
+<em>glmb</em> cousins, we implement a few additional methods for these
+functions that enable most of the methods to also work for these objects
+post modeling.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">methods</span>(<span class="at">class=</span><span class="st">&quot;rglmb&quot;</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt; [1] deviance   extractAIC print      residuals  summary   </span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#&gt; see &#39;?methods&#39; for accessing help and source code</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">methods</span>(<span class="at">class=</span><span class="st">&quot;summary.rglmb&quot;</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="co">#&gt; [1] formula print  </span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co">#&gt; see &#39;?methods&#39; for accessing help and source code</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">methods</span>(<span class="at">class=</span><span class="st">&quot;rlmb&quot;</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">#&gt; [1] print</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co">#&gt; see &#39;?methods&#39; for accessing help and source code</span></span></code></pre></div>
+</div>
+</div>
+<div id="advanced-topics" class="section level1">
+<h1>Advanced Topics</h1>
+<p>In this section, we cover additional functions included in the
+package that most users likely would not call directly but which provide
+visibility to the simulation methods utilized as part of the package.
+These functions can be broadly broken down into four distinct
+categories:.</p>
+<ul>
+<li>A set of simulation functions (one for each pfamily) that gets
+called during the estimation process when the respective pfamily is
+specified.</li>
+<li>Two functions for the Central Normal Distribution that play a key
+role in generating candidates for the envelope used to estimate some of
+the models</li>
+<li>A set of functions related to the envelope construction and
+simulation from a model in Standard form that uses the envelope as part
+of the simulation process</li>
+<li>A set of utility functions used by various method functions to
+produce the desired outputs</li>
+</ul>
+<div id="simulation-functions" class="section level2">
+<h2>Simulation Functions</h2>
+<p>One of the key items returned by the <em>pfamily</em> functions is an
+assigned simulation function to be called during the estimation process
+(one for each pfamily). These functions can also be called directly
+(though we don’t recommend it). The Function documentation for each of
+these underlying functions contains information on the type of algorihm
+used to generate the sample. We refer the reader to the documentation
+for each of these functions but note the following relationship:</p>
+<ul>
+<li>The <em>rNormal_reg</em> function is used for the <em>dNormal</em>
+<em>pfamily</em></li>
+<li>The <em>rGamma_reg</em> function is used for the <em>dGamma</em>
+<em>pfamily</em></li>
+<li>The <em>rNormalGamma_reg</em> function is used for the
+<em>dNormal_Gamma</em> <em>pfamily</em></li>
+</ul>
+</div>
+<div id="normal_ct-functions" class="section level2">
+<h2>Normal_ct Functions</h2>
+<p>For estimation of Bayesian generalized linear models with Normal
+Priors but non-gaussian families, accept-reject procedures are used
+where candidates are generated from mixtures of restricted multivariate
+normal distributions. Two functions for univariate restricted normal
+distributions (<em>rnorm_ct</em> and <em>pnorm_ct</em>) play a key role
+during this process and can be viewed as generalizations of the rnorm
+and pnorm functions.</p>
+</div>
+<div id="envelope-related-functions" class="section level2">
+<h2>Envelope Related Functions</h2>
+<p>For estimation of Bayesian generalized linear models with Normal
+Priors but with non-gaussian families, there are a number of functions
+that are used in order to generate the samples and that all in
+one-way-or another are related to the Enveloping functions used. The
+below is a list of these functions (we refer the reader to the
+respective function documentation for details).</p>
+<ul>
+<li><em>glmb_Standardize_Model</em> standardizes a Bayesian Generalized
+Linear Model so it can be sampled using an Enveloping function</li>
+<li><em>EnvelopeBuild</em> builds the enveloping function used during
+the simulation</li>
+<li><em>EnvelopeOpt</em> selects an “optimal” size for the Grid used
+during Envelope construction</li>
+<li><em>EnvelopeSort</em> sorts the envelope after construction to
+increade efficiency of the simulation</li>
+<li><em>EnvelopeSetGrid</em> calculates log-densities associated with
+the restricted normals used to generate candidates</li>
+<li><em>EnvelopeSetLogP</em> calculates constants used during sampling
+from the constructed envelope</li>
+<li><em>rNormalGLM_std</em> simulates from a standardized Bayesian
+Generalized linear model using an Enveloping function</li>
+<li><em>Neg_logLik</em> returns the Negative log-likelihood for a
+Generalized Linear Model</li>
+<li><em>Neg_logPost</em> returns the negative log-posterior for a
+Bayesian Generalized Linear Model</li>
+<li><em>Neg_logPost_Gradient</em> returns the Gradient for the Negative
+Log-posteror of a Bayesian Generalized Linear Model</li>
+</ul>
+</div>
+<div id="utility-functions" class="section level2">
+<h2>Utility Functions</h2>
+<p>Finally, the package contains a small set of functions that are used
+by various method functions. While these are currently exported, we may
+in the future choose not to export them as they are unlikely to be
+useful for users of the package as standalone functions.</p>
+<ul>
+<li>Compare_Model_Frames</li>
+<li>complete_newdata</li>
+<li>generate_predictions</li>
+<li>get_x_matrix</li>
+<li>glmbdic</li>
+</ul>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+<div id="ref-glmbayesChapterA02" class="csl-entry">
+Nygren, Kjell. 2025a. <span>“Chapter A02: Overview of Estimation
+Procedures.”</span> Vignette in the glmbayes R package.
+</div>
+<div id="ref-glmbayesChapterA08" class="csl-entry">
+———. 2025b. <span>“Chapter A08: Overview of Envelope Related
+Functions.”</span> Vignette in the glmbayes R package.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

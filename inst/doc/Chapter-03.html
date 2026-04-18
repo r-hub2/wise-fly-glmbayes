@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter 03: Tailoring Priors - Leveraging the Prior_Setup Function</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter 03: Tailoring Priors - Leveraging
+the Prior_Setup Function</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div id="introductory-discussion" class="section level2">
+<h2>1. Introductory Discussion</h2>
+<p>In this chapter, we explore how the Prior_Setup function can be used
+to specify multivariate normal priors for both Bayesian linear models
+and the generalized linear models (GLMs) introduced in later chapters.
+In the previous chapter, we covered the minimal arguments required to
+invoke the function: a model formula and a family (with an optional link
+function). These define the structure of the model to which the prior
+will be applied—namely, the variables being modeled, the assumed
+distribution of the response, and the link function connecting the
+linear predictor to the data. Multivariate normal and g-prior structure
+connects to standard GLM treatments <span class="citation">(McCullagh
+and Nelder 1989; Venables and Ripley 2002; Zellner 1986)</span>.
+Prior–data conflict diagnostics (when used elsewhere in the package)
+relate to <span class="citation">(Evans and Moshonov 2006)</span>.
+Envelope sampling builds on <span class="citation">(Nygren and Nygren
+2006)</span>.</p>
+<p>For full technical derivations of the priors and calibrated
+quantities returned by <code>Prior_Setup()</code> (including Gaussian
+Normal–Gamma calibration), see <strong>Chapter A12</strong> (<a href="https://knygren.r-universe.dev/articles/glmbayes/Chapter-A12.html" class="uri">https://knygren.r-universe.dev/articles/glmbayes/Chapter-A12.html</a>).</p>
+<p>In many cases, it is also helpful to provide a data frame to
+Prior_Setup, allowing the function to correctly identify and extract the
+relevant variables from the model environment.</p>
+<p>Now, let’s examine the remaining key arguments that enable the
+specification of multivariate normal priors. We begin by reviewing the
+function signature and a representative call—similar to the one used in
+the previous chapter, but now with visibility into the default
+settings:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>ps <span class="ot">=</span> <span class="fu">Prior_Setup</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  weight <span class="sc">~</span> group, <span class="at">data =</span> dat, <span class="at">family =</span> <span class="fu">gaussian</span>(), <span class="at">pwt =</span> <span class="fl">0.001</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">n_prior =</span> <span class="cn">NULL</span>, <span class="at">sd =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">intercept_source =</span> <span class="fu">c</span>(<span class="st">&quot;null_model&quot;</span>, <span class="st">&quot;full_model&quot;</span>),</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">effects_source =</span> <span class="fu">c</span>(<span class="st">&quot;null_effects&quot;</span>, <span class="st">&quot;full_model&quot;</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="at">mu =</span> <span class="cn">NULL</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#mu       = ps$mu</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#V        = ps$Sigma</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#disp_ML  = ps$dispersion</span></span></code></pre></div>
+<p>As shown above, we introduce six additional arguments beyond the core
+model specification:</p>
+<ul>
+<li>pwt, n_prior, and sd: These control the strength of the prior—i.e.,
+how much information the prior contributes relative to the
+likelihood.</li>
+<li>intercept_source, effects_source, and mu: These govern the location
+or centering of the prior distribution.</li>
+</ul>
+<p>In the next section, we discuss the default settings and their
+implications for model interpretation. Section 3 focuses on the
+parameters that control prior strength, while Section 4 addresses how
+the prior is centered.</p>
+</div>
+<div id="the-default-prior-specification" class="section level1">
+<h1>2. The default prior specification</h1>
+<p>When you call <code>Prior_Setup()</code> with a single
+<code>pwt</code> value, the prior on the coefficient vector<br />
+<span class="math inline">\(\beta =
+(\beta_0,\beta_1,\dots,\beta_{k})^\top\)</span><br />
+is set up to be</p>
+<p><span class="math display">\[
+  \beta \sim \mathcal{N}\bigl(\mu_{Prior},\;\Sigma_{Prior}\bigr),
+\]</span></p>
+<p>where <span class="math inline">\(\mu_{Prior}\)</span> is the derived
+prior mean and <span class="math inline">\(\Sigma_{Prior}\)</span> the
+derived prior covariance.</p>
+<p>In this section,we will frst focus on how the <code>pwt</code>
+argument is used to set <span class="math inline">\(\Sigma_{Prior}\)</span> and how some of the other
+defaults help set <span class="math inline">\(\mu_{Prior}\)</span>. We
+also take a look at how these together help determine the Posterior mean
+in Bayesian linear models.</p>
+<hr />
+<div id="identifiability-and-fullrank-likelihood-covariance" class="section level2">
+<h2>2.1 Identifiability and Full–Rank Likelihood Covariance</h2>
+<p>Before constructing the prior, <code>Prior_Setup()</code> fits the
+full GLM and extracts<br />
+the maximum likelihood estimate <span class="math inline">\(\widehat\beta_{\mathrm{MLE}}\)</span> and the
+variance–covariance of the maximum‐likelihood estimator. <span class="math display">\[
+  V_{MLE} \;=\;\mathrm{vcov}(\widehat\beta_{\mathrm{MLE}}).
+\]</span></p>
+<p>The matrix <span class="math inline">\(V_{MLE}\)</span> is checked to
+verify that it is a symmetric positive–definite (full rank). If <span class="math inline">\(V_{MLE}\)</span> is rank‐deficient, the classical
+GLM lacks identifiability and <code>Prior_Setup()</code> aborts with an
+error. While it is possible to estimate Bayesian models even if the
+classical GLM lacks identifiability, it is not possible to specificy a
+g-prior for such a likelihood function and we urge the user to use
+caution with such models.</p>
+<hr />
+</div>
+<div id="canonical-precision-definitions-and-scaling" class="section level2">
+<h2>2.2 Canonical Precision Definitions and Scaling</h2>
+<p>For enhanced understanding and to simplify derivations, let us now
+define the Likelihood precision, the Prior Precision, and the Posterior
+Precision as follows:</p>
+<p><span class="math display">\[
+  P_{MLE} = V_{MLE}^{-1},
+  \quad
+  P_{Prior} = \Sigma^{-1},
+  \quad
+  P_{Post} = P_0 + P_{Prior}.
+\]</span></p>
+<p>For <code>length(pwt)=1</code>, the <code>Prior_Setup()</code> uses
+the <span class="math inline">\(pwt\)</span> arguments to set the prior
+variance-covariance matrix as an inflated version of the likelihood
+variance–covariance matrix</p>
+<p><span class="math display">\[
+  \Sigma_{Prior} = \frac{1 - pwt}{pwt}\;V_{MLE},
+  \quad
+  \Longrightarrow
+  P_{Prior} = \frac{pwt}{1 - pwt}\;P_{MLE},
+\]</span></p>
+<p>and therefore</p>
+<p><span class="math display">\[
+  P_{\mathrm{Post}}
+  = \Bigl(1 + \frac{pwt}{1 - pwt}\Bigr)\,P_0
+  = \frac{1}{1 - pwt}\;P_0.
+\]</span></p>
+<p>Thus both <span class="math inline">\(P_{\mathrm{Prior}}\)</span> and
+<span class="math inline">\(P_{\mathrm{Post}}\)</span> are simple scalar
+multiples of <span class="math inline">\(P_0\)</span>. The scaling
+factor being applied to set <span class="math inline">\(\Sigma_{Prior}\)</span> is actually a Zellner
+g-prior:</p>
+<p><span class="math display">\[
+    g \;=\;\frac{1 - \text{pwt}}{\text{pwt}}. \]</span></p>
+<p>It is worth noting that the default for <code>Pwt</code>is 0.05 which
+means that g=19 and the prior Variance is thus 19 times the likelihood
+variance (and the standard deviation is <span class="math inline">\(\sqrt{19}\)</span> times larger than the
+likelihood standard deviations).</p>
+<hr />
+</div>
+<div id="posterior-mean-via-precision-matrices" class="section level2">
+<h2>2.3 Posterior Mean via Precision Matrices</h2>
+<p>In the Gaussian‐data case, the posterior is</p>
+<p><span class="math display">\[
+  \beta\mid y \;\sim\;
+  \mathcal{N}\bigl(\mu_{\mathrm{Post}},\,\Sigma_{\mathrm{Post}}\bigr),
+\]</span></p>
+<p>with</p>
+<p><span class="math display">\[
+  \Sigma_{\mathrm{Post}}
+  = P_{\mathrm{Post}}^{-1},
+  \quad
+  \mu_{\mathrm{Post}}
+  = P_{\mathrm{Post}}^{-1}
+    \bigl(P_0\,\widehat\beta_{\mathrm{MLE}}
+         \;+\;P_{\mathrm{Prior}}\,\mu\bigr).
+\]</span></p>
+<p>Plugging in the scalar‐multiple forms:</p>
+<p><span class="math display">\[
+  P_{\mathrm{Post}}^{-1} = (1 - pwt)\,P_{MLE}^{-1},
+  \quad
+  P_{\mathrm{Prior}} = \frac{pwt}{1 - pwt}\,P_{MLE},
+\]</span></p>
+<p>we recover the familiar weighted‐average form:</p>
+<p><span class="math display">\[
+  \mu_{\mathrm{Post}}
+  = (1 - pwt)\,\widehat\beta_{\mathrm{MLE}}
+    \;+\;pwt\,\mu_{Prior}.
+\]</span></p>
+<p>Hence we can see that the pwt argument determine the relative weight
+on the prior in the formula for the posterior mean in these models.
+While technically, we don’t have the same closed form solution for other
+models, the pwt still plays a role in how close the posterior will be to
+the prior mean.</p>
+<p>Since the default value for pwt is 0.01, we have a 1% weight on the
+prior for the default and the prior (when different from the Maximum
+likelihood estimate) hence pulls the posterior only minimally away from
+the maximum likelihood estimate.</p>
+</div>
+<div id="the-impact-of-the-null_model-and-null_effects-defaults-for-the-interpretation-of-model-diagnostics" class="section level2">
+<h2>2.4 The impact of the “null_model” and “null_effects” defaults for
+the interpretation of model diagnostics</h2>
+<p>In addition to the <strong>pwt</strong> arguments with its default,
+we also see from above that the default for the
+<strong><code>intercept_source</code></strong> is the “null_model” and
+the default for the <strong><code>effects_source</code></strong> is
+“null_effects”. The former means that the default prior for the
+intercept defaults to the estimate from the intercept only model while
+the latter means that the default prior for all effects variables is set
+to 0. This is in many ways consistent with the reference model utilized
+in most implementations for classical models. In particular, in
+classical models:</p>
+<p>-The R^2 is defined relative to the null model (i.e., the R^2 is
+always zero for the null model) -The default F-test in a classical model
+is usally relative to the null model -The t-statistics usually are
+designed to measure how far estimates are from 0 and this is the default
+for how p-values are calculated.</p>
+<p>It is worthwhile to now take a look at what this default
+specification means for the posterior mean when <code>pwt</code> is a
+scalar and the posterior mean is simplified as in the earlier section.
+In that case, we have:</p>
+<ul>
+<li><span class="math inline">\(\mu_{\mathrm{Post},1} = pwt \cdot
+\bar{y} + (1 - pwt) \cdot
+\widehat{\beta}_{\mathrm{MLE},\mathrm{Intercept}}\)</span></li>
+<li><span class="math inline">\(\mu_{\mathrm{Post},\mathrm{Effects}} =
+(1 - pwt) \cdot
+\widehat{\beta}_{\mathrm{MLE},\mathrm{Effects}}\)</span></li>
+</ul>
+<p>Let us now re-examine the the Plant data from the previous
+chapter.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>lm.D9 <span class="ot">&lt;-</span> <span class="fu">lm</span>(weight <span class="sc">~</span> group)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>sumlm<span class="ot">&lt;-</span><span class="fu">summary</span>(lm.D9)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>sumlm<span class="sc">$</span>coefficients</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;             Estimate Std. Error  t value     Pr(&gt;|t|)</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; (Intercept)    5.032  0.2202177 22.85012 9.547128e-15</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; groupTrt      -0.371  0.3114349 -1.19126 2.490232e-01</span></span></code></pre></div>
+<p>The groupTrt estimate from the classical model is -0.371 with a two
+sided p-value of 0.2490 (which implies that the one sided p-value is
+0.1245).</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>lmb.D9<span class="ot">=</span><span class="fu">lmb</span>(weight <span class="sc">~</span> group,<span class="fu">dNormal</span>(<span class="at">mu=</span>ps<span class="sc">$</span>mu,<span class="at">Sigma=</span>ps<span class="sc">$</span>Sigma,<span class="at">dispersion=</span>ps<span class="sc">$</span>dispersion),<span class="at">n=</span><span class="dv">1000</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>sumlmb<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb.D9)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>sumlmb<span class="sc">$</span>coefficients</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt;             Post.Mode  Post.Mean   Post.Sd    MC Error Pr(Null_tail)   SE(tail)</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; (Intercept)  5.031814  5.0311363 0.2172248 0.006869250         0.202 0.01269630</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; groupTrt    -0.370629 -0.3641917 0.3092222 0.009778466         0.120 0.01027619</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.202</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; groupTrt             0.120</span></span></code></pre></div>
+<p>We can now see that the corresponding output from the Bayesian run in
+many ways mirror the output from the classical model. In particular,
+four out of the columns have outputs analogous to corresponding outputs
+from the classical model. The Post.Mode and Post.Mean, both mirrors the
+Estimate column while the Post.sd column mirrors the Std. Error column.
+The Pr(tail), meanwhile is close to half of the value for Pr(&gt;|t|)
+column in the classical output.</p>
+<p>In addition to this, we have a column with MC Error which represents
+the error connected to the estimated Post. mean columns. This reflects
+the fact that we are using Monte Carlo simulation (in this case based on
+n=1000 draws) to estimate the mean. In the gaussian() case, the actual
+Post.Mean is the same as the Post.Mode so if we increase the number of
+draws, we are increasingly likely to observe a Post.Mean that is close
+to the Post.Mode column and the MC Error column shrinks (see below).</p>
+<p>Finally, we also have a column SE(tail). This reflects the Standard
+error connected to the Pr(tail) column. Just like with the MC Error, we
+can reduce the error associated with this estimate by generating a
+larger number of draws (again, see below).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>lmb.D9<span class="ot">=</span><span class="fu">lmb</span>(weight <span class="sc">~</span> group,<span class="fu">dNormal</span>(<span class="at">mu=</span>ps<span class="sc">$</span>mu,<span class="at">Sigma=</span>ps<span class="sc">$</span>Sigma,<span class="at">dispersion=</span>ps<span class="sc">$</span>dispersion),<span class="at">n=</span><span class="dv">100000</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>sumlmb<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb.D9)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>sumlmb<span class="sc">$</span>coefficients</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;             Post.Mode  Post.Mean   Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; (Intercept)  5.031814  5.0315824 0.2200432 0.0006958378       0.19915</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; groupTrt    -0.370629 -0.3707955 0.3107300 0.0009826145       0.11643</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.001262891        0.19915</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; groupTrt    0.001014268        0.11643</span></span></code></pre></div>
+<p>For the purposes of this vignette, we simply note that under our
+default assumptions for the intercept and effects, the Pr(tail) for
+slope parameters in Bayesian linear models tend to be similar to the
+one-sided p-value in the classical models when we combineex them with
+our default value for our <strong>pwt</strong> (i.e., 0.01). While we
+don’t explore it fully here, there are certain aspects in which these
+become more fully equivalent in the limit as <strong>pwt</strong> is
+pushed further towards zero. A later vignette provides more details on
+exactly how these tail probabilities relate to their classical
+counterparts, while also demonstrating some properties as
+<strong>pwt</strong>, <strong>n_prior</strong>, and the sample size
+approach certain limits.</p>
+</div>
+</div>
+<div id="adjusting-the-strength-of-priors-using-pwt-n_prior-and-sd" class="section level1">
+<h1>3. Adjusting the strength of priors using <strong>pwt</strong>,
+<strong>n_prior</strong>, and <em>sd</em></h1>
+<p>In setting the strength of priors, <strong>pwt</strong> serves as the
+default mechanism, blending the prior mean with the maximum likelihood
+estimates. When <strong>pwt</strong> is a scalar, it uniformly adjusts
+this blend across parameters. Alternatively, a vector form of
+<strong>pwt</strong> allows for more nuanced adjustments, deviating from
+a Zellner g-prior. <strong>n_prior</strong> offers an alternative
+approach, influencing the strength of priors based on sample size
+equivalence. Finally, <strong>sd</strong> directly sets the standard
+deviation, offering another layer of control over the priors’ influence.
+Each of these parameters plays a crucial role in tailoring the prior to
+reflect the analyst’s beliefs and the context of the data.</p>
+<p>To illustrate the role of these prior specifications, we will work
+with a model where the intercept dimension is orthogonal to the
+predictions as it makes interpretations clearer.</p>
+<div id="data-setup-and-visualization" class="section level2">
+<h2>3.1 Data Setup and Visualization</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">data</span>(mtcars)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># Create gallons per mile</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>mtcars<span class="sc">$</span>gpm <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> mtcars<span class="sc">$</span>mpg</span></code></pre></div>
+<p>The mtcars dataset contains fuel efficiency and engine
+characteristics for 32 vehicles. We begin by preparing the mtcars
+dataset for modeling. To analyze fuel consumption, we define gallons per
+mile (gpm) as the reciprocal of miles per gallon (gpm = 1/mpg). This
+transformation allows us to treat fuel use as a direct cost per unit
+distance, which aligns more naturally with physical energy
+expenditure.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># Mean-center predictors</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#mtcars$c_hp &lt;- scale(mtcars$hp, center = TRUE, scale = FALSE)</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#mtcars$c_drat &lt;- scale(mtcars$drat, center = TRUE, scale = FALSE)</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#mtcars$c_qsec &lt;- scale(mtcars$qsec, center = TRUE, scale = FALSE)</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>mtcars<span class="sc">$</span>c_wt  <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(mtcars<span class="sc">$</span>wt, <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>mtcars<span class="sc">$</span>c_cyl <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">scale</span>(mtcars<span class="sc">$</span>cyl, <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale =</span> <span class="cn">FALSE</span>))</span></code></pre></div>
+<p>Next, we mean-center the predictors of interest—vehicle weight (wt)
+and number of cylinders (cyl)—to improve interpretability and reduce
+collinearity in the regression model. Mean-centering ensures that the
+intercept corresponds to the expected fuel consumption for a vehicle
+with average weight and cylinder count.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co"># Fit linear model</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(gpm <span class="sc">~</span> c_wt, <span class="at">data =</span> mtcars)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># Create scatter plot</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="fu">plot</span>(mtcars<span class="sc">$</span>c_wt, mtcars<span class="sc">$</span>gpm,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="st">&quot;steelblue&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Mean-Centered Weight (c_wt)&quot;</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Gallons per Mile (gpm)&quot;</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;Fuel Consumption vs. Mean-Centered Weight&quot;</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co"># Add regression line</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="fu">abline</span>(fit, <span class="at">col =</span> <span class="st">&quot;darkred&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co"># Optional: Add confidence band manually</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>x_vals <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fu">min</span>(mtcars<span class="sc">$</span>c_wt), <span class="fu">max</span>(mtcars<span class="sc">$</span>c_wt), <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">c_wt =</span> x_vals), <span class="at">interval =</span> <span class="st">&quot;confidence&quot;</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="fu">lines</span>(x_vals, pred[, <span class="st">&quot;lwr&quot;</span>], <span class="at">col =</span> <span class="st">&quot;darkred&quot;</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="fu">lines</span>(x_vals, pred[, <span class="st">&quot;upr&quot;</span>], <span class="at">col =</span> <span class="st">&quot;darkred&quot;</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>To assess the plausibility of a linear relationship, we first plot
+gpm against mean-centered weight (c_wt). The scatter plot reveals a
+clear positive trend: heavier vehicles tend to consume more fuel per
+mile. The fitted regression line aligns well with the data, and the
+symmetric confidence band suggests that linearity and homoscedasticity
+are reasonable assumptions. This relationship is also physically
+motivated, as rolling resistance and energy demand scale approximately
+linearly with mass.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Ensure gpm is defined</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>mtcars<span class="sc">$</span>gpm <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> mtcars<span class="sc">$</span>mpg</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># Create boxplot</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="fu">boxplot</span>(gpm <span class="sc">~</span> <span class="fu">factor</span>(cyl), <span class="at">data =</span> mtcars,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>        <span class="at">col =</span> <span class="st">&quot;lightblue&quot;</span>, <span class="at">border =</span> <span class="st">&quot;darkblue&quot;</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">&quot;Number of Cylinders&quot;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">&quot;Gallons per Mile (gpm)&quot;</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">&quot;Fuel Consumption by Number of Cylinders&quot;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co"># Add jittered points</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)  <span class="co"># for reproducibility</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">jitter</span>(<span class="fu">as.numeric</span>(<span class="fu">factor</span>(mtcars<span class="sc">$</span>cyl)), <span class="at">amount =</span> <span class="fl">0.2</span>), mtcars<span class="sc">$</span>gpm,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>       <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">rgb</span>(<span class="dv">70</span><span class="sc">/</span><span class="dv">255</span>, <span class="dv">130</span><span class="sc">/</span><span class="dv">255</span>, <span class="dv">180</span><span class="sc">/</span><span class="dv">255</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>))</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>We then examine fuel consumption across cylinder categories using a
+boxplot. Treating cyl as a factor, we observe that vehicles with more
+cylinders tend to have higher median fuel consumption, with 8-cylinder
+cars showing the greatest fuel use. The jittered points reveal the
+distribution within each group and highlight the presence of outliers
+and some overlap acorss groups. This plot supports the inclusion of cyl
+as a categorical or mean-centered numeric predictor, depending on
+modeling goals.</p>
+<p>Together, these visualizations provide both empirical and theoretical
+justification for modeling gpm as a function of c_wt and c_cyl. The
+linear trend with weight is physically motivated, while the categorical
+differences in cylinder count suggest potential predictive value. These
+insights set the stage for exploring how prior strength influences
+inference in Bayesian regression</p>
+</div>
+<div id="using-the-pwt-argument-to-adjust-the-zellner-g-prior" class="section level2">
+<h2>3.2 Using the pwt argument to adjust the Zellner g-prior</h2>
+<p>To illustrate the impact of prior strength on marginal predictors, we
+fit a sequence of Bayesian models using gpm as the response and two
+mean-centered predictors: c_wt and c_cyl.</p>
+<p>To ensure reproducibility of posterior estimates and tail
+probabilities, we set a fixed random seed before simulation. This allows
+consistent interpretation across models and avoids misleading
+comparisons due to Monte Carlo variability.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Use Prior_Setup to illustrate prior strength</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>pscars  <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span> mtcars,<span class="at">pwt=</span><span class="fl">0.01</span>) <span class="do">## pwt=0.01--&gt;n_prior= 32/99</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>pscars2 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span> mtcars,<span class="at">pwt=</span><span class="fl">0.5</span>)  <span class="do">## pwt=0.5--&gt;n_prior= 32</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>pscars3 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span> mtcars,<span class="at">pwt=</span><span class="fl">0.55</span>) <span class="do">## pwt=0.55--&gt;n_prior= 39.111</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>pscars</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = gpm ~ c_wt + c_cyl, family = gaussian(), </span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt;     data = mtcars, pwt = 0.01)</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; Setting up a Zellner g-type prior: </span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt;   pwt = 0.01 </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt;   g   = (1 - pwt)/pwt = 99 </span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was computed as (pwt / (1 - pwt)) * n_likelihood: </span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 0.3232 </span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 32 </span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper  pwt</span></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.054227 0.012701  0.029335 0.079120 0.01</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="co">#&gt; c_wt          0.000000 0.021180 -0.041512 0.041512 0.01</span></span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="co">#&gt; c_cyl         0.000000 0.011604 -0.022743 0.022743 0.01</span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt;             (Intercept)    c_wt   c_cyl</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt; (Intercept)           1  0.0000  0.0000</span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="co">#&gt; c_wt                  0  1.0000 -0.7825</span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co">#&gt; c_cyl                 0 -0.7825  1.0000</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  1e-04 </span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt;   shape = 0.6616</span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt;   rate = 6.05648e-05</span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 1.09241e+04 which implies 1/Expected precision  = 9.15408e-05 </span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<p>With pwt = 0.01, the prior exerts minimal influence, resulting in
+wide prior standard deviations and broad credible intervals. For
+example, the prior SD for c_wt is approximately 0.0207, yielding a 95%
+credible interval of ±0.0406 around the prior mean. This reflects
+substantial uncertainty and allows the posterior to be largely driven by
+the data. The intercept’s prior interval spans nearly 0.05 units,
+indicating weak regularization and high flexibility in model fitting</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>pscars2</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = gpm ~ c_wt + c_cyl, family = gaussian(), </span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;     data = mtcars, pwt = 0.5)</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; Setting up a Zellner g-type prior: </span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt;   pwt = 0.5 </span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt;   g   = (1 - pwt)/pwt = 1 </span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was computed as (pwt / (1 - pwt)) * n_likelihood: </span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 32 </span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 32 </span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper pwt</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.054227 0.002298  0.049722 0.058732 0.5</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; c_wt          0.000000 0.003833 -0.007513 0.007513 0.5</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; c_cyl         0.000000 0.002100 -0.004116 0.004116 0.5</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt;             (Intercept)    c_wt   c_cyl</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; (Intercept)           1  0.0000  0.0000</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; c_wt                  0  1.0000 -0.7825</span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a><span class="co">#&gt; c_cyl                 0 -0.7825  1.0000</span></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  2e-04 </span></span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="co">#&gt;   shape = 16.5</span></span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="co">#&gt;   rate = 0.0029</span></span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 5.74117e+03 which implies 1/Expected precision  = 1.74181e-04 </span></span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<p>At pwt = 0.50, the prior and likelihood contribute equally to the
+posterior mean. This results in much tighter prior distributions: the
+prior SD for c_wt drops to ~0.00208, and its credible interval narrows
+to ±0.00408. The same pattern holds for c_cyl, whose prior interval
+shrinks to ±0.00223. These narrower intervals reflect stronger
+regularization, constraining the posterior estimates toward the prior
+mean and reducing sensitivity to noisy data.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>pscars3</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = gpm ~ c_wt + c_cyl, family = gaussian(), </span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt;     data = mtcars, pwt = 0.55)</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; Setting up a Zellner g-type prior: </span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;   pwt = 0.55 </span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt;   g   = (1 - pwt)/pwt = 0.8182 </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was computed as (pwt / (1 - pwt)) * n_likelihood: </span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 39.1111 </span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 32 </span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper  pwt</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.054227 0.002151  0.050011 0.058443 0.55</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; c_wt          0.000000 0.003587 -0.007031 0.007031 0.55</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt; c_cyl         0.000000 0.001965 -0.003852 0.003852 0.55</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co">#&gt;             (Intercept)    c_wt   c_cyl</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co">#&gt; (Intercept)           1  0.0000  0.0000</span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="co">#&gt; c_wt                  0  1.0000 -0.7825</span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="co">#&gt; c_cyl                 0 -0.7825  1.0000</span></span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  2e-04 </span></span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a><span class="co">#&gt;   shape = 20.0556</span></span>
+<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a><span class="co">#&gt;   rate = 0.0037</span></span>
+<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 5.39083e+03 which implies 1/Expected precision  = 1.855e-04 </span></span>
+<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-36"><a href="#cb12-36" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb12-37"><a href="#cb12-37" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<p>Increasing pwt slightly to 0.55 further tightens the prior
+distributions. The prior SD for c_cyl falls to ~0.00103, and its
+credible interval contracts to ±0.00202. This subtle shift can have
+meaningful diagnostic consequences—especially for marginal predictors—by
+reducing posterior variance and potentially pushing tail probabilities
+above conventional significance thresholds. The intercept’s interval
+also narrows slightly, reinforcing the model’s confidence in its prior
+location</p>
+<p>The prior standard deviations shown here are derived automatically
+from the specified pwt values, reflecting the degree of shrinkage toward
+the prior mean. While this default behavior is useful for regularization
+and empirical calibration, analysts may sometimes prefer to set prior
+uncertainty explicitly—especially when they have domain knowledge about
+plausible effect sizes. We explore that approach in a later section
+using the sd argument, which allows for direct control over the spread
+of each prior distribution.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">333</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>lmb_cars<span class="ot">&lt;-</span> <span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>lmb_cars2<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars2<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars2<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars2<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>lmb_cars3<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars3<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars3<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars3<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>sum_lmbcars<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars)  </span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>sum_lmbcars2<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars2)</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>sum_lmbcars3<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars3)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>sum_lmbcars<span class="sc">$</span>coefficients</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227240 0.054219787 0.001266651 4.005503e-05         0.497</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; c_wt        0.010850283 0.010859793 0.002149825 6.798343e-05         0.000</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002757255 0.002787737 0.001166016 3.687266e-05         0.008</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.015811104          0.497</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; c_wt        0.000000000          0.000</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002817091          0.008</span></span></code></pre></div>
+<p>With minimal prior influence, the posterior closely tracks the
+classical estimates. Both c_wt and c_cyl show strong directional
+evidence, with c_cyl clearly significant (Pr(tail) = 0.008), suggesting
+a meaningful association with fuel consumption.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>sum_lmbcars2<span class="sc">$</span>coefficients</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227240 0.054169822 0.001615584 5.108925e-05         0.474</span></span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="co">#&gt; c_wt        0.005479941 0.005557560 0.002826496 8.938167e-05         0.025</span></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.001392553 0.001361256 0.001530493 4.839845e-05         0.192</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.015789997          0.474</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; c_wt        0.004937104          0.025</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.012455360          0.192</span></span></code></pre></div>
+<p>Moderate prior strength visibly shrinks both coefficients. c_wt
+remains decisively significant, while c_cyl hovers near the one-tailed
+threshold (Pr(tail) = 0.054), indicating borderline relevance under
+regularization.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>sum_lmbcars3<span class="sc">$</span>coefficients</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227240 0.054255290 0.001585555 5.013964e-05         0.485</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt; c_wt        0.004931947 0.004972813 0.002816137 8.905406e-05         0.042</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.001253298 0.001225835 0.001512452 4.782795e-05         0.204</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.015804272          0.485</span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; c_wt        0.006343185          0.042</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.012742998          0.204</span></span></code></pre></div>
+<p>A slight increase in prior weight pushes c_cyl over the edge
+(Pr(tail) = 0.063), rendering it non-significant. This illustrates how
+modest prior adjustments can suppress marginal predictors and shift
+interpretive conclusions.</p>
+<p>Across models with increasing pwt, the posterior mean for c_cyl
+shrinks steadily toward zero, while its posterior standard deviation
+remains relatively stable. At low prior strength (pwt = 0.01), c_cyl is
+clearly significant (Pr(tail) = 0.005), closely tracking the classical
+estimate. As pwt increases to 0.50, the tail probability rises to
+0.050—right on the edge of one-tailed significance. At pwt = 0.55, c_cyl
+crosses the threshold (Pr(tail) = 0.056), demonstrating how modest prior
+influence can suppress marginal effects. In contrast, c_wt remains
+robustly significant across all prior settings, with posterior means and
+tail probabilities consistently indicating strong evidence. This
+progression highlights the diagnostic sensitivity of Bayesian inference
+and the interpretive leverage offered by prior calibration, especially
+when dealing with predictors of borderline relevance.”</p>
+</div>
+<div id="using-n_prior-as-an-alternative" class="section level2">
+<h2>3.3 Using n_prior as an alternative</h2>
+<p>An alternative to pwt is the n_prior argument, which allows users to
+specify the number of prior pseudo-observations. This framing is
+intuitive when the analyst views the prior as representing a
+hypothetical dataset. While less direct than pwt in controlling
+shrinkage, it offers a natural interpretation in terms of prior sample
+size. We revisit this idea later when splitting the dataset, but for now
+we illustrate its use and diagnostic implications.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Use Prior_Setup to illustrate prior strength</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>pscars4 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span> mtcars,<span class="at">n_prior=</span><span class="dv">1</span>)  <span class="do">## n_prior=1--&gt; pwt=0.0303</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co">#&gt; Computed pwt = 0.0303 from n_prior = 1 and n_effective = 32</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>pscars5 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span> mtcars,<span class="at">n_prior=</span><span class="dv">10</span>)  <span class="do">## n_prior=10--&gt; pwt=0.2381</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">#&gt; Computed pwt = 0.2381 from n_prior = 10 and n_effective = 32</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>pscars6 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span> mtcars,<span class="at">n_prior=</span><span class="dv">32</span>)  <span class="do">## n_prior=32--&gt; pwt=0.5</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co">#&gt; Computed pwt = 0.5 from n_prior = 32 and n_effective = 32</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">333</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>lmb_cars4<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars4<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars4<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars4<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>lmb_cars5<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars5<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars5<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars5<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>lmb_cars6<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars6<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars6<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars6<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>sum_lmbcars4<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars4)</span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a>sum_lmbcars5<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars5)</span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a>sum_lmbcars6<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars6)</span></code></pre></div>
+<p>As we can see from above, we now specify the n_prior argument instead
+of the pwt argument when calling the Prior_Setup function, everything
+else essentially remains the same as in the case where we use the pwt
+argument. The one thing to note is that the call to the Prior_Setup
+function now triggers a printout to the screen of the pwt argument and
+the information from which it was derived.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>sum_lmbcars4<span class="sc">$</span>coefficients</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227240 0.054219529 0.001310542 4.144298e-05         0.497</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="co">#&gt; c_wt        0.010627765 0.010637603 0.002224319 7.033913e-05         0.000</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002700709 0.002732247 0.001206419 3.815033e-05         0.013</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.015811104          0.497</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="co">#&gt; c_wt        0.000000000          0.000</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.003582039          0.013</span></span></code></pre></div>
+<p>With a very weak prior (n_prior = 1), the posterior remains close to
+the MLE. c_cyl retains directional significance, reinforcing its
+empirical signal when prior influence is minimal.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>sum_lmbcars5<span class="sc">$</span>coefficients</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227240 0.054170966 0.001583374 5.007069e-05         0.474</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co">#&gt; c_wt        0.008350386 0.008426458 0.002770144 8.759966e-05         0.002</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002121986 0.002091313 0.001499980 4.743353e-05         0.091</span></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.015789997          0.474</span></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co">#&gt; c_wt        0.001412799          0.002</span></span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.009094999          0.091</span></span></code></pre></div>
+<p>With a moderate prior (n_prior = 10), the posterior mean for c_cyl is
+visibly shrunk, and its tail probability increases, suggesting reduced
+confidence in its directional effect</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>sum_lmbcars5<span class="sc">$</span>coefficients</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227240 0.054170966 0.001583374 5.007069e-05         0.474</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="co">#&gt; c_wt        0.008350386 0.008426458 0.002770144 8.759966e-05         0.002</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002121986 0.002091313 0.001499980 4.743353e-05         0.091</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.015789997          0.474</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="co">#&gt; c_wt        0.001412799          0.002</span></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.009094999          0.091</span></span></code></pre></div>
+<p>At n_prior = 32 (equivalent to pwt = 0.5), the results mirror those
+from the earlier pwt-based model. This confirms the equivalence of the
+two approaches and reinforces the interpretive leverage offered by prior
+calibration.</p>
+</div>
+<div id="directly-specifying-prior-standard-deviations-with-sd" class="section level2">
+<h2>3.4 Directly Specifying Prior Standard Deviations with sd</h2>
+<p>The previous examples illustrate how pwt indirectly determines the
+prior standard deviations by blending the prior mean with the maximum
+likelihood estimate. As shown in the output from Prior_Setup, increasing
+pwt results in tighter prior distributions—reflected in smaller Prior.SD
+values and narrower credible intervals.</p>
+<p>In contrast, the sd argument allows the analyst to explicitly set the
+prior standard deviation for each coefficient. This offers direct
+control over the spread of the prior distribution, independent of sample
+size or likelihood curvature. It is especially useful when the analyst
+has domain knowledge about plausible effect sizes or wants to impose
+regularization that is not tied to the data-driven scale of the MLE. We
+now illustrate how to use the sd argument to manually specify prior
+uncertainty and compare its behavior to the pwt-based default.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>pscars7 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span>mtcars,<span class="at">sd=</span><span class="fu">c</span>(<span class="fl">0.005</span>,<span class="fl">0.010</span>,<span class="fl">0.0015</span>),<span class="at">n_prior=</span>(<span class="fl">0.01</span><span class="sc">/</span><span class="fl">0.99</span>)<span class="sc">*</span><span class="dv">32</span>)  <span class="do">## </span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="co">#&gt; Computed pwt from user-specified prior standard deviations (sd).</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>pscars7</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = gpm ~ c_wt + c_cyl, family = gaussian(), </span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a><span class="co">#&gt;     data = mtcars, n_prior = (0.01/0.99) * 32, sd = c(0.005, </span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="co">#&gt;         0.01, 0.0015))</span></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was provided to Prior_Setup (scalar prior sample size for precision / calibration; pwt is per coefficient):</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 0.3232 </span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 32 </span></span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a><span class="co">#&gt; Note: Differential prior weights (pwt) were specified per coefficient.</span></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper      pwt</span></span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.054227   0.0050  0.044427 0.064027 0.058549</span></span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a><span class="co">#&gt; c_wt          0.000000   0.0100 -0.019600 0.019600 0.041447</span></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a><span class="co">#&gt; c_cyl         0.000000   0.0015 -0.002940 0.002940 0.365816</span></span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a><span class="co">#&gt;             (Intercept)    c_wt   c_cyl</span></span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1"></a><span class="co">#&gt; (Intercept)           1  0.0000  0.0000</span></span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a><span class="co">#&gt; c_wt                  0  1.0000 -0.7825</span></span>
+<span id="cb21-28"><a href="#cb21-28" tabindex="-1"></a><span class="co">#&gt; c_cyl                 0 -0.7825  1.0000</span></span>
+<span id="cb21-29"><a href="#cb21-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  1e-04 </span></span>
+<span id="cb21-31"><a href="#cb21-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-32"><a href="#cb21-32" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb21-33"><a href="#cb21-33" tabindex="-1"></a><span class="co">#&gt;   shape = 0.6616</span></span>
+<span id="cb21-34"><a href="#cb21-34" tabindex="-1"></a><span class="co">#&gt;   rate = 7.99899e-05</span></span>
+<span id="cb21-35"><a href="#cb21-35" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 8.27125e+03 which implies 1/Expected precision  = 1.20901e-04 </span></span>
+<span id="cb21-36"><a href="#cb21-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-37"><a href="#cb21-37" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb21-38"><a href="#cb21-38" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<p>To impose differentiated prior strength across model coefficients, we
+manually specify a vector of prior standard deviations. The intercept
+and weight coefficients are assigned relatively weak priors (SDs of
+0.005 and 0.010), allowing moderate flexibility while still exerting
+some regularization. In contrast, the cylinder coefficient receives a
+much tighter prior (SD = 0.0015), reflecting stronger skepticism about
+its effect size. This yields credible intervals of ±0.0196 for c_wt and
+±0.00294 for c_cyl, and corresponds to implied pwt values of
+approximately 0.041 and 0.366 respectively. The result is a prior
+structure that allows the data to dominate where signal is strong, while
+constraining marginal predictors more aggressively. It is worth noting
+that the same kind of differentiated prior can be generated by passing
+pwt as a vector instead of as a scalar. This vectorized approach to
+prior specification offers a flexible alternative to scalar pwt,
+enabling analysts to encode domain-specific beliefs about relative
+effect plausibility directly into the prior structure—without relying on
+sample-size equivalence or uniform shrinkage.</p>
+<p>For this particular dataset, there are clear theoretical reasons to
+expect a near-proportional relationship between vehicle weight and fuel
+consumption. This aligns with physical models of rolling resistance and
+energy expenditure, which scale linearly with mass. In contrast, the
+theoretical basis for an effect from cylinder count is less direct.
+While cylinder number may proxy engine size or complexity, its impact on
+fuel consumption is mediated by design choices and driving conditions.
+As such, there is a compelling rationale for applying a more skeptical
+prior to the cylinder variable—reflecting weaker prior belief in its
+relevance. We now run the model using differentiated prior standard
+deviations and display the resulting output.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">333</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>lmb_cars7<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars7<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars7<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars7<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>sum_lmbcars7<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars7)</span>
+<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>sum_lmbcars7</span>
+<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="co">#&gt; Call</span></span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="co">#&gt; lmb(formula = gpm ~ c_wt + c_cyl, pfamily = dNormal(mu = pscars7$mu, </span></span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="co">#&gt;     Sigma = pscars7$Sigma, dispersion = pscars7$dispersion), </span></span>
+<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="co">#&gt;     data = mtcars)</span></span>
+<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="co">#&gt; Expected Residuals:</span></span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="co">#&gt;           Min            1Q        Median            3Q           Max </span></span>
+<span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="co">#&gt; -1.605366e-02 -5.186900e-03  6.241659e-05  4.642549e-03  1.339404e-02 </span></span>
+<span id="cb22-14"><a href="#cb22-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-15"><a href="#cb22-15" tabindex="-1"></a><span class="co">#&gt; Prior and Maximum Likelihood Estimates with Standard Deviations</span></span>
+<span id="cb22-16"><a href="#cb22-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-17"><a href="#cb22-17" tabindex="-1"></a><span class="co">#&gt;             Null Mode Prior Mean Prior.sd Max Like. Like.sd</span></span>
+<span id="cb22-18"><a href="#cb22-18" tabindex="-1"></a><span class="co">#&gt; (Intercept)  0.054227   0.054227 0.005000  0.054227   0.001</span></span>
+<span id="cb22-19"><a href="#cb22-19" tabindex="-1"></a><span class="co">#&gt; c_wt         0.000000   0.000000 0.010000  0.010960   0.002</span></span>
+<span id="cb22-20"><a href="#cb22-20" tabindex="-1"></a><span class="co">#&gt; c_cyl        0.000000   0.000000 0.001500  0.002785   0.001</span></span>
+<span id="cb22-21"><a href="#cb22-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-22"><a href="#cb22-22" tabindex="-1"></a><span class="co">#&gt; Bayesian Estimates Based on 1000 iid draws</span></span>
+<span id="cb22-23"><a href="#cb22-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-24"><a href="#cb22-24" tabindex="-1"></a><span class="co">#&gt;             Post.Mode Post.Mean   Post.Sd  MC Error Pr(Null_tail) SE(tail)</span></span>
+<span id="cb22-25"><a href="#cb22-25" tabindex="-1"></a><span class="co">#&gt; (Intercept) 5.423e-02 5.422e-02 1.404e-03 4.439e-05     4.970e-01    0.016</span></span>
+<span id="cb22-26"><a href="#cb22-26" tabindex="-1"></a><span class="co">#&gt; c_wt        1.388e-02 1.391e-02 2.079e-03 6.573e-05     0.000e+00    0.000</span></span>
+<span id="cb22-27"><a href="#cb22-27" tabindex="-1"></a><span class="co">#&gt; c_cyl       1.283e-04 1.509e-04 8.647e-04 2.734e-05     4.380e-01    0.016</span></span>
+<span id="cb22-28"><a href="#cb22-28" tabindex="-1"></a><span class="co">#&gt;             Pr(Prior_tail)    </span></span>
+<span id="cb22-29"><a href="#cb22-29" tabindex="-1"></a><span class="co">#&gt; (Intercept)          0.497    </span></span>
+<span id="cb22-30"><a href="#cb22-30" tabindex="-1"></a><span class="co">#&gt; c_wt                &lt;2e-16 ***</span></span>
+<span id="cb22-31"><a href="#cb22-31" tabindex="-1"></a><span class="co">#&gt; c_cyl                0.438    </span></span>
+<span id="cb22-32"><a href="#cb22-32" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
+<span id="cb22-33"><a href="#cb22-33" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
+<span id="cb22-34"><a href="#cb22-34" tabindex="-1"></a><span class="co">#&gt;   Directional Tail Summaries:</span></span>
+<span id="cb22-35"><a href="#cb22-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-36"><a href="#cb22-36" tabindex="-1"></a><span class="co">#&gt;                Metric vs Null vs Prior</span></span>
+<span id="cb22-37"><a href="#cb22-37" tabindex="-1"></a><span class="co">#&gt;  Mahalanobis Distance 11.1603  11.1603</span></span>
+<span id="cb22-38"><a href="#cb22-38" tabindex="-1"></a><span class="co">#&gt;      Tail Probability  0.0000   0.0000</span></span>
+<span id="cb22-39"><a href="#cb22-39" tabindex="-1"></a><span class="co">#&gt;   [Tail probabilities are P(delta^T * Z &lt;= 0) in whitened space]</span></span>
+<span id="cb22-40"><a href="#cb22-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-41"><a href="#cb22-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-42"><a href="#cb22-42" tabindex="-1"></a><span class="co">#&gt; Distribution Percentiles</span></span>
+<span id="cb22-43"><a href="#cb22-43" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-44"><a href="#cb22-44" tabindex="-1"></a><span class="co">#&gt;                   1.0%       2.5%       5.0%     Median      95.0%      97.5%</span></span>
+<span id="cb22-45"><a href="#cb22-45" tabindex="-1"></a><span class="co">#&gt; (Intercept)  0.0509665  0.0514507  0.0518178  0.0542199  0.0564434  0.0571390</span></span>
+<span id="cb22-46"><a href="#cb22-46" tabindex="-1"></a><span class="co">#&gt; c_wt         0.0087148  0.0097131  0.0105347  0.0138904  0.0173886  0.0179081</span></span>
+<span id="cb22-47"><a href="#cb22-47" tabindex="-1"></a><span class="co">#&gt; c_cyl       -0.0018906 -0.0015000 -0.0011939  0.0001024  0.0016031  0.0019327</span></span>
+<span id="cb22-48"><a href="#cb22-48" tabindex="-1"></a><span class="co">#&gt;             99.0%</span></span>
+<span id="cb22-49"><a href="#cb22-49" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.058</span></span>
+<span id="cb22-50"><a href="#cb22-50" tabindex="-1"></a><span class="co">#&gt; c_wt        0.019</span></span>
+<span id="cb22-51"><a href="#cb22-51" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002</span></span>
+<span id="cb22-52"><a href="#cb22-52" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-53"><a href="#cb22-53" tabindex="-1"></a><span class="co">#&gt; Effective Number of Parameters: 2.310513 </span></span>
+<span id="cb22-54"><a href="#cb22-54" tabindex="-1"></a><span class="co">#&gt; Expected Residual Deviance: 27.41328 </span></span>
+<span id="cb22-55"><a href="#cb22-55" tabindex="-1"></a><span class="co">#&gt; DIC: -218.1337 </span></span>
+<span id="cb22-56"><a href="#cb22-56" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-57"><a href="#cb22-57" tabindex="-1"></a><span class="co">#&gt; Expected Mean dispersion: 6.886086e-05 </span></span>
+<span id="cb22-58"><a href="#cb22-58" tabindex="-1"></a><span class="co">#&gt; Sq.root of Expected Mean dispersion: 0.008298245 </span></span>
+<span id="cb22-59"><a href="#cb22-59" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb22-60"><a href="#cb22-60" tabindex="-1"></a><span class="co">#&gt; Mean Likelihood Subgradient Candidates Per iid sample: 1</span></span></code></pre></div>
+<p>The posterior output reflects the impact of our manually specified
+prior standard deviations, which imposed differentiated regularization
+across coefficients. The prior for c_cyl was especially tight (SD =
+0.0015), resulting in substantial shrinkage: the posterior mean dropped
+to 0.00050, well below the MLE of 0.00278. Despite this, the posterior
+standard deviation remained relatively large in proportion, and the tail
+probability rose to 0.265—clearly non-significant under a one-tailed
+test. This confirms that the skeptical prior effectively suppressed a
+marginal signal. In contrast, the prior for c_wt was much looser (SD =
+0.010), allowing the posterior mean to remain close to the MLE (0.0136
+vs. 0.01096) and yielding a highly significant tail probability
+(&lt;2e-16). This reinforces the robustness of the weight effect, even
+under moderate regularization. The intercept, with a prior SD of 0.005,
+shows minimal shrinkage and remains centered near its MLE. The
+Mahalanobis distance (11.35) and directional tail probability (0.0000)
+indicate substantial prior-posterior conflict: the prior mean lies far
+from the posterior mean, and posterior draws almost never fall in the
+direction of the prior. This suggests that the prior structure is
+strongly contradicted by the data.</p>
+<p>This model demonstrates how targeted prior specification can clarify
+which predictors are robustly supported by the data and which are
+sensitive to prior skepticism. The differential shrinkage across
+dimensions is both diagnostically informative and theoretically
+justified.</p>
+</div>
+</div>
+<div id="adjusting-the-prior-means-using-intercept_source-effects_source-and-mu" class="section level1">
+<h1>4. Adjusting the prior means using
+<strong>intercept_source</strong>, <strong>effects_source</strong>, and
+<strong>mu</strong></h1>
+<p>By default, Prior_Setup() centers the prior mean for the intercept at
+the value estimated from the null model (i.e., the mean of the outcome),
+and sets the prior means for all effects to zero. However, in many
+modeling contexts, it is useful to shift these prior means to reflect
+domain knowledge, empirical estimates, or structural expectations. This
+can be done in three ways: by using intercept_source, by using
+effects_source, or by manually specifying a prior mean vector via
+mu.</p>
+<div id="using-intercept_source-and-effects_source" class="section level3">
+<h3>4.1 Using intercept_source and effects_source</h3>
+<p>These arguments allow the prior mean to be derived from fitted
+models: - intercept_source = “null_model”: sets the prior mean for the
+intercept based on a model with no predictors (i.e., just the mean of
+the outcome). - intercept_source = “full_model”: uses the intercept from
+the full model fit. - effects_source = “null_effects”: sets prior means
+for predictors to zero. - effects_source = “full_model”: uses the
+coefficients from the full model fit as prior means.</p>
+<p>This approach is useful when the analyst wants to regularize toward
+empirical estimates, especially in hierarchical or shrinkage
+settings.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>pscars8 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),<span class="at">data =</span>mtcars,<span class="at">intercept_source =</span> <span class="st">&quot;full_model&quot;</span>,<span class="at">effects_source =</span> <span class="st">&quot;full_model&quot;</span>)  <span class="do">## </span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="co">#&gt; Using default pwt = 0.01 (low-d default).</span></span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>pscars8</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = gpm ~ c_wt + c_cyl, family = gaussian(), </span></span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="co">#&gt;     data = mtcars, intercept_source = &quot;full_model&quot;, effects_source = &quot;full_model&quot;)</span></span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a><span class="co">#&gt; Setting up a Zellner g-type prior: </span></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a><span class="co">#&gt;   pwt = 0.01 </span></span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a><span class="co">#&gt;   g   = (1 - pwt)/pwt = 99 </span></span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was computed as (pwt / (1 - pwt)) * n_likelihood: </span></span>
+<span id="cb23-13"><a href="#cb23-13" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 0.3232 </span></span>
+<span id="cb23-14"><a href="#cb23-14" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 32 </span></span>
+<span id="cb23-15"><a href="#cb23-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-16"><a href="#cb23-16" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb23-17"><a href="#cb23-17" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb23-18"><a href="#cb23-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-19"><a href="#cb23-19" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb23-20"><a href="#cb23-20" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper  pwt</span></span>
+<span id="cb23-21"><a href="#cb23-21" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.054227 0.012407  0.029911 0.078544 0.01</span></span>
+<span id="cb23-22"><a href="#cb23-22" tabindex="-1"></a><span class="co">#&gt; c_wt          0.010960 0.020690 -0.029591 0.051511 0.01</span></span>
+<span id="cb23-23"><a href="#cb23-23" tabindex="-1"></a><span class="co">#&gt; c_cyl         0.002785 0.011335 -0.019432 0.025002 0.01</span></span>
+<span id="cb23-24"><a href="#cb23-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-25"><a href="#cb23-25" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb23-26"><a href="#cb23-26" tabindex="-1"></a><span class="co">#&gt;             (Intercept)    c_wt   c_cyl</span></span>
+<span id="cb23-27"><a href="#cb23-27" tabindex="-1"></a><span class="co">#&gt; (Intercept)           1  0.0000  0.0000</span></span>
+<span id="cb23-28"><a href="#cb23-28" tabindex="-1"></a><span class="co">#&gt; c_wt                  0  1.0000 -0.7825</span></span>
+<span id="cb23-29"><a href="#cb23-29" tabindex="-1"></a><span class="co">#&gt; c_cyl                 0 -0.7825  1.0000</span></span>
+<span id="cb23-30"><a href="#cb23-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-31"><a href="#cb23-31" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  0 </span></span>
+<span id="cb23-32"><a href="#cb23-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-33"><a href="#cb23-33" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb23-34"><a href="#cb23-34" tabindex="-1"></a><span class="co">#&gt;   shape = 0.6616</span></span>
+<span id="cb23-35"><a href="#cb23-35" tabindex="-1"></a><span class="co">#&gt;   rate = 5.77931e-05</span></span>
+<span id="cb23-36"><a href="#cb23-36" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 1.1448e+04 which implies 1/Expected precision  = 8.73514e-05 </span></span>
+<span id="cb23-37"><a href="#cb23-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb23-38"><a href="#cb23-38" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb23-39"><a href="#cb23-39" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<p>From this output, we can see that the prior means is very close to
+the MLE estimate even with a diffuse prior. Let’s now estimate the model
+using that prior.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">333</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>lmb_cars8<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars8<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars8<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars8<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>sum_lmbcars8<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars8)</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>sum_lmbcars8<span class="sc">$</span>coefficients1</span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a><span class="co">#&gt;              Null Mode  Prior Mean   Prior.sd   Max Like.     Like.sd</span></span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.05422724 0.054227240 0.01240650 0.054227240 0.001246900</span></span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a><span class="co">#&gt; c_wt        0.00000000 0.010959882 0.02068966 0.010959882 0.002079389</span></span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.00000000 0.002785106 0.01133530 0.002785106 0.001139240</span></span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>sum_lmbcars8<span class="sc">$</span>coefficients</span>
+<span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb24-12"><a href="#cb24-12" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227240 0.054219960 0.001237328 3.912774e-05         0.497</span></span>
+<span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a><span class="co">#&gt; c_wt        0.010959882 0.010969171 0.002100056 6.640959e-05         0.000</span></span>
+<span id="cb24-14"><a href="#cb24-14" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002785106 0.002814882 0.001139022 3.601904e-05         0.007</span></span>
+<span id="cb24-15"><a href="#cb24-15" tabindex="-1"></a><span class="co">#&gt;               SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb24-16"><a href="#cb24-16" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.01581110          0.497</span></span>
+<span id="cb24-17"><a href="#cb24-17" tabindex="-1"></a><span class="co">#&gt; c_wt        0.01581139          0.500</span></span>
+<span id="cb24-18"><a href="#cb24-18" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.01580883          0.491</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Use Prior_Setup to illustrate prior strength</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>lmcars_small <span class="ot">&lt;-</span> <span class="fu">lm</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt,  <span class="at">data =</span> mtcars)</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>lmcars_small</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a><span class="co">#&gt; lm(formula = gpm ~ c_wt, data = mtcars)</span></span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a><span class="co">#&gt; (Intercept)         c_wt  </span></span>
+<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a><span class="co">#&gt;     0.05423      0.01494</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co"># Use Prior_Setup to illustrate prior strength</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>pscars9 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(  <span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">family=</span><span class="fu">gaussian</span>(),  <span class="at">data =</span> mtcars,  <span class="at">pwt=</span><span class="fl">0.01</span>,<span class="at">mu=</span><span class="fu">c</span>(<span class="fl">0.05423</span>,<span class="fl">0.01494</span>,<span class="dv">0</span>))</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="co">#&gt; Using user-specified prior mean vector (mu).</span></span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>pscars9</span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = gpm ~ c_wt + c_cyl, family = gaussian(), </span></span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a><span class="co">#&gt;     data = mtcars, pwt = 0.01, mu = c(0.05423, 0.01494, 0))</span></span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a><span class="co">#&gt; Setting up a Zellner g-type prior: </span></span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a><span class="co">#&gt;   pwt = 0.01 </span></span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a><span class="co">#&gt;   g   = (1 - pwt)/pwt = 99 </span></span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was computed as (pwt / (1 - pwt)) * n_likelihood: </span></span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 0.3232 </span></span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 32 </span></span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb26-19"><a href="#cb26-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-20"><a href="#cb26-20" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb26-21"><a href="#cb26-21" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper  pwt</span></span>
+<span id="cb26-22"><a href="#cb26-22" tabindex="-1"></a><span class="co">#&gt; (Intercept)    0.05423 0.012419  0.029889 0.078571 0.01</span></span>
+<span id="cb26-23"><a href="#cb26-23" tabindex="-1"></a><span class="co">#&gt; c_wt           0.01494 0.020711 -0.025653 0.055533 0.01</span></span>
+<span id="cb26-24"><a href="#cb26-24" tabindex="-1"></a><span class="co">#&gt; c_cyl          0.00000 0.011347 -0.022240 0.022240 0.01</span></span>
+<span id="cb26-25"><a href="#cb26-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-26"><a href="#cb26-26" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb26-27"><a href="#cb26-27" tabindex="-1"></a><span class="co">#&gt;             (Intercept)    c_wt   c_cyl</span></span>
+<span id="cb26-28"><a href="#cb26-28" tabindex="-1"></a><span class="co">#&gt; (Intercept)           1  0.0000  0.0000</span></span>
+<span id="cb26-29"><a href="#cb26-29" tabindex="-1"></a><span class="co">#&gt; c_wt                  0  1.0000 -0.7825</span></span>
+<span id="cb26-30"><a href="#cb26-30" tabindex="-1"></a><span class="co">#&gt; c_cyl                 0 -0.7825  1.0000</span></span>
+<span id="cb26-31"><a href="#cb26-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-32"><a href="#cb26-32" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  0 </span></span>
+<span id="cb26-33"><a href="#cb26-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-34"><a href="#cb26-34" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb26-35"><a href="#cb26-35" tabindex="-1"></a><span class="co">#&gt;   shape = 0.6616</span></span>
+<span id="cb26-36"><a href="#cb26-36" tabindex="-1"></a><span class="co">#&gt;   rate = 5.79122e-05</span></span>
+<span id="cb26-37"><a href="#cb26-37" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 1.14245e+04 which implies 1/Expected precision  = 8.75314e-05 </span></span>
+<span id="cb26-38"><a href="#cb26-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb26-39"><a href="#cb26-39" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb26-40"><a href="#cb26-40" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">333</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>lmb_cars9<span class="ot">&lt;-</span><span class="fu">lmb</span>(<span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,<span class="at">pfamily=</span><span class="fu">dNormal</span>(<span class="at">mu=</span>pscars9<span class="sc">$</span>mu,<span class="at">Sigma=</span>pscars9<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> pscars9<span class="sc">$</span>dispersion),<span class="at">data =</span>mtcars)</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>sum_lmbcars9<span class="ot">&lt;-</span><span class="fu">summary</span>(lmb_cars9)</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>sum_lmbcars9<span class="sc">$</span>coefficients1</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a><span class="co">#&gt;              Null Mode Prior Mean   Prior.sd   Max Like.     Like.sd</span></span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.05422724    0.05423 0.01241928 0.054227240 0.001246900</span></span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a><span class="co">#&gt; c_wt        0.00000000    0.01494 0.02071097 0.010959882 0.002079389</span></span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.00000000    0.00000 0.01134697 0.002785106 0.001139240</span></span>
+<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a>sum_lmbcars9<span class="sc">$</span>coefficients</span>
+<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a><span class="co">#&gt;               Post.Mode   Post.Mean     Post.Sd     MC Error Pr(Null_tail)</span></span>
+<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.054227267 0.054219980 0.001238602 3.916804e-05         0.497</span></span>
+<span id="cb27-12"><a href="#cb27-12" tabindex="-1"></a><span class="co">#&gt; c_wt        0.010999683 0.011008982 0.002102218 6.647798e-05         0.000</span></span>
+<span id="cb27-13"><a href="#cb27-13" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002757255 0.002787062 0.001140195 3.605614e-05         0.008</span></span>
+<span id="cb27-14"><a href="#cb27-14" tabindex="-1"></a><span class="co">#&gt;                SE(tail) Pr(Prior_tail)</span></span>
+<span id="cb27-15"><a href="#cb27-15" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.015811104          0.497</span></span>
+<span id="cb27-16"><a href="#cb27-16" tabindex="-1"></a><span class="co">#&gt; c_wt        0.005480785          0.031</span></span>
+<span id="cb27-17"><a href="#cb27-17" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.002817091          0.008</span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="co"># Use Prior_Setup to illustrate prior strength</span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>ps4 <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(</span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>  <span class="at">formula =</span> gpm <span class="sc">~</span>  c_wt<span class="sc">+</span>c_cyl,</span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>  <span class="at">family=</span><span class="fu">gaussian</span>(),</span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a>  <span class="at">n_prior=</span><span class="dv">1</span></span>
+<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a><span class="do">##  ,pwt = c(0.1, 0.5),     # Example vector weights</span></span>
+<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a><span class="do">##  priorsd = c(5, 2),     # Custom SDs for each predictor</span></span>
+<span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a><span class="do">##  priorN = NULL          # Leave NULL to focus on pwt and priorsd</span></span>
+<span id="cb28-10"><a href="#cb28-10" tabindex="-1"></a>)</span>
+<span id="cb28-11"><a href="#cb28-11" tabindex="-1"></a><span class="co">#&gt; Computed pwt = 0.0303 from n_prior = 1 and n_effective = 32</span></span>
+<span id="cb28-12"><a href="#cb28-12" tabindex="-1"></a>ps4</span>
+<span id="cb28-13"><a href="#cb28-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-14"><a href="#cb28-14" tabindex="-1"></a><span class="co">#&gt; Call:  Prior_Setup(formula = gpm ~ c_wt + c_cyl, family = gaussian(), </span></span>
+<span id="cb28-15"><a href="#cb28-15" tabindex="-1"></a><span class="co">#&gt;     data = mtcars, n_prior = 1)</span></span>
+<span id="cb28-16"><a href="#cb28-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-17"><a href="#cb28-17" tabindex="-1"></a><span class="co">#&gt; Setting up a Zellner g-type prior: </span></span>
+<span id="cb28-18"><a href="#cb28-18" tabindex="-1"></a><span class="co">#&gt;   pwt = 0.0303 </span></span>
+<span id="cb28-19"><a href="#cb28-19" tabindex="-1"></a><span class="co">#&gt;   g   = (1 - pwt)/pwt = 32 </span></span>
+<span id="cb28-20"><a href="#cb28-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-21"><a href="#cb28-21" tabindex="-1"></a><span class="co">#&gt; Note: n_prior was computed as (pwt / (1 - pwt)) * n_likelihood: </span></span>
+<span id="cb28-22"><a href="#cb28-22" tabindex="-1"></a><span class="co">#&gt;   n_prior      = 1 </span></span>
+<span id="cb28-23"><a href="#cb28-23" tabindex="-1"></a><span class="co">#&gt;   n_likelihood = 32 </span></span>
+<span id="cb28-24"><a href="#cb28-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-25"><a href="#cb28-25" tabindex="-1"></a><span class="co">#&gt; Prior Setup Summary</span></span>
+<span id="cb28-26"><a href="#cb28-26" tabindex="-1"></a><span class="co">#&gt; ====================</span></span>
+<span id="cb28-27"><a href="#cb28-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-28"><a href="#cb28-28" tabindex="-1"></a><span class="co">#&gt; Prior Estimates with 95% Confidence Intervals</span></span>
+<span id="cb28-29"><a href="#cb28-29" tabindex="-1"></a><span class="co">#&gt;             Prior.Mean Prior.SD  CI.Lower CI.Upper      pwt</span></span>
+<span id="cb28-30"><a href="#cb28-30" tabindex="-1"></a><span class="co">#&gt; (Intercept)   0.054227 0.007549  0.039432 0.069022 0.030303</span></span>
+<span id="cb28-31"><a href="#cb28-31" tabindex="-1"></a><span class="co">#&gt; c_wt          0.000000 0.012589 -0.024673 0.024673 0.030303</span></span>
+<span id="cb28-32"><a href="#cb28-32" tabindex="-1"></a><span class="co">#&gt; c_cyl         0.000000 0.006897 -0.013518 0.013518 0.030303</span></span>
+<span id="cb28-33"><a href="#cb28-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-34"><a href="#cb28-34" tabindex="-1"></a><span class="co">#&gt; Prior Correlation Matrix</span></span>
+<span id="cb28-35"><a href="#cb28-35" tabindex="-1"></a><span class="co">#&gt;             (Intercept)    c_wt   c_cyl</span></span>
+<span id="cb28-36"><a href="#cb28-36" tabindex="-1"></a><span class="co">#&gt; (Intercept)           1  0.0000  0.0000</span></span>
+<span id="cb28-37"><a href="#cb28-37" tabindex="-1"></a><span class="co">#&gt; c_wt                  0  1.0000 -0.7825</span></span>
+<span id="cb28-38"><a href="#cb28-38" tabindex="-1"></a><span class="co">#&gt; c_cyl                 0 -0.7825  1.0000</span></span>
+<span id="cb28-39"><a href="#cb28-39" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-40"><a href="#cb28-40" tabindex="-1"></a><span class="co">#&gt; Conditional Dispersion (Gaussian family):  1e-04 </span></span>
+<span id="cb28-41"><a href="#cb28-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-42"><a href="#cb28-42" tabindex="-1"></a><span class="co">#&gt; Gamma Prior on Residual Precision:</span></span>
+<span id="cb28-43"><a href="#cb28-43" tabindex="-1"></a><span class="co">#&gt;   shape = 1</span></span>
+<span id="cb28-44"><a href="#cb28-44" tabindex="-1"></a><span class="co">#&gt;   rate = 8.54744e-05</span></span>
+<span id="cb28-45"><a href="#cb28-45" tabindex="-1"></a><span class="co">#&gt;   Expected precision (inverse variance) = 1.16994e+04 which implies 1/Expected precision  = 8.54744e-05 </span></span>
+<span id="cb28-46"><a href="#cb28-46" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb28-47"><a href="#cb28-47" tabindex="-1"></a><span class="co">#&gt;   Applicable to gaussian models with compound pfamilies (e.g., dNormal_Gamma, dIndependent_Normal_Gamma),</span></span>
+<span id="cb28-48"><a href="#cb28-48" tabindex="-1"></a><span class="co">#&gt;   as well as for Gamma regression, quasipoisson, and quasibinomial models.</span></span></code></pre></div>
+<hr />
+</div>
+<div id="the-role-of-the-intercept_source-in-setting-the-prior-mean-for-the-intercept" class="section level2">
+<h2>4.2 The role of the <code>intercept_source</code> in setting the
+prior mean for the intercept</h2>
+<p>The <code>intercept_source</code> argument is used to initialize the
+prior mean for the intercept. Our Prior_Setup function provides two
+options for setting the prior mean for the intercept. The first (the
+default) is to initialize the prior mean to the intercept from a call to
+the <strong>glm()</strong> function for the null model, while the
+alternative is to initializes the prior mean to the intercept to the
+intercept from a a call to the <strong>glm()</strong> for a
+<strong>null</strong> intercept only model.</p>
+<ul>
+<li><strong><code>intercept_source</code></strong>
+<ul>
+<li><code>&quot;null_model&quot;</code>: <span class="math inline">\(\mu_0 =
+\widehat\beta_{0,\mathrm{null}}\)</span><br />
+</li>
+<li><code>&quot;full_model&quot;</code>: <span class="math inline">\(\mu_0 =
+\widehat\beta_{0,\mathrm{MLE}}\)</span></li>
+</ul></li>
+</ul>
+<p>The choice between these two specifications has some implications for
+the resulting estimates and standard errors for the effects parameters.
+Under the former, tail probabilities for effects under the default
+(discussed more below) are likely to be relatively close to one sided
+p-values in the classical frequentist model. The other alternative can
+be a good choice if we want to test the hypothesis that the true model
+is an intercept only model. The extent to which these two specifications
+are meaningfully different to a substantial degree from each other
+depends to a substantial degree on whether variables have been centered
+(in the case of continuous variables) and/or have been assigned
+reasonable reference levels (in the case of categorical variable).</p>
+<p>The reason the null model is the default is because it tends to yield
+more reasonable predictions when combined with null effects.</p>
+<p>In <code>glmbayes</code>, the default prior centering reflects a
+pragmatic balance between statistical rigor and user convenience:</p>
+<div id="intercept-prior-centered-at-full-model-mle" class="section level3">
+<h3>4.2.1 Intercept Prior: Centered at Full Model MLE</h3>
+<p>By default, the prior for the intercept is centered at the maximum
+likelihood estimate from the full model. This avoids unintended
+shrinkage caused by poor centering or unbalanced predictors—especially
+in models with categorical variables. When predictors are not scaled or
+centered, the intercept in a full model can diverge substantially from
+the null model baseline. Even a weak prior (small <code>pwt</code>) can
+exert disproportionate influence if the prior mean is misaligned.</p>
+<p>Centering the intercept prior at the full model MLE ensures:</p>
+<ul>
+<li>Alignment with the model’s structural interpretation of the
+intercept<br />
+</li>
+<li>Robustness to variable coding and imbalance<br />
+</li>
+<li>Minimal distortion from prior miscentering<br />
+</li>
+<li>A smoother user experience without requiring manual
+preprocessing</li>
+</ul>
+</div>
+<div id="effect-priors-centered-at-zero" class="section level3">
+<h3>4.2.2 Effect Priors: Centered at Zero</h3>
+<p>By contrast, the default prior for effect coefficients is centered at
+zero. This reflects a common statistical convention: the null hypothesis
+typically assumes no effect. Centering at zero allows users to interpret
+posterior summaries in terms of deviation from no effect, and makes tail
+probabilities (e.g., <span class="math inline">\(\Pr(\beta &lt;
+0)\)</span>) directly meaningful.</p>
+<p>This setup also makes it easy to specify informative priors centered
+at zero simply by adjusting:</p>
+<ul>
+<li><code>pwt</code>: the prior weight, interpreted as relative sample
+size<br />
+</li>
+<li><code>n_prior</code>: the number of pseudo-observations contributing
+to the prior</li>
+</ul>
+</div>
+<div id="summary" class="section level3">
+<h3>4.2.3 Summary</h3>
+<p>The default prior centering in <code>glmbayes</code> reflects two
+complementary principles: - For intercepts: center at the full model MLE
+to avoid misalignment and unintended shrinkage. - For effects: center at
+zero to reflect the null hypothesis and support intuitive posterior
+interpretation.</p>
+<p>This design ensures that default behavior is both statistically sound
+and user-friendly, while allowing flexible prior specification through
+<code>pwt</code> or <code>n_prior</code>.</p>
+</div>
+</div>
+<div id="the-role-of-the-effects_source-in-setting-the-prior-mean-for-the-model-effects" class="section level2">
+<h2>4.3 The role of the <code>effects_source</code> in setting the prior
+mean for the model effects</h2>
+<p>Like with the <code>intercept_source</code> argument, our Prior_Setup
+function provides two alternative options.</p>
+<p>The default is to set them to be <strong>null_effects</strong> (in
+other words to equal zero). When combined with the default setting for
+the <strong>intercept_source</strong>, this tends to result in tail
+probabilities close to the one-sided p-values in the classical
+frequentist model (the same may or may not be true when the
+intercept_source is set equal to the null_model).</p>
+<p>The alternative is to set them equal to the estimates from the
+<strong>full_model</strong>. This is likely to be preferred if one wants
+to minimize the impact of the prior on the final estimates in the sense
+that they mirror the classical frequentist estimates.</p>
+<ul>
+<li><strong><code>effects_source</code></strong>
+<ul>
+<li><code>&quot;null_effects&quot;</code>: for each non-intercept <span class="math inline">\(j\)</span>, <span class="math inline">\(\mu_j =
+0\)</span><br />
+</li>
+<li><code>&quot;full_model&quot;</code>: for each non-intercept <span class="math inline">\(j\)</span>, <span class="math inline">\(\mu_j =
+\widehat\beta_{j,\mathrm{MLE}}\)</span></li>
+</ul></li>
+</ul>
+</div>
+<div id="manually-setting-prior-means-using-mu" class="section level2">
+<h2>4.4 Manually Setting Prior Means Using <code>mu</code></h2>
+<p>In addition to the automated centering mechanisms provided by
+<code>intercept_source</code> and <code>effects_source</code>, users may
+directly specify the prior mean vector through the <code>mu</code>
+argument. When supplied, <code>mu</code> overrides all other centering
+logic and is used exactly as provided.</p>
+<div id="how-mu-interacts-with-the-other-arguments" class="section level3">
+<h3>4.4.1 How <code>mu</code> interacts with the other arguments</h3>
+<p>The precedence rules in <code>Prior_Setup()</code> are:</p>
+<ol style="list-style-type: decimal">
+<li><p>If <code>mu</code> is supplied, it is used verbatim, and
+<code>intercept_source</code> and <code>effects_source</code> are
+ignored.</p></li>
+<li><p>If <code>mu</code> is not supplied, the function constructs the
+prior mean vector using:</p>
+<ul>
+<li><code>intercept_source</code> for the intercept</li>
+<li><code>effects_source</code> for all non‑intercept coefficients</li>
+</ul></li>
+<li><p>The length of <code>mu</code> must match the number of
+coefficients in the model matrix.</p></li>
+</ol>
+</div>
+<div id="requirements-for-userspecified-mu" class="section level3">
+<h3>4.4.2 Requirements for user‑specified <code>mu</code></h3>
+<p><code>mu</code> may be provided as:</p>
+<ul>
+<li>a numeric vector of length equal to the number of coefficients,
+or</li>
+<li>a matrix of dimension nvar × 1</li>
+</ul>
+<p>The function validates:</p>
+<ul>
+<li>numeric type</li>
+<li>correct length</li>
+<li>correct dimensions</li>
+<li>assigns coefficient names automatically</li>
+</ul>
+<p>If the dimensions do not match, the function stops with an
+informative error.</p>
+</div>
+<div id="when-manual-mu-is-useful" class="section level3">
+<h3>4.4.3 When manual <code>mu</code> is useful</h3>
+<p>Manually specifying <code>mu</code> is appropriate when:</p>
+<ul>
+<li>domain knowledge suggests plausible effect sizes</li>
+<li>the analyst wants to encode directional or magnitude
+expectations</li>
+<li>the default centering (null model or full model) is
+inappropriate</li>
+<li>different predictors require different prior locations</li>
+<li>the model is part of a hierarchical or multi‑level structure</li>
+<li>the analyst wants to reproduce a prior from an external study</li>
+</ul>
+</div>
+<div id="example-specifying-a-custom-prior-mean" class="section level3">
+<h3>4.4.4 Example: specifying a custom prior mean</h3>
+<p>A simple example using the <code>mtcars</code> data:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>ps_custom <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(</span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>  gpm <span class="sc">~</span> c_wt <span class="sc">+</span> c_cyl,</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a>  <span class="at">pwt  =</span> <span class="fl">0.01</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>  <span class="at">mu   =</span> <span class="fu">c</span>(<span class="fl">0.05423</span>, <span class="fl">0.01494</span>, <span class="dv">0</span>)   <span class="co"># intercept, c_wt, c_cyl</span></span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>)</span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a><span class="co">#&gt; Using user-specified prior mean vector (mu).</span></span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a>ps_custom<span class="sc">$</span>mu</span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a><span class="co">#&gt;                  mu</span></span>
+<span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a><span class="co">#&gt; (Intercept) 0.05423</span></span>
+<span id="cb29-13"><a href="#cb29-13" tabindex="-1"></a><span class="co">#&gt; c_wt        0.01494</span></span>
+<span id="cb29-14"><a href="#cb29-14" tabindex="-1"></a><span class="co">#&gt; c_cyl       0.00000</span></span></code></pre></div>
+<p>This produces a prior centered at the user‑specified values, with the
+prior covariance still determined by <code>pwt</code> (or by
+<code>n_prior</code> or <code>sd</code>, if supplied).</p>
+</div>
+<div id="relationship-between-mu-and-prior-strength" class="section level3">
+<h3>4.4.5 Relationship between <code>mu</code> and prior strength</h3>
+<p>It is important to distinguish:</p>
+<ul>
+<li><code>mu</code> controls the location of the prior, while</li>
+<li><code>pwt</code>, <code>n_prior</code>, and <code>sd</code> control
+the strength of the prior.</li>
+</ul>
+<p>Thus:</p>
+<ul>
+<li>A strongly informative prior mean will have minimal influence if
+<code>pwt</code> is small.</li>
+<li>A weakly informative prior mean can have substantial influence if
+<code>pwt</code> is large.</li>
+</ul>
+</div>
+<div id="summary-1" class="section level3">
+<h3>4.4.6 Summary</h3>
+<ul>
+<li>Use <code>mu</code> when you want full control over prior
+centering.</li>
+<li>Use <code>intercept_source</code> and <code>effects_source</code>
+when you want automatic empirical centering.</li>
+<li><code>mu</code> always overrides the other two.</li>
+<li>Prior strength is controlled separately through <code>pwt</code>,
+<code>n_prior</code>, or <code>sd</code>.</li>
+</ul>
+</div>
+</div>
+<div id="practical-considerations-for-prior-means-and-prior-strength" class="section level2">
+<h2>5. Practical Considerations for Prior Means and Prior Strength</h2>
+<p>Specifying a prior involves two connected decisions:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Where to center the prior</strong> (the prior mean)</li>
+<li><strong>How strongly the prior should pull the posterior</strong>
+(the prior variance or weight)</li>
+</ol>
+<p>The behavior of the posterior depends on both. This section
+summarizes practical considerations that help guide the choice of
+<code>intercept_source</code>, <code>effects_source</code>,
+<code>mu</code>, and the prior strength parameters <code>pwt</code>,
+<code>n_prior</code>, and <code>sd</code>.</p>
+<div id="centering-and-scaling-of-predictors" class="section level3">
+<h3>5.1 Centering and Scaling of Predictors</h3>
+<p>The effect of prior centering depends on how predictors are
+coded.</p>
+<ul>
+<li>Continuous predictors should ideally be centered. This aligns the
+null-model intercept with the full-model intercept and reduces
+unintended shrinkage.</li>
+<li>Categorical predictors should have interpretable reference levels.
+Poor reference levels can cause the full-model intercept to differ
+substantially from the null-model intercept.</li>
+</ul>
+<p>When predictors are not centered or reference levels are not
+meaningful, using <code>intercept_source = &quot;full_model&quot;</code> often
+produces more stable behavior.</p>
+</div>
+<div id="choosing-the-prior-mean-for-the-intercept" class="section level3">
+<h3>5.2 Choosing the Prior Mean for the Intercept</h3>
+<ul>
+<li><p><code>intercept_source = &quot;null_model&quot;</code> (default)<br />
+Appropriate when predictors are centered or balanced. Posterior tail
+probabilities resemble classical one-sided p-values.</p></li>
+<li><p><code>intercept_source = &quot;full_model&quot;</code><br />
+Preferable when predictors are uncentered or categorical. This avoids
+shrinkage toward an intercept that does not reflect the structure of the
+full model.</p></li>
+</ul>
+<p>The intercept prior can have a noticeable influence when predictors
+are poorly centered, even when <code>pwt</code> is small.</p>
+</div>
+<div id="choosing-the-prior-means-for-the-effects" class="section level3">
+<h3>5.3 Choosing the Prior Means for the Effects</h3>
+<ul>
+<li><p><code>effects_source = &quot;null_effects&quot;</code> (default)<br />
+Centers all effects at zero. Appropriate for hypothesis testing or when
+the analyst wants posterior summaries relative to the classical
+null.</p></li>
+<li><p><code>effects_source = &quot;full_model&quot;</code><br />
+Centers the prior at the maximum likelihood estimates. Useful when the
+goal is regularization rather than hypothesis testing, or when the
+analyst wants the posterior to remain close to the classical
+estimates.</p></li>
+</ul>
+</div>
+<div id="when-to-specify-mu-directly" class="section level3">
+<h3>5.4 When to Specify <code>mu</code> Directly</h3>
+<p>Manual specification of <code>mu</code> is appropriate when:</p>
+<ul>
+<li>domain knowledge suggests plausible effect sizes</li>
+<li>the analyst wants to encode directional expectations</li>
+<li>the default centering mechanisms are inappropriate</li>
+<li>different predictors require different prior locations</li>
+<li>the model is part of a hierarchical or multi-level structure</li>
+</ul>
+<p>When <code>mu</code> is supplied, it overrides both
+<code>intercept_source</code> and <code>effects_source</code>.</p>
+</div>
+<div id="choosing-the-strength-of-the-prior" class="section level3">
+<h3>5.5 Choosing the Strength of the Prior</h3>
+<p>The strength of the prior is controlled by:</p>
+<ul>
+<li><code>pwt</code>: prior weight relative to the likelihood</li>
+<li><code>n_prior</code>: effective prior sample size</li>
+<li><code>sd</code>: prior standard deviations (converted internally to
+<code>pwt</code>)</li>
+</ul>
+<p>These parameters determine how strongly the prior mean influences the
+posterior.</p>
+<ul>
+<li><p>Small <code>pwt</code> (for example, 0.01)<br />
+The posterior remains close to the maximum likelihood estimate unless
+the prior mean is far from the likelihood estimate.</p></li>
+<li><p>Moderate or large <code>pwt</code> (for example, from
+<code>n_prior = 1</code> or small <code>sd</code>)<br />
+The posterior is pulled more strongly toward the prior mean.</p></li>
+<li><p>Vector <code>pwt</code> or vector <code>sd</code><br />
+Allows different predictors to have different prior strengths.</p></li>
+</ul>
+</div>
+<div id="interaction-between-prior-location-and-prior-strength" class="section level3">
+<h3>5.6 Interaction Between Prior Location and Prior Strength</h3>
+<p>Prior location and prior strength must be considered together.</p>
+<ul>
+<li>A well-chosen prior mean has little effect if the prior is
+weak.</li>
+<li>A poorly chosen prior mean can have substantial influence if the
+prior is strong.</li>
+<li>Using <code>&quot;full_model&quot;</code> centering with a strong prior can
+effectively reproduce the maximum likelihood estimates.</li>
+<li>Using <code>&quot;null_effects&quot;</code> with a strong prior can shrink
+effects strongly toward zero.</li>
+</ul>
+<p>This interaction is especially important when predictors are
+uncentered or when the intercept differs substantially between the null
+and full models.</p>
+</div>
+<div id="summary-2" class="section level3">
+<h3>5.7 Summary</h3>
+<ul>
+<li>Prior means (<code>intercept_source</code>,
+<code>effects_source</code>, <code>mu</code>) determine
+<strong>where</strong> the prior pulls.</li>
+<li>Prior strength (<code>pwt</code>, <code>n_prior</code>,
+<code>sd</code>) determines <strong>how strongly</strong> it pulls.</li>
+<li>Center and scale predictors when possible.</li>
+<li>Choose prior centering based on the modeling goal:
+<ul>
+<li>classical-like inference: <code>&quot;null_model&quot;</code> and
+<code>&quot;null_effects&quot;</code></li>
+<li>regularization toward empirical estimates:
+<code>&quot;full_model&quot;</code></li>
+<li>domain-informed priors: <code>mu</code></li>
+</ul></li>
+<li>Always consider prior strength when evaluating the impact of prior
+centering.</li>
+</ul>
+<p>These considerations help ensure that prior specification behaves
+predictably and supports the analyst’s inferential goals.</p>
+</div>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-EvansMoshonov2006" class="csl-entry">
+Evans, Michael, and Hadas Moshonov. 2006. <span>“Checking for Prior-Data
+Conflict.”</span> <em>Bayesian Analysis</em> 1 (4): 893–914. <a href="https://doi.org/10.1214/06-BA129">https://doi.org/10.1214/06-BA129</a>.
+</div>
+<div id="ref-McCullagh1989" class="csl-entry">
+McCullagh, P., and J. A. Nelder. 1989. <em><span>Generalized Linear
+Models</span></em>. London: Chapman; Hall.
+</div>
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+<div id="ref-VenablesRipley2002" class="csl-entry">
+Venables, W. N., and B. D. Ripley. 2002. <em><span class="nocase">Modern
+Applied Statistics with S</span></em>. New York: Springer.
+</div>
+<div id="ref-zellner1986gprior" class="csl-entry">
+Zellner, Arnold. 1986. <span>“On Assessing Prior Distributions and
+Bayesian Regression Analysis with g‐prior Distributions.”</span> In
+<em>Bayesian Inference and Decision Techniques: Essays in Honor of Bruno
+de Finetti</em>, edited by P. K. Goel and Arnold Zellner, 6:233–43.
+Studies in Bayesian Econometrics and Statistics. Elsevier.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

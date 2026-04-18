@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A09: Parallel Sampling Implementation using RcppParallel</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A09: Parallel Sampling
+Implementation using RcppParallel</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(glmbayes)</span></code></pre></div>
+<div id="chapter-a09-parallel-sampling-implementation-using-rcppparallel" class="section level1">
+<h1>Chapter A09: Parallel Sampling Implementation using
+RcppParallel</h1>
+<div id="introduction" class="section level2">
+<h2>1. Introduction</h2>
+<p>The <code>glmbayes</code> package uses <strong>parallel
+sampling</strong> for many envelope-based samplers because generating
+iid draws can be computationally expensive and acceptance rates may be
+low. By default, <code>use_parallel = TRUE</code>, so large fits often
+run on multiple cores via RcppParallel.</p>
+<p>However, RcppParallel-based sampling <strong>cannot be
+interrupted</strong>. Once the main parallel loop starts, the R session
+is blocked until it completes. Users may experience the sampler as
+“freezing” during long runs. To address this, the package runs
+<strong>pilots</strong> that estimate how long sampling will take and,
+in interactive sessions, asks users to opt in or out before the
+non-interruptible phase begins.</p>
+<p>This chapter describes the parallel sampling implementation, the
+pilot logic, and the interactive safeguards. Parallel <strong>envelope
+construction</strong> (e.g., in <code>EnvelopeDispersionBuild</code>)
+uses a similar pilot pattern and is noted briefly. GPU acceleration via
+OpenCL is covered in Chapter A10.</p>
+</div>
+<div id="where-parallel-sampling-is-used" class="section level2">
+<h2>2. Where Parallel Sampling Is Used</h2>
+<p>Parallel sampling is used in two main C++ paths:</p>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="23%" />
+<col width="26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Entry point</th>
+<th>When</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>rNormalGLM_cpp</code></td>
+<td>Non-Gaussian GLMs (Poisson, binomial, Gamma, etc.) with
+<code>use_parallel = TRUE</code> and <code>n &gt; 1</code></td>
+<td>Called by <code>rNormal_reg</code></td>
+</tr>
+<tr class="even">
+<td><code>rIndepNormalGammaReg_cpp</code></td>
+<td>Gaussian with independent Normal–Gamma prior,
+<code>use_parallel = TRUE</code> and <code>n &gt; 1</code></td>
+<td>Uses <code>rIndepNormalGammaReg_std_parallel_cpp</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Serial fallback:</strong> When
+<code>use_parallel = FALSE</code> or <code>n == 1</code>, the serial
+path is used instead. The serial path includes
+<code>Rcpp::checkUserInterrupt()</code> in its loop, so it can be
+interrupted (e.g., with Ctrl+C).</p>
+</div>
+<div id="why-parallel-sampling-cannot-be-interrupted" class="section level2">
+<h2>3. Why Parallel Sampling Cannot Be Interrupted</h2>
+<p>RcppParallel uses Intel TBB (Threading Building Blocks) to distribute
+work across multiple threads. The R main thread is blocked while
+<code>RcppParallel::parallelFor()</code> runs. R’s
+<code>R_CheckUserInterrupt()</code> is not safe to call from worker
+threads, and there is no supported way to cancel a running TBB task from
+R. As a result:</p>
+<ul>
+<li>During the parallel phase, Ctrl+C and similar interrupts do not
+reliably stop the run.</li>
+<li>The session may appear to hang until the run completes.</li>
+</ul>
+<p>The pilot phase mitigates this by estimating runtime <em>before</em>
+the full parallel run and giving users a chance to decline.</p>
+</div>
+<div id="pilot-based-time-estimation-and-opt-in" class="section level2">
+<h2>4. Pilot-Based Time Estimation and Opt-In</h2>
+<p>The pilot flow consists of:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Pilot run</strong> – A small serial or parallel batch (e.g.,
+1 draw or a few draws) to measure per-draw or per-observation time.</li>
+<li><strong>Calibration run</strong> – A larger parallel batch
+(typically up to ~1% of <code>n</code>, capped so it takes at most ~5
+minutes) to refine the time estimate.</li>
+<li><strong>Time estimate</strong> – Extrapolation to the full sample
+size <code>n</code>.</li>
+<li><strong>Interactive safeguard</strong> – If the estimate exceeds 5
+minutes, the user is prompted in interactive sessions.</li>
+<li><strong>Non-interactive behavior</strong> – In non-interactive
+sessions (e.g., R CMD check, batch jobs), the run proceeds automatically
+without prompting.</li>
+</ol>
+<p><strong>Threshold:</strong> 300 seconds (5 minutes). Above this, the
+user is asked whether to continue.</p>
+<p><strong>Prompt:</strong>
+<code>&quot;Estimated simulation exceeds 5 minutes. Continue? [y/N]: &quot;</code>
+(or similar).</p>
+<p><strong>Responses:</strong> <code>y</code>, <code>yes</code>,
+<code>1</code>, or <code>continue</code> → proceed; <code>n</code>,
+<code>no</code>, <code>2</code>, or empty → stop with an informative
+error.</p>
+</div>
+<div id="rnormalglm-pilot-logic-non-gaussian-glms" class="section level2">
+<h2>5. rNormalGLM Pilot Logic (Non-Gaussian GLMs)</h2>
+<p>For non-Gaussian GLMs (Poisson, binomial, Gamma, etc.), the
+<code>rNormalGLM</code> C++ path uses
+<code>run_rcppparallel_pilot()</code>:</p>
+<div id="single-draw-test" class="section level3">
+<h3>5.1 Single-Draw Test</h3>
+<p>A single draw is generated in <strong>serial</strong> mode to measure
+per-draw time and to detect problems early.</p>
+</div>
+<div id="max_draws-cap-and-zero-accepts" class="section level3">
+<h3>5.2 max_draws Cap and Zero Accepts</h3>
+<p>If the pilot hits an internal <code>max_draws</code> cap with
+<strong>zero</strong> accepted draws, this indicates the envelope may be
+insufficiently tight. The code warns that:</p>
+<ul>
+<li>The envelope may be too loose for the posterior.</li>
+<li>The full run has no cap and cannot be interrupted.</li>
+<li>If acceptance remains zero, the simulation may appear to hang
+indefinitely.</li>
+</ul>
+<p>Recommended actions include: - Set <code>use_opencl = TRUE</code> or
+increase the requested number of draws (which affects
+<code>n_envopt</code> and may tighten the envelope). - Try a different
+<code>Gridtype</code> to force a tighter envelope. - Strengthen the
+prior.</p>
+<p>An interactive prompt then asks:
+<code>&quot;Enter 1 to continue full run, 2 to stop and return partial results: &quot;</code>.
+If the user chooses 2, partial test results are returned and the full
+run is aborted.</p>
+</div>
+<div id="calibration-run-and-refined-estimate" class="section level3">
+<h3>5.3 Calibration Run and Refined Estimate</h3>
+<p>The calibration batch size is:</p>
+<p><span class="math display">\[
+m_{\text{stage}} = \min\left( \lceil 0.01 \cdot n \rceil,\; \lfloor
+300000 / \text{est\_per\_draw\_ms} \rfloor \right),
+\]</span></p>
+<p>where 300000 ms <span class="math inline">\(\approx\)</span> 5
+minutes. The calibration run uses
+<code>parallelFor(0, m_stage, worker)</code> to measure per-draw time
+empirically.</p>
+<p>From the calibration:</p>
+<ul>
+<li><code>per_candidate_sec</code> = calibration elapsed time / total
+candidates used</li>
+<li><code>est_per_draw_sec</code> = <code>per_candidate_sec</code> ×
+<code>E_draws</code> (expected candidates per accepted draw)</li>
+<li><code>est_total_sec</code> = <code>est_per_draw_sec</code> ×
+<code>n</code></li>
+</ul>
+</div>
+<div id="five-minute-safeguard" class="section level3">
+<h3>5.4 Five-Minute Safeguard</h3>
+<p>If <code>est_total_sec &gt; 300</code>:</p>
+<ul>
+<li><strong>Interactive:</strong> Prompt
+<code>&quot;Do you want to continue? [y/N]: &quot;</code></li>
+<li><strong>Non-interactive:</strong> Proceed automatically with a
+note.</li>
+</ul>
+</div>
+<div id="diagnostics-verbose-true" class="section level3">
+<h3>5.5 Diagnostics (verbose = TRUE)</h3>
+<p>With <code>verbose = TRUE</code>, the pilot reports:</p>
+<ul>
+<li>Estimated simulation time for <code>n</code> draws</li>
+<li>Note that the phase uses RcppParallel and cannot be safely
+interrupted</li>
+<li>Calibration elapsed time and number of draws</li>
+<li><code>avg_candidates_per_draw</code> (empirical) vs
+<code>E_draws</code></li>
+<li><code>per_candidate_sec</code> and
+<code>est_per_draw_sec</code></li>
+</ul>
+</div>
+</div>
+<div id="rindepnormalgammareg-pilot-logic" class="section level2">
+<h2>6. rIndepNormalGammaReg Pilot Logic</h2>
+<p>For Gaussian regression with independent Normal–Gamma priors, the
+pilot logic is similar in spirit but tailored to joint <span class="math inline">\((\beta, \phi)\)</span> sampling:</p>
+<div id="single-draw-test-1" class="section level3">
+<h3>6.1 Single-Draw Test</h3>
+<p>One observation is generated in serial mode to measure
+per-observation time.</p>
+</div>
+<div id="calibration-run" class="section level3">
+<h3>6.2 Calibration Run</h3>
+<p><span class="math display">\[
+m_{\text{stage}} = \min\left( \lceil 0.01 \cdot n \rceil,\; \lfloor
+300000 / \text{per\_obs\_ms\_serial} \rfloor \right).
+\]</span></p>
+<p>The calibration run is parallel:
+<code>parallelFor(0, m_stage, worker)</code>.</p>
+</div>
+<div id="time-estimate" class="section level3">
+<h3>6.3 Time Estimate</h3>
+<ul>
+<li><code>per_obs_sec</code> = calibration elapsed time /
+<code>m_stage</code></li>
+<li><code>est_total_sec</code> = <code>per_obs_sec</code> ×
+<code>n</code></li>
+</ul>
+</div>
+<div id="five-minute-safeguard-1" class="section level3">
+<h3>6.4 Five-Minute Safeguard</h3>
+<p>Same as rNormalGLM: if <code>est_total_sec &gt; 300</code>, prompt in
+interactive sessions.</p>
+</div>
+</div>
+<div id="envelopedispersionbuild-pilot-envelope-construction" class="section level2">
+<h2>7. EnvelopeDispersionBuild Pilot (Envelope Construction)</h2>
+<p>The RSS and UB2 steps in <code>EnvelopeDispersionBuild</code> use
+closed-form bounds (<code>bound_rss_over_dispersion</code> and
+<code>bound_ub2_over_dispersion</code>) and no longer perform RSS/UB2
+minimization or pilot timing blocks.</p>
+<div id="five-minute-safeguard-2" class="section level3">
+<h3>7.1 Five-Minute Safeguard</h3>
+<p>Since minimization/pilots are disabled, the time-estimate safeguard
+is not used.</p>
+</div>
+</div>
+<div id="choosing-serial-vs-parallel" class="section level2">
+<h2>8. Choosing Serial vs Parallel</h2>
+<table>
+<colgroup>
+<col width="38%" />
+<col width="61%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Scenario</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Debugging or small runs</strong></td>
+<td><code>use_parallel = FALSE</code> – serial path is
+interruptible</td>
+</tr>
+<tr class="even">
+<td><strong>Large production runs</strong></td>
+<td><code>use_parallel = TRUE</code> – faster; rely on the pilot and
+prompt</td>
+</tr>
+<tr class="odd">
+<td><strong>Scripts / non-interactive</strong></td>
+<td>No prompt; runs proceed automatically</td>
+</tr>
+</tbody>
+</table>
+<p>To disable parallel sampling:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">glmb</span>(formula, data, family, pfamily, <span class="at">n =</span> <span class="dv">5000</span>, <span class="at">use_parallel =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">rglmb</span>(<span class="at">n =</span> <span class="dv">5000</span>, y, x, family, pfamily, <span class="at">use_parallel =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>Serial sampling is slower but can be interrupted. Parallel sampling
+is faster but non-interruptible once the main loop starts.</p>
+</div>
+<div id="technical-details" class="section level2">
+<h2>9. Technical Details</h2>
+<div id="rcppparallel-worker-pattern" class="section level3">
+<h3>9.1 RcppParallel Worker Pattern</h3>
+<p>The parallel samplers use the standard RcppParallel
+<code>Worker</code> pattern:</p>
+<ul>
+<li>A struct inheriting from <code>RcppParallel::Worker</code></li>
+<li><code>operator()(size_t begin, size_t end)</code> processes the
+range <code>[begin, end)</code></li>
+<li>Shared outputs use <code>RcppParallel::RVector</code> or
+<code>RcppParallel::RMatrix</code> for thread-safe writes</li>
+<li>Each thread has its own RNG state to avoid contention</li>
+</ul>
+</div>
+<div id="thread-safety" class="section level3">
+<h3>9.2 Thread Safety</h3>
+<ul>
+<li>RNG: Thread-local state; no sharing across workers</li>
+<li>Callbacks: The negative log-posterior and gradient functions
+(<code>f2</code>, <code>f3</code>) are called from workers; a mutex
+protects R callback invocations where needed</li>
+<li>Output: Write-only ranges per worker; no overlapping writes</li>
+</ul>
+</div>
+<div id="dependencies" class="section level3">
+<h3>9.3 Dependencies</h3>
+<ul>
+<li><strong>RcppParallel</strong> – Provides TBB and the
+<code>parallelFor</code> interface</li>
+<li><strong>TBB</strong> – Bundled with RcppParallel; no separate
+installation required</li>
+</ul>
+</div>
+</div>
+<div id="troubleshooting" class="section level2">
+<h2>10. Troubleshooting</h2>
+<table>
+<colgroup>
+<col width="25%" />
+<col width="40%" />
+<col width="34%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Suggestion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sampler appears to hang</td>
+<td>Long parallel run</td>
+<td>Use <code>verbose = TRUE</code> to see pilot estimates before the
+main run</td>
+</tr>
+<tr class="even">
+<td>Zero accepts in pilot</td>
+<td>Envelope too loose</td>
+<td>Try <code>use_opencl = TRUE</code>, larger <code>n</code>, different
+<code>Gridtype</code>, or stronger prior</td>
+</tr>
+<tr class="odd">
+<td>Prompt never appears</td>
+<td>Non-interactive session</td>
+<td>Expected; runs proceed automatically in batch/CI</td>
+</tr>
+<tr class="even">
+<td>Want to interrupt a run</td>
+<td>Parallel phase has started</td>
+<td>Cannot interrupt; use <code>use_parallel = FALSE</code> for
+interruptible runs</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cross-references" class="section level2">
+<h2>11. Cross-References</h2>
+<ul>
+<li><strong>Chapter A05</strong> – Simulation pipeline (optimization,
+standardization, envelope, sampling)</li>
+<li><strong>Chapter A08</strong> – Envelope-related functions</li>
+<li><strong>Chapter A10</strong> – OpenCL acceleration for envelope
+construction</li>
+<li><strong><code>?glmb</code></strong>,
+<strong><code>?rglmb</code></strong>,
+<strong><code>?lmb</code></strong>, <strong><code>?rlmb</code></strong>
+– <code>use_parallel</code> argument</li>
+<li><strong>NEWS.md</strong> – Parallel sampling and pilot-related
+changes</li>
+</ul>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

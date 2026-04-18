@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter A04: Directional Tail Diagnostics for Prior-Posterior Disagreement</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter A04: Directional Tail Diagnostics
+for Prior-Posterior Disagreement</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div id="directional-tail-diagnostic-current-implementation" class="section level2">
+<h2>Directional tail diagnostic (current implementation)</h2>
+<p>This appendix documents the current <code>directional_tail()</code>
+diagnostic, how to call it directly, and how it is used inside
+<code>summary.glmb()</code>.</p>
+<p>The diagnostic measures prior–posterior disagreement in a
+multivariate direction <span class="citation">(Evans and Moshonov
+2006)</span> rather than coefficient-by-coefficient only. It
+reports:</p>
+<ul>
+<li><code>mahalanobis_shift</code>: the standardized prior-posterior
+shift magnitude in whitened space</li>
+<li><code>p_directional</code>: directional tail probability,
+<code>P(delta^T Z &lt;= 0)</code></li>
+<li><code>delta</code>: posterior mean shift vector in whitened
+coordinates</li>
+</ul>
+<div id="theoretical-interpretation-and-relation-to-t-and-f" class="section level3">
+<h3>Theoretical interpretation and relation to t and F</h3>
+<p>Let <code>mu0</code> denote the reference vector (prior mean by
+default, or a null/reference mode), and let <span class="math inline">\(\beta^{(m)}\)</span> be posterior draws.
+<code>directional_tail()</code> computes a whitening map from posterior
+precision so that</p>
+<p><span class="math display">\[
+Z^{(m)} = W\left(\beta^{(m)} - \mu_0\right),
+\]</span></p>
+<p>with <span class="math inline">\(W^\top W =
+\text{Prec}_{post}\)</span>. In this scale, Euclidean distance
+corresponds to Mahalanobis distance in the original coefficient
+space.</p>
+<p>Define</p>
+<p><span class="math display">\[
+\delta = E[Z \mid y], \qquad d = \|\delta\|_2.
+\]</span></p>
+<p>The function returns <span class="math inline">\(d\)</span> as
+<code>mahalanobis_shift</code>, and the directional-tail probability</p>
+<p><span class="math display">\[
+p_{\text{dir}} = P\!\left(\delta^\top Z \le 0 \mid y\right),
+\]</span></p>
+<p>estimated by posterior draws.</p>
+<p>Intuition: <span class="math inline">\(\delta\)</span> is the
+posterior mean shift away from the reference in whitened space. The
+event <span class="math inline">\(\delta^\top Z \le 0\)</span> is the
+half-space opposite the direction of disagreement, so <span class="math inline">\(p_{\text{dir}}\)</span> quantifies how much
+posterior mass lies “against” that shift.</p>
+<p>Under a Gaussian approximation in whitened space, <span class="math display">\[
+Z \mid y \approx N(\delta, I_p),
+\]</span> then with <span class="math inline">\(u =
+\delta/\|\delta\|\)</span>, <span class="math display">\[
+u^\top Z \sim N(d, 1), \qquad
+p_{\text{dir}} = P(u^\top Z \le 0) = \Phi(-d).
+\]</span> So the directional tail is a one-dimensional tail probability
+driven entirely by the standardized distance <span class="math inline">\(d\)</span>.</p>
+<div id="relation-to-univariate-t-statistics" class="section level4">
+<h4>Relation to univariate t statistics</h4>
+<p>For <span class="math inline">\(p=1\)</span>, whitening reduces to
+scalar standardization and <span class="math display">\[
+d = \frac{\mu_{post} - \mu_0}{\sigma_{post}},
+\]</span> so <span class="math inline">\(d\)</span> is the posterior
+z/t-type contrast against <span class="math inline">\(\mu_0\)</span>. In
+this case:</p>
+<ul>
+<li>two-sided t/z-style tail: <span class="math inline">\(2\Phi(-|d|)\)</span> (or Student-t analogue with
+df)</li>
+<li>directional tail used here: <span class="math inline">\(\Phi(-|d|)\)</span> when the direction is set by
+<span class="math inline">\(\delta\)</span></li>
+</ul>
+<p>Thus <code>directional_tail()</code> plays the same role as a
+one-sided standardized test in the univariate case, while still
+extending naturally to multivariate models.</p>
+</div>
+<div id="relation-to-multivariate-waldf-style-tests" class="section level4">
+<h4>Relation to multivariate Wald/F-style tests</h4>
+<p>The squared shift <span class="math display">\[
+d^2 = \delta^\top \delta
+\]</span> is the whitened quadratic distance from the reference. This is
+the same geometric core as multivariate Wald statistics (and, after
+scaling, Hotelling/F forms): larger <span class="math inline">\(d^2\)</span> means stronger global departure from
+the reference.</p>
+<p>Difference in emphasis:</p>
+<ul>
+<li>Wald/Hotelling/F use <strong>radial</strong> evidence (any
+direction).</li>
+<li><code>directional_tail()</code> uses <strong>directional
+half-space</strong> evidence along <span class="math inline">\(\delta\)</span>.</li>
+</ul>
+<p>Under the Gaussian approximation, both are monotone in <span class="math inline">\(d\)</span>: as <span class="math inline">\(d\)</span> increases, quadratic-test evidence
+strengthens and <span class="math inline">\(p_{\text{dir}}=\Phi(-d)\)</span> decreases.</p>
+<p>In this sense, <code>directional_tail()</code> is a directional
+companion to multivariate Wald/F-style testing: it retains the same
+Mahalanobis geometry but reports evidence on an interpretable one-sided
+directional probability scale.</p>
+</div>
+</div>
+<div id="interpretation-what-probability-is-being-assessed" class="section level3">
+<h3>Interpretation: what probability is being assessed?</h3>
+<p>This is the key conceptual difference from classical p-values <span class="citation">(Bernardo and Smith 1994)</span>.</p>
+<p>In a classical t-test, the p-value is a <strong>sampling probability
+under the null</strong>: <span class="math display">\[
+P_{H_0}\!\left(T(Y^{rep}) \ge T(y_{obs})\right),
+\]</span> that is, how extreme the observed statistic would be in
+repeated samples if <span class="math inline">\(H_0\)</span> were
+true.</p>
+<p>By contrast, the directional-tail quantity here is a
+<strong>posterior probability conditional on the observed data</strong>:
+<span class="math display">\[
+p_{\text{dir}} = P\!\left(\delta^\top Z \le 0 \mid y,\ \text{model},\
+\text{prior},\ \mu_0\right).
+\]</span></p>
+<p>So the probability being assessed is not a prior probability and not
+a frequentist repeated-sampling probability. It is posterior mass, after
+updating by the data.</p>
+<p>Practical interpretation:</p>
+<ul>
+<li>Small <code>p_directional</code>: posterior mass is concentrated in
+the direction away from the reference <span class="math inline">\(\mu_0\)</span>, indicating stronger directional
+disagreement.</li>
+<li>Large <code>p_directional</code> (near 0.5): weak directional
+separation from the reference.</li>
+<li>Very large values (close to 1) can occur when the sign of <span class="math inline">\(\delta\)</span> is reversed by construction or
+when the chosen reference is on the opposite side of most posterior
+mass.</li>
+</ul>
+<p>For <code>summary.glmb()</code>, this means:</p>
+<ul>
+<li><code>dir_tail</code> (vs prior): posterior directional disagreement
+with the prior mean.</li>
+<li><code>dir_tail_null</code> (vs null): posterior directional
+disagreement with the null/intercept-only reference used in the summary
+routine.</li>
+</ul>
+<div id="univariate-connection-to-known-bayesian-tailsign-summaries" class="section level4">
+<h4>Univariate connection to known Bayesian tail/sign summaries</h4>
+<p>In the one-parameter case, directional tail reduces to a one-sided
+posterior tail area relative to <span class="math inline">\(\mu_0\)</span>:</p>
+<ul>
+<li>if posterior shift is positive: <span class="math inline">\(p_{\text{dir}} = P(\beta \le \mu_0 \mid
+y)\)</span></li>
+<li>if posterior shift is negative: <span class="math inline">\(p_{\text{dir}} = P(\beta \ge \mu_0 \mid
+y)\)</span></li>
+</ul>
+<p>This is closely related to well-known Bayesian sign/tail summaries
+(including posterior sign probability / “probability of direction” style
+summaries in applied Bayesian reporting <span class="citation">(Gelman
+et al. 2013)</span>). In that language, for a scalar parameter,
+<code>p_directional</code> is essentially the opposite-side posterior
+mass, and the sign probability is approximately <span class="math inline">\(1 - p_{\text{dir}}\)</span>.</p>
+<p>The main contribution of <code>directional_tail()</code> is the
+<strong>multivariate extension</strong>: it uses whitening plus
+projection onto the posterior shift direction to provide a single
+coherent directional-tail probability even when coefficients are
+correlated and inference is genuinely multivariate.</p>
+</div>
+</div>
+<div id="how-magnitude-compares-to-classical-tests" class="section level3">
+<h3>How magnitude compares to classical tests</h3>
+<p>Because the targets differ (posterior mass vs repeated-sampling
+extremeness), <code>p_directional</code> is not numerically identical to
+a classical p-value. Still, the two are often comparable through the
+standardized shift magnitude <span class="math inline">\(d\)</span>.</p>
+<p>In the scalar Gaussian approximation: <span class="math display">\[
+p_{\text{dir}} \approx \Phi(-|d|), \qquad
+p_{\text{post,2s}} \approx 2\Phi(-|d|),
+\]</span> while a classical two-sided p-value is typically <span class="math display">\[
+p_{\text{classical,2s}} \approx 2\{1-F_t(|t|;\nu)\}
+\]</span> (or <span class="math inline">\(2\Phi(-|z|)\)</span>
+asymptotically).</p>
+<div id="strong-prior-regime" class="section level4">
+<h4>Strong-prior regime</h4>
+<p>When the prior is strong relative to the likelihood, two effects
+dominate:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Centering effect</strong>: posterior mean is pulled toward
+the prior/reference.</li>
+<li><strong>Precision effect</strong>: posterior covariance contracts
+along prior-informed directions.</li>
+</ol>
+<p>Consequences for <code>p_directional</code> vs classical
+p-values:</p>
+<ul>
+<li>If prior and null/reference are aligned with each other (and with
+little data contradiction), the posterior shift from <span class="math inline">\(\mu_0\)</span> is usually smaller, so <span class="math inline">\(d\)</span> is smaller and
+<code>p_directional</code> tends to be larger (weaker apparent evidence
+against the reference) than classical p-values.</li>
+<li>If the prior is strong but centered away from the classical null in
+the same direction as the data, <span class="math inline">\(d\)</span>
+can increase and <code>p_directional</code> can be smaller (stronger
+evidence in that direction) than classical tails.</li>
+<li>In multivariate settings, this divergence is often anisotropic:
+prior strength can increase/decrease evidence differently across
+directions, and <code>directional_tail()</code> summarizes the net
+directional result along <span class="math inline">\(\delta\)</span>.</li>
+</ul>
+</div>
+<div id="weak-prior-data-dominant-limit" class="section level4">
+<h4>Weak-prior (data-dominant) limit</h4>
+<p>As prior precision becomes small relative to information in the
+data:</p>
+<ul>
+<li>posterior mean approaches the MLE (or quasi-MLE),</li>
+<li>posterior covariance approaches the inverse observed
+information,</li>
+<li><span class="math inline">\(d\)</span> approaches the usual
+standardized likelihood-based contrast.</li>
+</ul>
+<p>Hence in the univariate case, <code>p_directional</code> approaches a
+one-sided likelihood-based tail measure, and <span class="math inline">\(2\,p_{\text{dir}}\)</span> approaches the familiar
+two-sided z/t-style tail (asymptotically).</p>
+<p>In the multivariate case, <span class="math inline">\(d^2\)</span>
+approaches the corresponding Wald quadratic form (and its Hotelling/F
+scaling in finite samples), so Bayesian directional and classical
+quadratic tests tend to agree more closely in large-sample/weak-prior
+regimes.</p>
+</div>
+<div id="scalar-decomposition-normal-gamma-heuristic" class="section level4">
+<h4>Scalar decomposition (normal-gamma heuristic)</h4>
+<p>For one coefficient, the posterior-vs-classical comparison can be
+decomposed into a center effect and a scale effect. Write <span class="math display">\[
+t_{\text{post}} =
+\frac{\hat\beta_{\text{post}}-\mu_0}{\text{SE}_{\text{post}}}, \qquad
+t_{\text{class}} =
+\frac{\hat\beta_{\text{MLE}}-\mu_0}{\text{SE}_{\text{class}}}.
+\]</span> Then <span class="math display">\[
+t_{\text{post}}
+= t_{\text{class}}
+\times
+\underbrace{\frac{\hat\beta_{\text{post}}-\mu_0}{\hat\beta_{\text{MLE}}-\mu_0}}_{\text{center/shrinkage
+factor } \kappa}
+\times
+\underbrace{\frac{\text{SE}_{\text{class}}}{\text{SE}_{\text{post}}}}_{\text{scale
+factor}}.
+\]</span></p>
+<p>In conjugate normal-gamma style parameterizations, a common heuristic
+is <span class="math display">\[
+\text{SE}_{\text{post}}
+\approx
+\text{SE}_{\text{class}}
+\sqrt{\frac{n-p}{n+n_{\text{prior}}}},
+\]</span> so <span class="math display">\[
+\frac{\text{SE}_{\text{class}}}{\text{SE}_{\text{post}}}
+\approx
+\sqrt{\frac{n+n_{\text{prior}}}{n-p}}.
+\]</span> If one also uses a simple shrinkage approximation <span class="math inline">\(\kappa \approx
+\frac{n}{n+n_{\text{prior}}}\)</span>, then <span class="math display">\[
+t_{\text{post}}
+\approx
+t_{\text{class}}
+\cdot
+\frac{n}{n+n_{\text{prior}}}
+\cdot
+\sqrt{\frac{n+n_{\text{prior}}}{n-p}}.
+\]</span></p>
+<p>Using <span class="math inline">\(n_{\text{prior}} =
+n\,\frac{\text{pwt}}{1-\text{pwt}}\)</span>, this can be rewritten as
+<span class="math display">\[
+t_{\text{post}}
+\approx
+t_{\text{class}}
+\cdot
+\sqrt{1-\text{pwt}}
+\cdot
+\sqrt{\frac{n}{n-p}}.
+\]</span></p>
+<p>This expression shows why posterior directional tails can be either
+larger or smaller than classical tails:</p>
+<ul>
+<li><strong>centering/shrinkage (<span class="math inline">\(\kappa\)</span>)</strong> tends to pull <span class="math inline">\(t_{\text{post}}\)</span> toward 0,</li>
+<li><strong>scale correction</strong> can push <span class="math inline">\(|t_{\text{post}}|\)</span> upward,</li>
+<li>the net result depends on their product.</li>
+</ul>
+<p>A useful threshold from this heuristic is: <span class="math display">\[
+\sqrt{\frac{n+n_{\text{prior}}}{n-p}} &gt; 1
+\;\;\Longleftrightarrow\;\;
+n_{\text{prior}} &gt; p,
+\]</span> so once prior pseudo-sample size is large relative to
+dimension, scale effects can dominate unless center shrinkage is also
+strong.</p>
+<p>This is the scalar analogue of the multivariate directional-tail
+story: center and scale are both active, and the final probability is
+driven by the standardized shift magnitude after whitening.</p>
+</div>
+</div>
+<div id="incorporating-the-package-example-ex_directional_tail.r" class="section level3">
+<h3>Incorporating the package example
+(<code>Ex_directional_tail.R</code>)</h3>
+<p>The package example already demonstrates the intended workflow and
+interpretation. In particular, it shows:</p>
+<ul>
+<li>fitting a model (<code>lmb</code>/<code>glmb</code>),</li>
+<li>calling <code>directional_tail(fit)</code>,</li>
+<li>extracting <code>mahalanobis_shift</code>,
+<code>p_directional</code>, and the draw-level objects,</li>
+<li>visualizing tail vs non-tail draws in whitened and raw coefficient
+spaces.</li>
+</ul>
+<p>A compact usage sketch from that example is:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">example</span>(<span class="st">&quot;directional_tail&quot;</span>, <span class="at">package =</span> <span class="st">&quot;glmbayes&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Core objects used in interpretation:</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fu">directional_tail</span>(fit)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>dt<span class="sc">$</span>mahalanobis_shift</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>dt<span class="sc">$</span>p_directional</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Same quantities are also surfaced in summary output:</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>s<span class="sc">$</span>dir_tail</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>s<span class="sc">$</span>dir_tail_null</span></code></pre></div>
+<div id="illustrative-plots-from-ex_directional_tail.r" class="section level4">
+<h4>Illustrative plots from <code>Ex_directional_tail.R</code></h4>
+<p>The example script also includes two useful diagnostic
+visualizations:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Whitened space plot</strong>: tail vs non-tail draws,
+directional boundary, and shift radius.</li>
+<li><strong>Raw coefficient space plot</strong>: tail vs non-tail draws
+with prior and posterior centers.</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fu">directional_tail</span>(fit)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>Z     <span class="ot">&lt;-</span> dt<span class="sc">$</span>draws<span class="sc">$</span>Z</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>flag  <span class="ot">&lt;-</span> dt<span class="sc">$</span>draws<span class="sc">$</span>is_tail</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>delta <span class="ot">&lt;-</span> dt<span class="sc">$</span>delta</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>w     <span class="ot">&lt;-</span> delta</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  Z,</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="at">col =</span> <span class="fu">ifelse</span>(flag, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;blue&quot;</span>),</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>  <span class="at">pch =</span> <span class="dv">19</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Z1&quot;</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Z2&quot;</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Directional Tail Diagnostic (Whitened Space)&quot;</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co"># Decision boundary orthogonal to direction vector</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> <span class="sc">-</span>w[<span class="dv">1</span>] <span class="sc">/</span> w[<span class="dv">2</span>], <span class="at">col =</span> <span class="st">&quot;darkgreen&quot;</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co"># Radius corresponding to Mahalanobis shift</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(delta<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="fu">symbols</span>(</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>  delta[<span class="dv">1</span>], delta[<span class="dv">2</span>],</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>  <span class="at">circles =</span> r,</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>  <span class="at">inches  =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>  <span class="at">add     =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>  <span class="at">lwd     =</span> <span class="dv">2</span>,</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>  <span class="at">fg      =</span> <span class="st">&quot;gray&quot;</span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>)</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="fu">points</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">col =</span> <span class="st">&quot;black&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>)          <span class="co"># reference center in whitened space</span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="fu">points</span>(delta[<span class="dv">1</span>], delta[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">&quot;purple&quot;</span>, <span class="at">lwd =</span> <span class="dv">2</span>) <span class="co"># posterior shift</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>B       <span class="ot">&lt;-</span> dt<span class="sc">$</span>draws<span class="sc">$</span>B</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>flag    <span class="ot">&lt;-</span> dt<span class="sc">$</span>draws<span class="sc">$</span>is_tail</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>mu0     <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(fit<span class="sc">$</span>Prior<span class="sc">$</span>mean)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>mu_post <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(B)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  B,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="at">col  =</span> <span class="fu">ifelse</span>(flag, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;blue&quot;</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>  <span class="at">pch  =</span> <span class="dv">19</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Coefficient 1&quot;</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Coefficient 2&quot;</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Directional Tail Diagnostic (Raw Coefficient Space)&quot;</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">points</span>(mu0[<span class="dv">1</span>], mu0[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">col =</span> <span class="st">&quot;black&quot;</span>, <span class="at">cex =</span> <span class="fl">1.5</span>)       <span class="co"># reference center</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="fu">points</span>(mu_post[<span class="dv">1</span>], mu_post[<span class="dv">2</span>], <span class="at">pch =</span> <span class="dv">3</span>, <span class="at">col =</span> <span class="st">&quot;darkgreen&quot;</span>, <span class="at">cex =</span> <span class="fl">1.5</span>)  <span class="co"># posterior center</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="fu">legend</span>(</span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  <span class="st">&quot;topright&quot;</span>,</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>  <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">&quot;Tail draws&quot;</span>, <span class="st">&quot;Non-tail draws&quot;</span>, <span class="st">&quot;Reference&quot;</span>, <span class="st">&quot;Posterior&quot;</span>),</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="at">col    =</span> <span class="fu">c</span>(<span class="st">&quot;red&quot;</span>, <span class="st">&quot;blue&quot;</span>, <span class="st">&quot;black&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>),</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  <span class="at">pch    =</span> <span class="fu">c</span>(<span class="dv">19</span>, <span class="dv">19</span>, <span class="dv">4</span>, <span class="dv">3</span>),</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>  <span class="at">bty    =</span> <span class="st">&quot;n&quot;</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="how-directional_tail-is-called" class="section level3">
+<h3>How <code>directional_tail()</code> is called</h3>
+<p>The function is exported and can be called directly on a fitted
+object (<code>glmb</code> or <code>lmb</code>):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glmb</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  counts <span class="sc">~</span> outcome <span class="sc">+</span> treatment,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">poisson</span>(),</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">pfamily =</span> <span class="fu">dNormal</span>(<span class="at">mu =</span> mu, <span class="at">Sigma =</span> V)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>dt_prior <span class="ot">&lt;-</span> <span class="fu">directional_tail</span>(fit)      <span class="co"># reference = prior mean</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>dt_prior</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">print</span>(dt_prior)</span></code></pre></div>
+<p>To compare against a user-specified reference (for example a
+null/intercept-only mode), pass <code>mu0</code> explicitly:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>mu0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(fit<span class="sc">$</span>Prior<span class="sc">$</span>mean))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">names</span>(mu0) <span class="ot">&lt;-</span> <span class="fu">names</span>(fit<span class="sc">$</span>Prior<span class="sc">$</span>mean)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>mu0[<span class="st">&quot;(Intercept)&quot;</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">glm</span>(counts <span class="sc">~</span> <span class="dv">1</span>, <span class="at">family =</span> <span class="fu">poisson</span>(), <span class="at">data =</span> fit<span class="sc">$</span>data))[<span class="dv">1</span>]</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>dt_null <span class="ot">&lt;-</span> <span class="fu">directional_tail</span>(fit, <span class="at">mu0 =</span> mu0)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>dt_null</span></code></pre></div>
+</div>
+<div id="how-summary.glmb-uses-directional-tail" class="section level3">
+<h3>How <code>summary.glmb()</code> uses directional tail</h3>
+<p><code>summary.glmb()</code> computes two directional diagnostics
+internally:</p>
+<ol style="list-style-type: decimal">
+<li><code>directional_tail(object)</code> : posterior vs prior mean</li>
+<li><code>directional_tail(object, mu0 = null_est_full)</code> :
+posterior vs null reference</li>
+</ol>
+<p>These are returned in the summary object:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>s<span class="sc">$</span>dir_tail        <span class="co"># vs prior</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>s<span class="sc">$</span>dir_tail_null   <span class="co"># vs null</span></span></code></pre></div>
+<p>The print method displays a compact “Directional Tail Summaries”
+table with:</p>
+<ul>
+<li>Mahalanobis Distance (<code>vs Null</code>,
+<code>vs Prior</code>)</li>
+<li>Tail Probability (<code>vs Null</code>, <code>vs Prior</code>)</li>
+</ul>
+</div>
+<div id="minimal-reproducible-workflow" class="section level3">
+<h3>Minimal reproducible workflow</h3>
+<p>The package example <code>inst/examples/Ex_directional_tail.R</code>
+provides a full reproducible script. A minimal call pattern is:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>ps <span class="ot">&lt;-</span> <span class="fu">Prior_Setup</span>(weight <span class="sc">~</span> group, <span class="at">family =</span> <span class="fu">gaussian</span>(), <span class="at">data =</span> dat2)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lmb</span>(weight <span class="sc">~</span> group, <span class="fu">dNormal</span>(ps<span class="sc">$</span>mu, ps<span class="sc">$</span>Sigma, <span class="at">dispersion =</span> ps<span class="sc">$</span>dispersion), <span class="at">data =</span> dat2, <span class="at">n =</span> <span class="dv">10000</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fu">directional_tail</span>(fit)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">print</span>(dt)</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="supplementary-notes-why-the-bayesian-tail-can-be-smaller" class="section level2">
+<h2>Supplementary notes: why the Bayesian tail can be smaller</h2>
+<p>** 1.0 Why the Bayesian tail can be smaller</p>
+<p>There are three distinct, concrete reasons the Bayesian posterior
+tail probability for a coefficient can be smaller than the classical t
+tail</p>
+<p>*** 1.1 Different effective degrees of freedom
+(<strong>v</strong>)</p>
+<p>In the conjugate parameterization above, posterior <span class="math inline">\(\boldsymbol{v = 2\alpha_{0} + n}\)</span>. If the
+prior has positive <span class="math inline">\(\boldsymbol{\alpha_{0}}\)</span> (an informative
+prior on the variance), the posterior <span class="math inline">\(\boldsymbol{v}\)</span> will be larger than the
+classical <span class="math inline">\(n - p\)</span>. Increasing <span class="math inline">\(v\)</span> makes the Student‑t closer to normal
+(lighter tails), so the tail probability at the same <span class="math inline">\(t\)</span> value is smaller.</p>
+<p>– Even for vaguely inforative priors, the prior contributes
+“pseudo-observations” to the posterior <strong>df</strong>. This is
+often the main cause of smaller Bayesian tails</p>
+<p>*** 1.2 Different standard error (scale) used in the denominator</p>
+<p>Bayesian marginal variance for <span class="math inline">\(\boldsymbol{\beta_{j}}\)</span> is <span class="math inline">\(\boldsymbol{\frac{\beta_{n}}{\alpha_{n}}
+V_{n}[j,j]}\)</span>.</p>
+<p>Two effects happen here:<br />
+(a) <span class="math inline">\(\boldsymbol{V_{n}}\)</span> generally
+shrinks relative to <span class="math inline">\((X^{T}X)^{-1}\)</span>
+because of the prior precision <span class="math inline">\(\boldsymbol{V_{0}^{-1}}\)</span>, and<br />
+(b) the posterior scale factor <span class="math inline">\(\boldsymbol{\frac{\beta_{n}}{\alpha_{n}}}\)</span>
+can be smaller than the classical estimate <span class="math inline">\(\hat{s}^{2}\)</span> depending on prior
+hyperparameters and the data (e.g., prior favors smaller variance).</p>
+<p>Either effect reduces the denominator and can increase the raw <span class="math inline">\(t\)</span> value — but combined with larger <span class="math inline">\(\boldsymbol{v}\)</span> the net tail probability
+can still be smaller.</p>
+<p>So you must compare both the numerator (posterior mean <span class="math inline">\(\boldsymbol{m_{n,j}}\)</span>) vs. the OLS
+estimate <span class="math inline">\(\hat{\beta}_{j}\)</span>, and the
+denominator (posterior scale vs. <span class="math inline">\(\boldsymbol{\hat{s}\sqrt{(X^{T}X)^{-1}_{jj}}}\)</span>).
+Prior shrinkage often makes <span class="math inline">\(m_{n,j}\)</span>
+closer to zero and <span class="math inline">\(V_{n}[j,j]\)</span>
+smaller, both of which reduce evidence against <span class="math inline">\(H_{0}\)</span>.</p>
+<div id="different-centering-posterior-mean-vs.-ols-and-prior-shrinkage" class="section level3">
+<h3>1.3 Different centering (posterior mean vs. OLS) and prior
+shrinkage</h3>
+<ul>
+<li>If the prior pulls <span class="math inline">\(\boldsymbol{m_{n,j}}\)</span> toward <span class="math inline">\(\boldsymbol{\beta_{0}}\)</span> (e.g., 0), the
+numerator of the Bayesian <span class="math inline">\(t\)</span> is
+smaller in magnitude than <span class="math inline">\(\hat{\beta}_{j}\)</span>, further reducing tail
+probability. In combination with (1) and (2), the posterior tail
+probability will often be noticeably smaller than the classical one.
+Griffin &amp; Brown and other shrinkage‑prior literature discuss this
+tradeoff explicitly for normal–gamma shrinkage priors.</li>
+</ul>
+<p>For Bayesian linear models with normal-gamma priors, it seems like
+standard errors used in t-statistic calculations need to be adjusted
+relative to the classical estimates. In particular, the adjustment seems
+to be</p>
+<p>The adjusted standard error is:</p>
+<p><span class="math display">\[
+\text{Std\_err}_t = \text{Std\_err} \cdot \sqrt{ \frac{n - p}{n +
+n_{\text{prior}}} }
+\]</span></p>
+<p>which leads to:</p>
+<p><span class="math display">\[
+t_{\text{adj},i}
+= \frac{n}{n + n_{\text{prior}}}
+  \, t_{\text{unadjusted},i}
+  \, \sqrt{\frac{n + n_{\text{prior}}}{n - p}}.
+\]</span></p>
+<p>where the first ratio shows the skrinkage effect (lower t-value) and
+the second effect the impact of the adjustment to the standard error
+(which boosts the t-value).</p>
+<p><span class="math display">\[
+t_{\text{adj},i} = \sqrt{\frac{n}{n + n_{\text{prior}}}} \cdot
+\sqrt{\frac{n}{n -p}}  \cdot t_{\text{unadjusted},i}
+\]</span></p>
+<p><span class="math display">\[
+t_{\text{adj},i} = \sqrt{\frac{n}{n + n_{\text{prior}}}} \cdot
+\sqrt{\frac{n}{n -p}}  \cdot t_{\text{unadjusted},i}
+\]</span></p>
+<p><span class="math display">\[
+t_{\text{adj},i} = \sqrt{1-pwt} \cdot \sqrt{\frac{n}{n -p}}  \cdot
+t_{\text{unadjusted},i}
+\]</span></p>
+<p>It can be seen from the above that t-statitic in the Bayesian context
+is larger than the unadjusted t-statistic (i.e., inflated) whenver</p>
+<p><span class="math display">\[
+n_{\text{prior}} &lt; p \cdot \frac{n}{n - p}
+\]</span></p>
+<p>which implies tail probabilities smaller than their classical
+counterparts.</p>
+<p><span class="math display">\[
+n + n_{\text{prior}}
+= n + n\left(\frac{\text{pwt}}{1 - \text{pwt}}\right)
+= \frac{n(1 - \text{pwt}) + n(\text{pwt})}{1 - \text{pwt}}
+= \frac{n}{1 - \text{pwt}}.
+\]</span></p>
+<p>The adjusted standard error is <span class="math display">\[
+\text{StdErr}_{t}
+= \text{StdErr} \cdot
+\sqrt{\frac{n - p}{n + n_{\text{prior}}}},
+\]</span> which leads to the adjusted t-statistic</p>
+<p><span class="math display">\[
+t_{\text{adj},i}
+= t_{\text{unadjusted},i} \cdot
+\sqrt{\frac{n + n_{\text{prior}}}{n - p}}.
+\]</span></p>
+<p>For reference, the same expression can be written as</p>
+<p><span class="math display">\[
+\text{StdErr}_{t}
+= \text{StdErr} \cdot
+\sqrt{\frac{n - p}{n + n_{\text{prior}}}}.
+\]</span></p>
+<p>which leads to</p>
+<p><span class="math display">\[
+t_{\text{adj},i}
+= t_{\text{unadjusted},i} \cdot
+  \sqrt{\frac{n + n_{\text{prior}}}{n - p}}.
+\]</span></p>
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-BernardoSmith1994" class="csl-entry">
+Bernardo, José M., and Adrian F. M. Smith. 1994. <em>Bayesian
+Theory</em>. Wiley.
+</div>
+<div id="ref-EvansMoshonov2006" class="csl-entry">
+Evans, Michael, and Hadas Moshonov. 2006. <span>“Checking for Prior-Data
+Conflict.”</span> <em>Bayesian Analysis</em> 1 (4): 893–914. <a href="https://doi.org/10.1214/06-BA129">https://doi.org/10.1214/06-BA129</a>.
+</div>
+<div id="ref-Gelman2013" class="csl-entry">
+Gelman, Andrew, John B. Carlin, Hal S. Stern, David B. Dunson, Aki
+Vehtari, and Donald B. Rubin. 2013. <em>Bayesian Data Analysis</em>. 3rd
+ed. CRC Press.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

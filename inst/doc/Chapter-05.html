@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Kjell Nygren" />
+
+<meta name="date" content="2026-04-18" />
+
+<title>Chapter 05: Foundations of GLMs – Families, Links, and Log-Concave Likelihoods</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Chapter 05: Foundations of GLMs – Families,
+Links, and Log-Concave Likelihoods</h1>
+<h4 class="author">Kjell Nygren</h4>
+<h4 class="date">2026-04-18</h4>
+
+
+
+<div id="conceptual-overview" class="section level1">
+<h1>1. Conceptual Overview</h1>
+<p>Generalized linear models (GLMs) rest on two foundational
+ideas:<br />
+(1) <strong>exponential family likelihoods</strong>, which provide a
+unified mathematical structure for a wide range of data-generating
+processes, and<br />
+(2) <strong>link functions</strong>, which connect the mean of the
+response to a linear predictor.</p>
+<p>This section reviews the core concepts behind exponential families,
+explains why canonical links play such an important role, and highlights
+the special role of <strong>log-concavity</strong> in both classical and
+Bayesian estimation. Standard references for GLM structure include <span class="citation">(McCullagh and Nelder 1989; Nelder and Wedderburn
+1972)</span>; the original formulation of GLMs in <strong>S</strong>
+appears in <span class="citation">(Hastie and Pregibon 1992)</span>. For
+Bayesian GLMs with normal priors, envelope-based iid posterior sampling
+in <strong>glmbayes</strong> builds on <span class="citation">(Nygren
+and Nygren 2006)</span>.</p>
+<div id="exponential-families-a-unifying-framework" class="section level2">
+<h2>1.1 Exponential Families: A Unifying Framework</h2>
+<p>Many common statistical models belong to the exponential family, a
+class of distributions that can be written in the
+<strong>weighted</strong> form</p>
+<p><span class="math display">\[
+f(y \mid \theta, \phi, w)
+= \exp\left\{
+  \sum_{i=1}^{n}
+    w_i \left[
+      \frac{y_i \theta_i - b(\theta_i)}{a(\phi)}
+      + c(y_i, \phi)
+    \right]
+\right\}.
+\]</span></p>
+<p>Here:</p>
+<ul>
+<li><span class="math inline">\(\theta_i\)</span> is the canonical
+(natural) parameter<br />
+</li>
+<li><span class="math inline">\(b(\theta_i)\)</span> is the cumulant
+function<br />
+</li>
+<li><span class="math inline">\(a(\phi)\)</span> is a dispersion or
+scale parameter<br />
+</li>
+<li><span class="math inline">\(c(y_i, \phi)\)</span> collects terms not
+involving <span class="math inline">\(\theta_i\)</span><br />
+</li>
+<li><span class="math inline">\(w_i\)</span> is an observation weight
+(typically nonnegative)</li>
+</ul>
+<p>This formulation includes the Gaussian, Poisson, Binomial, Gamma, and
+many others.<br />
+The exponential-family form is not merely aesthetic: it guarantees
+several structural properties that GLMs rely on:</p>
+<ul>
+<li>The mean is <span class="math inline">\(\mu_i =
+b&#39;(\theta_i)\)</span>.<br />
+</li>
+<li>The variance is <span class="math inline">\(\mathrm{Var}(Y_i) =
+b&#39;&#39;(\theta_i)\, a(\phi)\)</span>.<br />
+</li>
+<li>Sufficient statistics are low-dimensional (often just the sample
+mean).<br />
+</li>
+<li>Likelihoods are typically smooth and well-behaved.</li>
+</ul>
+<p>These properties make exponential-family models computationally
+stable and theoretically elegant, especially when combined with linear
+predictors.</p>
+</div>
+<div id="canonical-link-functions" class="section level2">
+<h2>1.2 Canonical Link Functions</h2>
+<p>A GLM specifies a relationship between the mean <code>mu</code> and a
+linear predictor <code>eta = X beta</code> through a <strong>link
+function</strong>:</p>
+<p><span class="math display">\[
+g(\mu) = \eta.
+\]</span></p>
+<p>When the link function is chosen so that <span class="math inline">\(\theta = \eta\)</span>, the link is called
+<strong>canonical</strong>.<br />
+Canonical links have several advantages:</p>
+<ul>
+<li>The score equations become linear in the sufficient
+statistics.<br />
+</li>
+<li>Iteratively reweighted least squares (IRLS) takes a particularly
+simple form.<br />
+</li>
+<li>The Fisher scoring and Newton–Raphson updates coincide.<br />
+</li>
+<li>The log-likelihood is often concave in <code>beta</code> (a key
+point for Section 5).</li>
+</ul>
+<p>Examples:</p>
+<ul>
+<li>Gaussian with identity link<br />
+</li>
+<li>Poisson with log link<br />
+</li>
+<li>Binomial with logit link<br />
+</li>
+<li>Gamma with inverse link</li>
+</ul>
+<p>Although noncanonical links are sometimes preferred for
+interpretability or domain-specific reasons, canonical links typically
+yield the most stable estimation behavior.</p>
+</div>
+<div id="why-log-concavity-matters" class="section level2">
+<h2>1.3 Why Log-Concavity Matters</h2>
+<p>A function <code>f</code> is <strong>log-concave</strong> if
+<code>log f</code> is concave.<br />
+Most exponential-family likelihoods with canonical links are log-concave
+in the linear predictor, and often in the coefficients <code>beta</code>
+as well.</p>
+<p>Log-concavity has several important implications:</p>
+<div id="a-existence-of-gradients-and-subgradients" class="section level3">
+<h3>(a) Existence of gradients and subgradients</h3>
+<p>For concave functions, the gradient exists almost everywhere, and
+when it does not, a <strong>subgradient</strong> always exists.<br />
+This is crucial for:</p>
+<ul>
+<li>optimization algorithms<br />
+</li>
+<li>envelope construction<br />
+</li>
+<li>sampling methods based on tangencies<br />
+</li>
+<li>the likelihood-subgradient densities introduced in your JASA
+paper</li>
+</ul>
+<p>Because GLM likelihoods are log-concave in many common cases,
+subgradient-based methods are guaranteed to work.</p>
+</div>
+<div id="b-any-local-maximum-is-a-global-maximum" class="section level3">
+<h3>(b) Any local maximum is a global maximum</h3>
+<p>Concavity implies:</p>
+<ul>
+<li>no spurious local optima<br />
+</li>
+<li>stable convergence of Newton, Fisher scoring, and IRLS<br />
+</li>
+<li>predictable behavior even in high dimensions</li>
+</ul>
+<p>This is one of the reasons GLMs are so widely used: the optimization
+landscape is benign.</p>
+</div>
+<div id="c-validity-of-envelope-construction-methods" class="section level3">
+<h3>(c) Validity of envelope construction methods</h3>
+<p>The envelope construction approach of <span class="citation">(Nygren
+and Nygren 2006)</span> relies on:</p>
+<ul>
+<li>log-concavity of the likelihood<br />
+</li>
+<li>existence of subgradients for the negative log-likelihood<br />
+</li>
+<li>the ability to form tight tangent-based upper bounds</li>
+</ul>
+<p>For GLMs with canonical links, these conditions are naturally
+satisfied.<br />
+This makes GLMs an ideal setting for likelihood-subgradient densities,
+mixture envelopes, and accept–reject sampling strategies.</p>
+</div>
+<div id="d-simplified-bayesian-computation" class="section level3">
+<h3>(d) Simplified Bayesian computation</h3>
+<p>Log-concave likelihoods interact especially well with:</p>
+<ul>
+<li>normal priors<br />
+</li>
+<li>normal-gamma priors<br />
+</li>
+<li>Laplace approximations<br />
+</li>
+<li>adaptive rejection sampling<br />
+</li>
+<li>convex optimization methods</li>
+<li>envelope based accept-reject sampling</li>
+</ul>
+<p>Posterior modes are unique, posterior tails behave predictably, and
+envelope-based samplers remain efficient even in moderate
+dimensions.</p>
+<hr />
+<p>This conceptual foundation sets the stage for the rest of the
+chapter:</p>
+<ul>
+<li>Section 2 contrasts classical and Bayesian GLM workflows.<br />
+</li>
+<li>Section 3 details the families and links supported in
+<code>glmb</code>.<br />
+</li>
+<li>Section 4 shows how to specify families and links in practice.<br />
+</li>
+<li>Section 5 returns to log-concavity and its role in estimation and
+sampling.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="generalized-linear-models-in-practice-formulas-families-and-links" class="section level1">
+<h1>2. Generalized Linear Models in Practice: Formulas, Families, and
+Links</h1>
+<p>Section 1 introduced the exponential‑family structure underlying
+generalized linear models.<br />
+This section explains how that structure is implemented in practice
+through R’s glm function.<br />
+The goal is to show how formulas, families, and link functions work
+together inside glm, and how these components are passed to the
+model‑fitting machinery.</p>
+<p>A GLM in R is defined by three user‑supplied components:</p>
+<ol style="list-style-type: decimal">
+<li>a model formula that defines the linear predictor<br />
+</li>
+<li>a family specification that chooses the exponential‑family
+distribution<br />
+</li>
+<li>a link function that connects the mean of the response to the linear
+predictor</li>
+</ol>
+<p>Together, these components translate the theoretical framework of
+Section 1 into a practical modeling interface.</p>
+<div id="the-formula-interface-and-the-linear-predictor" class="section level2">
+<h2>2.1 The Formula Interface and the Linear Predictor</h2>
+<p>In R, the linear predictor is defined using a formula such as:</p>
+<pre><code>y ~ x1 + x2 + x3</code></pre>
+<p>This corresponds to the linear predictor</p>
+<p><span class="math display">\[
+\eta = X \beta
+\]</span></p>
+<p>where X is the model matrix constructed from the formula.<br />
+The formula interface automatically handles:</p>
+<ul>
+<li>dummy variables for factors<br />
+</li>
+<li>interaction terms (for example, x1:x2 or x1 * x2)<br />
+</li>
+<li>polynomial terms (for example, poly(x, 2))<br />
+</li>
+<li>offsets and weights when supplied</li>
+</ul>
+<p>Thus, the formula defines the systematic component of the GLM.</p>
+</div>
+<div id="family-objects-how-glm-receives-the-distribution-and-link" class="section level2">
+<h2>2.2 Family Objects: How glm Receives the Distribution and Link</h2>
+<p>The family argument in glm is not a character string.<br />
+It is a function call that constructs a family object.<br />
+For example:</p>
+<pre><code>family = poisson(link = &quot;log&quot;)</code></pre>
+<p>When glm is called, this expression is evaluated first.<br />
+The result is a structured object containing:</p>
+<ul>
+<li>the name of the distribution<br />
+</li>
+<li>the link function <span class="math inline">\(g(\mu)\)</span><br />
+</li>
+<li>the inverse link <span class="math inline">\(g^{-1}(\eta)\)</span><br />
+</li>
+<li>the variance function <span class="math inline">\(V(\mu)\)</span><br />
+</li>
+<li>the derivative of the inverse link<br />
+</li>
+<li>deviance and AIC functions<br />
+</li>
+<li>initialization and validation rules</li>
+</ul>
+<p>glm then uses this object to:</p>
+<ul>
+<li>map between <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\eta\)</span><br />
+</li>
+<li>compute IRLS weights<br />
+</li>
+<li>evaluate deviance residuals<br />
+</li>
+<li>check that <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\eta\)</span> lie in valid domains<br />
+</li>
+<li>compute likelihood-based quantities when available</li>
+</ul>
+<div id="specifying-a-nondefault-link" class="section level3">
+<h3>Specifying a non‑default link</h3>
+<p>The link is modified by passing an argument to the family
+constructor.<br />
+Examples include:</p>
+<pre><code>family = binomial(link = &quot;probit&quot;)
+family = poisson(link = &quot;identity&quot;)
+family = Gamma(link = &quot;log&quot;)</code></pre>
+<p>In all cases, glm receives a family object with the appropriate link
+embedded inside it.</p>
+</div>
+<div id="binomial-response-formats" class="section level3">
+<h3>Binomial response formats</h3>
+<p>The binomial and quasibinomial families accept responses in three
+forms:</p>
+<ul>
+<li>a factor (success vs failure)<br />
+</li>
+<li>a numeric vector of proportions with weights<br />
+</li>
+<li>a two‑column matrix of successes and failures</li>
+</ul>
+<p>This flexibility is unique to the binomial family and reflects its
+exponential‑family structure.</p>
+</div>
+<div id="quasifamilies" class="section level3">
+<h3>Quasi‑families</h3>
+<p>The quasi, quasibinomial, and quasipoisson families:</p>
+<ul>
+<li>do not correspond to true exponential‑family likelihoods<br />
+</li>
+<li>allow user‑specified variance functions<br />
+</li>
+<li>allow over‑dispersion<br />
+</li>
+<li>still use the same link‑function machinery</li>
+</ul>
+<p>They behave like GLMs but without a fixed likelihood.</p>
+</div>
+</div>
+<div id="link-functions-connecting-means-to-linear-predictors" class="section level2">
+<h2>2.3 Link Functions: Connecting Means to Linear Predictors</h2>
+<p>The link function <span class="math inline">\(g(\mu) = \eta\)</span>
+determines how the mean of the response relates to the linear
+predictor.<br />
+Each family has a canonical link, which ensures that:</p>
+<ul>
+<li>the canonical parameter equals the linear predictor (<span class="math inline">\(\theta = \eta\)</span>)<br />
+</li>
+<li>the log-likelihood is often concave in <span class="math inline">\(\beta\)</span><br />
+</li>
+<li>IRLS has a simple form<br />
+</li>
+<li>the score equations are linear in the sufficient statistics</li>
+</ul>
+<p>Examples of canonical links include:</p>
+<ul>
+<li>Gaussian: identity<br />
+</li>
+<li>Binomial: logit<br />
+</li>
+<li>Poisson: log<br />
+</li>
+<li>Gamma: inverse<br />
+</li>
+<li>Inverse Gaussian: <span class="math inline">\(1 /
+\mu^{2}\)</span></li>
+</ul>
+<p>Noncanonical links (for example, probit, cloglog, identity for
+binomial) are also available.<br />
+They use the same family‑object machinery but may lose some of the
+computational advantages of canonical links.</p>
+</div>
+<div id="how-glm-combines-formulas-families-and-links" class="section level2">
+<h2>2.4 How glm Combines Formulas, Families, and Links</h2>
+<p>The glm function brings together the components above in a way that
+mirrors the theory of Section 1:</p>
+<ul>
+<li>The formula defines the linear predictor <span class="math inline">\(\eta = X \beta\)</span>.<br />
+</li>
+<li>The family object provides the variance function <span class="math inline">\(V(\mu)\)</span> and the exponential-family
+functions <span class="math inline">\(b(\theta)\)</span>, <span class="math inline">\(b&#39;(\theta)\)</span>, and <span class="math inline">\(b&#39;&#39;(\theta)\)</span>.<br />
+</li>
+<li>The link provides <span class="math inline">\(g(\mu)\)</span>, <span class="math inline">\(g^{-1}(\eta)\)</span>, and the derivative of the
+inverse link.<br />
+</li>
+<li>The IRLS algorithm solves the likelihood equations using the
+curvature implied by <span class="math inline">\(V(\mu)\)</span>.<br />
+</li>
+<li>With canonical links, the log-likelihood is typically log-concave,
+ensuring a unique maximum and stable convergence.</li>
+</ul>
+<div id="a-critical-example-how-glm-receives-formula-family-and-link" class="section level3">
+<h3>A critical example: how glm receives formula, family, and link</h3>
+<p>A single line of code captures the entire GLM specification in R:</p>
+<pre><code>glm(counts ~ outcome + treatment,
+    family = poisson(link = &quot;log&quot;))</code></pre>
+<p>This line shows all three components working together:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Formula</strong><br />
+<code>counts ~ outcome + treatment</code><br />
+tells glm how to build the model matrix X, and therefore the linear
+predictor <span class="math inline">\(\eta = X \beta\)</span>.</p></li>
+<li><p><strong>Family</strong><br />
+<code>poisson(...)</code><br />
+constructs a family object describing the Poisson distribution and its
+variance function <span class="math inline">\(V(\mu) =
+\mu\)</span>.</p></li>
+<li><p><strong>Link</strong><br />
+<code>link = &quot;log&quot;</code><br />
+is passed inside the family call, telling glm to use the log link<br />
+<span class="math inline">\(g(\mu) = \log(\mu)\)</span>,<br />
+with inverse<br />
+<span class="math inline">\(\mu = \exp(\eta)\)</span>.</p></li>
+</ol>
+<p>glm evaluates the family call first, constructs the family object,
+builds the model matrix from the formula, and then fits the model using
+IRLS under the Poisson log‑link specification.</p>
+<p>This single line illustrates exactly how R combines the formula, the
+family, and the link to define and fit a GLM.</p>
+</div>
+</div>
+<div id="transition-to-the-complete-familylink-reference" class="section level2">
+<h2>2.5 Transition to the Complete Family–Link Reference</h2>
+<p>The concepts above describe how GLMs are specified and fitted in
+practice.<br />
+Section 3 now provides a complete reference of all families and link
+functions implemented in glm, expressed in the exponential‑family form
+introduced in Section 1.</p>
+</div>
+</div>
+<div id="families-and-link-functions-in-glm" class="section level1">
+<h1>3. Families and Link Functions in <code>glm()</code></h1>
+<p>Section 2 explained how formulas, families, and link functions are
+passed to <code>glm()</code> and how they define the structure of a
+generalized linear model.<br />
+This section provides a concise overview of the families and link
+functions available in base R, and explains how they relate to the
+exponential‑family framework introduced in Section 1.</p>
+<p>A complete, fully expanded reference of all family–link
+combinations—including canonical parameters, cumulant functions, and
+variance functions—is provided in <strong>Appendix A</strong>.</p>
+<div id="families-and-link-functions-in-base-r" class="section level2">
+<h2>3.1 Families and Link Functions in Base R</h2>
+<p>The table below summarizes the families available in base R’s
+<code>glm()</code> function and the link functions supported for each
+family. Canonical links are marked with “(canonical)”.</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="29%" />
+<col width="56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Description</th>
+<th>Supported Link Functions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>gaussian()</code></td>
+<td>Continuous outcomes with constant variance</td>
+<td><code>identity</code> (canonical), <code>log</code>,
+<code>inverse</code></td>
+</tr>
+<tr class="even">
+<td><code>binomial()</code></td>
+<td>Binary data or proportions</td>
+<td><code>logit</code> (canonical), <code>probit</code>,
+<code>cauchit</code>, <code>cloglog</code>, <code>identity</code></td>
+</tr>
+<tr class="odd">
+<td><code>poisson()</code></td>
+<td>Count data</td>
+<td><code>log</code> (canonical), <code>identity</code>,
+<code>sqrt</code></td>
+</tr>
+<tr class="even">
+<td><code>Gamma()</code></td>
+<td>Positive continuous, skewed</td>
+<td><code>inverse</code> (canonical), <code>identity</code>,
+<code>log</code></td>
+</tr>
+<tr class="odd">
+<td><code>inverse.gaussian()</code></td>
+<td>Positive continuous with heavy tails</td>
+<td><code>$1 / \mu^{2}$</code> (canonical), <code>identity</code>,
+<code>log</code>, <code>inverse</code></td>
+</tr>
+<tr class="even">
+<td><code>quasi()</code></td>
+<td>User-specified mean-variance relationship</td>
+<td>Depends on user specification</td>
+</tr>
+<tr class="odd">
+<td><code>quasibinomial()</code></td>
+<td>Overdispersed binomial</td>
+<td>Same as <code>binomial()</code></td>
+</tr>
+<tr class="even">
+<td><code>quasipoisson()</code></td>
+<td>Overdispersed Poisson</td>
+<td>Same as <code>poisson()</code></td>
+</tr>
+</tbody>
+</table>
+<div id="notes" class="section level3">
+<h3>Notes</h3>
+<ul>
+<li>Canonical links ensure that the canonical parameter <span class="math inline">\(\theta\)</span> equals the linear predictor <span class="math inline">\(\eta\)</span>, which often yields concave
+log-likelihoods and stable IRLS updates.<br />
+</li>
+<li>Quasi-families (<code>quasi</code>, <code>quasibinomial</code>,
+<code>quasipoisson</code>) do not correspond to true exponential-family
+distributions but retain the GLM mean-variance structure.<br />
+</li>
+<li>All families listed above integrate cleanly with the formula
+interface described in Section 2.</li>
+</ul>
+</div>
+</div>
+<div id="how-families-and-links-fit-the-exponentialfamily-structure" class="section level2">
+<h2>3.2 How Families and Links Fit the Exponential‑Family Structure</h2>
+<p>Each family in <code>glm()</code> corresponds to a specific
+exponential‑family distribution of the form</p>
+<p><span class="math display">\[
+f(y \mid \theta, \phi)
+= \exp\left\{
+\frac{y\theta - b(\theta)}{a(\phi)} + c(y,\phi)
+\right\}.
+\]</span></p>
+<p>The choice of <strong>family</strong> determines:</p>
+<ul>
+<li>the canonical parameter <span class="math inline">\(\theta\)</span><br />
+</li>
+<li>the cumulant function <span class="math inline">\(b(\theta)\)</span><br />
+</li>
+<li>the variance function <span class="math inline">\(V(\mu) =
+b&#39;&#39;(\theta) a(\phi)\)</span></li>
+</ul>
+<p>The choice of <strong>link function</strong> determines:</p>
+<ul>
+<li>how the mean <span class="math inline">\(\mu\)</span> relates to the
+linear predictor <span class="math inline">\(\eta\)</span><br />
+</li>
+<li>whether the canonical parameter equals the linear predictor
+(canonical links)<br />
+</li>
+<li>the curvature of the log‑likelihood and the behavior of IRLS</li>
+</ul>
+<p>Canonical links (e.g., logit for binomial, log for Poisson) often
+yield:</p>
+<ul>
+<li>concave log‑likelihoods<br />
+</li>
+<li>simpler score equations<br />
+</li>
+<li>stable IRLS updates</li>
+</ul>
+<p>Noncanonical links remain valid but may alter curvature and
+convergence properties.</p>
+</div>
+<div id="where-to-find-the-full-mathematical-forms" class="section level2">
+<h2>3.3 Where to Find the Full Mathematical Forms</h2>
+<p>The full exponential‑family expansions for <strong>every</strong>
+family–link combination—including:</p>
+<ul>
+<li><span class="math inline">\(g(\mu) = \eta\)</span><br />
+</li>
+<li><span class="math inline">\(g^{-1}(\eta)\)</span><br />
+</li>
+<li>canonical parameter <span class="math inline">\(\theta\)</span><br />
+</li>
+<li>cumulant function <span class="math inline">\(b(\theta)\)</span><br />
+</li>
+<li>variance function <span class="math inline">\(V(\mu)\)</span></li>
+</ul>
+<p>are provided in <strong>Appendix A</strong>.</p>
+<p>This keeps the main text focused on concepts while still giving
+advanced users access to the complete mathematical reference.</p>
+</div>
+<div id="why-this-matters-for-bayesian-glms" class="section level2">
+<h2>3.4 Why This Matters for Bayesian GLMs</h2>
+<p>The Bayesian extensions used in <code>glmb()</code> and
+<code>Prior_Setup()</code> rely on the same structure:</p>
+<ul>
+<li>The likelihood is exponential‑family, often log‑concave.<br />
+</li>
+<li>The linear predictor is defined through the same formula
+interface.<br />
+</li>
+<li>Canonical links ensure that gradients and subgradients exist,
+enabling envelope construction and efficient sampling.<br />
+</li>
+<li>Normal and normal‑gamma priors interact cleanly with the likelihood
+because both live in a convex, well‑behaved parameter space.</li>
+</ul>
+<p>In short, the classical GLM framework provides the mathematical and
+computational foundation on which the Bayesian methods in later chapters
+are built.</p>
+</div>
+</div>
+<div id="bayesian-glms-with-glmb" class="section level1">
+<h1>4. Bayesian GLMs with <code>glmb()</code></h1>
+<p>The function <code>glmb()</code> is a Bayesian extension of the
+classical <code>glm()</code> function.<br />
+Its interface mirrors <code>glm()</code> as closely as possible: users
+specify a model using a formula, choose a likelihood family, and then
+supply a prior distribution through the <code>pfamily</code>
+argument.<br />
+This design preserves the familiar GLM workflow while enabling full
+Bayesian inference.</p>
+<div id="relationship-to-classical-glms" class="section level2">
+<h2>4.1 Relationship to Classical GLMs</h2>
+<p>The setup for <code>glmb()</code> follows the same structure as
+<code>glm()</code>:</p>
+<ul>
+<li>the <strong>formula</strong> defines the linear predictor<br />
+</li>
+<li>the <strong>family</strong> defines the likelihood and link
+function<br />
+</li>
+<li>the <strong>model frame</strong>, <strong>model matrix</strong>,
+<strong>offsets</strong>, and <strong>weights</strong> are constructed
+identically<br />
+</li>
+<li>the returned object inherits from <code>&quot;glm&quot;</code> and
+<code>&quot;lm&quot;</code></li>
+</ul>
+<p>This compatibility ensures that standard
+generics—<code>summary()</code>, <code>predict()</code>,
+<code>residuals()</code>, <code>extractAIC()</code>, and others—work
+naturally with <code>glmb</code> objects.</p>
+</div>
+<div id="the-pfamily-argument-specifying-priors" class="section level2">
+<h2>4.2 The <code>pfamily</code> Argument: Specifying Priors</h2>
+<p>The key addition in <code>glmb()</code> is the required
+<code>pfamily</code> argument, which specifies the prior distribution
+for the regression coefficients.<br />
+The <code>pfamily</code> system parallels how <code>glm()</code> uses
+<code>family</code>:</p>
+<ul>
+<li><code>family</code> → likelihood and link<br />
+</li>
+<li><code>pfamily</code> → prior distribution and hyperparameters</li>
+</ul>
+<p>The default prior is a multivariate normal:</p>
+<pre><code>pfamily = dNormal(mu, Sigma)</code></pre>
+<p>The helper function <code>Prior_Setup()</code> constructs sensible
+defaults for <code>mu</code> and <code>Sigma</code>, using a
+reparameterized form of Zellner’s g-prior.<br />
+Users may also fully customize the prior.</p>
+<p>Supported prior families include:</p>
+<ul>
+<li><strong>dNormal</strong> (all likelihood families)<br />
+</li>
+<li><strong>dNormalGamma</strong> (Gaussian family)<br />
+</li>
+<li><strong>dIndependent_Normal_Gamma</strong> (Gaussian family)</li>
+</ul>
+</div>
+<div id="supported-likelihood-families" class="section level2">
+<h2>4.3 Supported Likelihood Families</h2>
+<p><code>glmb()</code> currently supports:</p>
+<ul>
+<li><strong>Gaussian</strong> (identity link)<br />
+</li>
+<li><strong>Poisson</strong> and <strong>quasipoisson</strong> (log
+link)<br />
+</li>
+<li><strong>Gamma</strong> (log link)<br />
+</li>
+<li><strong>Binomial</strong> and <strong>quasibinomial</strong> (logit,
+probit, cloglog links)</li>
+</ul>
+<p>These match the most commonly used GLM families.</p>
+</div>
+<div id="a-direct-illustration-calling-glmb-with-formulas-families-and-priors" class="section level2">
+<h2>4.4 A Direct Illustration: Calling <code>glmb()</code> with
+Formulas, Families, and Priors</h2>
+<p>Just as a classical GLM is defined by a formula and a likelihood
+family:</p>
+<pre><code>glm(counts ~ outcome + treatment,
+    family = poisson(link = &quot;log&quot;))</code></pre>
+<p>a Bayesian GLM adds one additional component: the prior family.</p>
+<p>A typical workflow uses <code>Prior_Setup()</code> to construct prior
+parameters:</p>
+<pre><code>ps &lt;- Prior_Setup(counts ~ outcome + treatment,
+                  family = poisson(link = &quot;log&quot;))
+mu &lt;- ps$mu
+V  &lt;- ps$Sigma</code></pre>
+<p>The corresponding Bayesian call mirrors the classical one:</p>
+<pre><code>glmb.D93 &lt;- glmb(counts ~ outcome + treatment,
+                 family  = poisson(link = &quot;log&quot;),
+                 pfamily = dNormal(mu = mu, Sigma = V))</code></pre>
+<p>This single line shows how <code>glmb()</code> receives:</p>
+<ul>
+<li>the <strong>formula</strong> (to build the model matrix),<br />
+</li>
+<li>the <strong>family</strong> (to define the likelihood and
+link),<br />
+</li>
+<li>the <strong>pfamily</strong> (to define the prior
+distribution).</li>
+</ul>
+<p>The result is a set of independent posterior draws for coefficients,
+fitted values, linear predictors, and deviance, along with posterior
+summaries such as the posterior mode and DIC.</p>
+</div>
+<div id="posterior-sampling" class="section level2">
+<h2>4.5 Posterior Sampling</h2>
+<p>For any supported combination of likelihood family, link, and prior
+family, <code>glmb()</code> generates <strong>independent draws</strong>
+from the posterior distribution—no MCMC chains are required.</p>
+<ul>
+<li>For the <strong>Gaussian</strong> family with normal or normal‑gamma
+priors, draws come from closed‑form conjugate posteriors.<br />
+</li>
+<li>For all other cases, <code>glmb()</code> uses an accept–reject
+sampler based on likelihood‑subgradient envelopes.</li>
+</ul>
+<p>By default:</p>
+<ul>
+<li><code>n = 1000</code> posterior draws are generated<br />
+</li>
+<li>parallel CPU simulation is used<br />
+</li>
+<li>OpenCL acceleration can be enabled for envelope construction</li>
+</ul>
+</div>
+<div id="returned-object" class="section level2">
+<h2>4.6 Returned Object</h2>
+<p>A <code>glmb</code> object contains:</p>
+<ul>
+<li>posterior draws of coefficients, fitted values, linear predictors,
+and deviance<br />
+</li>
+<li>posterior means and posterior mode<br />
+</li>
+<li>DIC components (<code>pD</code>, <code>Dbar</code>,
+<code>Dthetabar</code>, <code>DIC</code>)<br />
+</li>
+<li>the underlying <code>&quot;glm&quot;</code> object<br />
+</li>
+<li>model frame, design matrix, response, and prior specification<br />
+</li>
+<li>envelope diagnostics (<code>iters</code>)</li>
+</ul>
+<p>Because <code>glmb</code> inherits from <code>&quot;glm&quot;</code> and
+<code>&quot;lm&quot;</code>, most classical methods apply directly.</p>
+</div>
+<div id="related-functions" class="section level2">
+<h2>4.7 Related Functions</h2>
+<p>The package also includes:</p>
+<ul>
+<li><strong><code>lmb()</code></strong> — Bayesian version of
+<code>lm()</code> for Gaussian models<br />
+</li>
+<li><strong><code>rglmb()</code> and <code>rlmb()</code></strong> —
+minimal interfaces used internally by <code>glmb()</code></li>
+</ul>
+<p>These functions share the same computational engine but expose fewer
+features.</p>
+</div>
+</div>
+<div id="logconcavity-envelopes-and-posterior-computation" class="section level1">
+<h1>5. Log‑Concavity, Envelopes, and Posterior Computation</h1>
+<p>The Bayesian methods implemented in <code>glmb()</code> rely on the
+exponential‑family structure described in Sections 1–3.<br />
+This section explains, at a high level, why the posterior distribution
+is well‑behaved for generalized linear models and how
+<code>glmb()</code> exploits this structure to generate independent
+posterior draws.</p>
+<div id="why-logconcavity-matters" class="section level2">
+<h2>5.1 Why Log‑Concavity Matters</h2>
+<p>For the likelihood families supported by <code>glmb()</code>, the
+log‑likelihood is <strong>concave</strong> in the canonical
+parameter.<br />
+When combined with a log‑concave prior (such as the multivariate normal
+used by default), the posterior density is also log‑concave.<br />
+This ensures:</p>
+<ul>
+<li>a <strong>unique posterior mode</strong>,<br />
+</li>
+<li>stable numerical optimization,<br />
+</li>
+<li>well‑behaved curvature around the mode,<br />
+</li>
+<li>efficient envelope construction for accept–reject sampling.</li>
+</ul>
+<p>Canonical links (e.g., logit for binomial, log for Poisson) preserve
+concavity and are therefore especially convenient.</p>
+</div>
+<div id="envelope-construction" class="section level2">
+<h2>5.2 Envelope Construction</h2>
+<p>For non‑Gaussian models, <code>glmb()</code> uses an accept–reject
+sampler based on <strong>likelihood‑subgradient
+envelopes</strong>.<br />
+The idea is to build a tight, convex upper bound on the negative
+log‑likelihood using tangent points.<br />
+This envelope:</p>
+<ul>
+<li>bounds the log‑likelihood everywhere,<br />
+</li>
+<li>is easy to sample from,<br />
+</li>
+<li>becomes tighter as more tangent points are added.</li>
+</ul>
+<p>The <code>Gridtype</code> and <code>n_envopt</code> arguments control
+how many tangent points are used, trading off envelope tightness against
+construction cost.<br />
+The component <code>iters</code> in the returned object reports how many
+candidate draws were generated before acceptance.</p>
+</div>
+<div id="posterior-computation-strategy" class="section level2">
+<h2>5.3 Posterior Computation Strategy</h2>
+<p>Posterior sampling in <code>glmb()</code> proceeds in two stages:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Mode finding</strong><br />
+A classical GLM fit is used as the starting point, and the posterior
+mode is obtained by optimizing the sum of the log‑likelihood and
+log‑prior.</p></li>
+<li><p><strong>Independent sampling</strong></p>
+<ul>
+<li>For Gaussian models with conjugate priors, draws come from
+closed‑form posterior distributions.<br />
+</li>
+<li>For all other supported families, the envelope‑based accept–reject
+sampler generates <strong>independent</strong> posterior draws.</li>
+</ul></li>
+</ol>
+<p>Because the sampler produces independent draws, there are no chains,
+no burn‑in, and no convergence diagnostics.<br />
+This makes posterior summaries straightforward and computationally
+efficient.</p>
+</div>
+<div id="summary" class="section level2">
+<h2>5.4 Summary</h2>
+<p>The computational methods in <code>glmb()</code> leverage the
+structure of exponential‑family likelihoods and log‑concave priors to
+produce fast, reliable Bayesian inference for generalized linear
+models.<br />
+These methods ensure that the Bayesian extension behaves predictably
+across all supported families and links, while maintaining a workflow
+that closely parallels the classical <code>glm()</code> function.</p>
+</div>
+</div>
+<div id="appendix-a.-full-exponentialfamily-forms-for-all-glm-families-and-links" class="section level1">
+<h1>Appendix A. Full Exponential‑Family Forms for All <code>glm()</code>
+Families and Links</h1>
+<p>This appendix provides a complete reference for the
+exponential‑family forms associated with every family–link combination
+implemented in base R’s <code>glm()</code> function.<br />
+These tables expand the conceptual overview in Section 3 by listing:</p>
+<ul>
+<li>the family<br />
+</li>
+<li>the link function<br />
+</li>
+<li>the mean–link relationship <span class="math inline">\(g(\mu) =
+\eta\)</span><br />
+</li>
+<li>the inverse link <span class="math inline">\(\mu =
+g^{-1}(\eta)\)</span><br />
+</li>
+<li>the canonical parameter <span class="math inline">\(\theta\)</span><br />
+</li>
+<li>the cumulant function <span class="math inline">\(b(\theta)\)</span><br />
+</li>
+<li>the variance function <span class="math inline">\(V(\mu)\)</span></li>
+</ul>
+<p>All expressions follow the exponential‑family form introduced in
+Section 1:</p>
+<p><span class="math display">\[
+f(y \mid \theta, \phi)
+= \exp\left\{
+\frac{y\theta - b(\theta)}{a(\phi)} + c(y,\phi)
+\right\}.
+\]</span></p>
+<hr />
+<div id="appendix-a.-exponential-family-and-link-reference-tables" class="section level2">
+<h2>Appendix A. Exponential-family and link reference tables</h2>
+</div>
+<div id="a.1-gaussian-family" class="section level2">
+<h2>A.1 Gaussian Family</h2>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="6%" />
+<col width="18%" />
+<col width="23%" />
+<col width="13%" />
+<col width="17%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Link</th>
+<th><span class="math inline">\(g(\mu)=\eta\)</span></th>
+<th><span class="math inline">\(\mu=g^{-1}(\eta)\)</span></th>
+<th><span class="math inline">\(\theta\)</span></th>
+<th><span class="math inline">\(b(\theta)\)</span></th>
+<th><span class="math inline">\(V(\mu)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gaussian</td>
+<td>identity (canonical)</td>
+<td><span class="math inline">\(\eta=\mu\)</span></td>
+<td><span class="math inline">\(\mu=\eta\)</span></td>
+<td><span class="math inline">\(\theta=\mu\)</span></td>
+<td><span class="math inline">\(\theta^2/2\)</span></td>
+<td><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="even">
+<td>Gaussian</td>
+<td>log</td>
+<td><span class="math inline">\(\eta=\log(\mu)\)</span></td>
+<td><span class="math inline">\(\mu=e^\eta\)</span></td>
+<td><span class="math inline">\(\theta=\mu\)</span></td>
+<td><span class="math inline">\(\theta^2/2\)</span></td>
+<td><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="odd">
+<td>Gaussian</td>
+<td>inverse</td>
+<td><span class="math inline">\(\eta=1/\mu\)</span></td>
+<td><span class="math inline">\(\mu=1/\eta\)</span></td>
+<td><span class="math inline">\(\theta=\mu\)</span></td>
+<td><span class="math inline">\(\theta^2/2\)</span></td>
+<td><span class="math inline">\(1\)</span></td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="a.2-binomial-family" class="section level2">
+<h2>A.2 Binomial Family</h2>
+<p>Exponential‑family core:</p>
+<p><span class="math display">\[
+b(\theta)=\log(1+e^\theta), \quad
+\mu=\frac{e^\theta}{1+e^\theta}, \quad
+V(\mu)=\mu(1-\mu).
+\]</span></p>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="6%" />
+<col width="18%" />
+<col width="23%" />
+<col width="13%" />
+<col width="17%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Link</th>
+<th><span class="math inline">\(g(\mu)=\eta\)</span></th>
+<th><span class="math inline">\(\mu=g^{-1}(\eta)\)</span></th>
+<th><span class="math inline">\(\theta\)</span></th>
+<th><span class="math inline">\(b(\theta)\)</span></th>
+<th><span class="math inline">\(V(\mu)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Binomial</td>
+<td>logit (canonical)</td>
+<td><span class="math inline">\(\eta=\log(\mu/(1-\mu))\)</span></td>
+<td><span class="math inline">\(\mu=\frac{e^\eta}{1+e^\eta}\)</span></td>
+<td><span class="math inline">\(\theta=\eta\)</span></td>
+<td><span class="math inline">\(\log(1+e^\theta)\)</span></td>
+<td><span class="math inline">\(\mu(1-\mu)\)</span></td>
+</tr>
+<tr class="even">
+<td>Binomial</td>
+<td>probit</td>
+<td><span class="math inline">\(\eta=\Phi^{-1}(\mu)\)</span></td>
+<td><span class="math inline">\(\mu=\Phi(\eta)\)</span></td>
+<td><span class="math inline">\(\theta=\log(\mu/(1-\mu))\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr class="odd">
+<td>Binomial</td>
+<td>cloglog</td>
+<td><span class="math inline">\(\eta=\log[-\log(1-\mu)]\)</span></td>
+<td><span class="math inline">\(\mu=1-e^{-e^\eta}\)</span></td>
+<td><span class="math inline">\(\theta=\log(\mu/(1-\mu))\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr class="even">
+<td>Binomial</td>
+<td>cauchit</td>
+<td><span class="math inline">\(\eta=\tan\{\pi(\mu-1/2)\}\)</span></td>
+<td><span class="math inline">\(\mu=\frac{1}{2}+\frac{1}{\pi}\arctan(\eta)\)</span></td>
+<td><span class="math inline">\(\theta=\log(\mu/(1-\mu))\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr class="odd">
+<td>Binomial</td>
+<td>identity</td>
+<td><span class="math inline">\(\eta=\mu\)</span></td>
+<td><span class="math inline">\(\mu=\eta\)</span></td>
+<td><span class="math inline">\(\theta=\log(\mu/(1-\mu))\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="a.3-poisson-family" class="section level2">
+<h2>A.3 Poisson Family</h2>
+<p><span class="math display">\[
+b(\theta)=e^\theta, \quad
+\mu=e^\theta, \quad
+V(\mu)=\mu.
+\]</span></p>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="6%" />
+<col width="18%" />
+<col width="23%" />
+<col width="13%" />
+<col width="17%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Link</th>
+<th><span class="math inline">\(g(\mu)=\eta\)</span></th>
+<th><span class="math inline">\(\mu=g^{-1}(\eta)\)</span></th>
+<th><span class="math inline">\(\theta\)</span></th>
+<th><span class="math inline">\(b(\theta)\)</span></th>
+<th><span class="math inline">\(V(\mu)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Poisson</td>
+<td>log (canonical)</td>
+<td><span class="math inline">\(\eta=\log(\mu)\)</span></td>
+<td><span class="math inline">\(\mu=e^\eta\)</span></td>
+<td><span class="math inline">\(\theta=\eta\)</span></td>
+<td><span class="math inline">\(e^\theta\)</span></td>
+<td><span class="math inline">\(\mu\)</span></td>
+</tr>
+<tr class="even">
+<td>Poisson</td>
+<td>identity</td>
+<td><span class="math inline">\(\eta=\mu\)</span></td>
+<td><span class="math inline">\(\mu=\eta\)</span></td>
+<td><span class="math inline">\(\theta=\log(\mu)\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr class="odd">
+<td>Poisson</td>
+<td>sqrt</td>
+<td><span class="math inline">\(\eta=\sqrt{\mu}\)</span></td>
+<td><span class="math inline">\(\mu=\eta^2\)</span></td>
+<td><span class="math inline">\(\theta=\log(\mu)\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="a.4-gamma-family" class="section level2">
+<h2>A.4 Gamma Family</h2>
+<p><span class="math display">\[
+b(\theta)=-\log(-\theta), \quad
+\mu=-1/\theta, \quad
+V(\mu)=\mu^2.
+\]</span></p>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="6%" />
+<col width="18%" />
+<col width="23%" />
+<col width="13%" />
+<col width="17%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Link</th>
+<th><span class="math inline">\(g(\mu)=\eta\)</span></th>
+<th><span class="math inline">\(\mu=g^{-1}(\eta)\)</span></th>
+<th><span class="math inline">\(\theta\)</span></th>
+<th><span class="math inline">\(b(\theta)\)</span></th>
+<th><span class="math inline">\(V(\mu)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gamma</td>
+<td>inverse (canonical)</td>
+<td><span class="math inline">\(\eta=1/\mu\)</span></td>
+<td><span class="math inline">\(\mu=1/\eta\)</span></td>
+<td><span class="math inline">\(\theta=-1/\mu\)</span></td>
+<td><span class="math inline">\(-\log(-\theta)\)</span></td>
+<td><span class="math inline">\(\mu^2\)</span></td>
+</tr>
+<tr class="even">
+<td>Gamma</td>
+<td>identity</td>
+<td><span class="math inline">\(\eta=\mu\)</span></td>
+<td><span class="math inline">\(\mu=\eta\)</span></td>
+<td><span class="math inline">\(\theta=-1/\mu\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr class="odd">
+<td>Gamma</td>
+<td>log</td>
+<td><span class="math inline">\(\eta=\log(\mu)\)</span></td>
+<td><span class="math inline">\(\mu=e^\eta\)</span></td>
+<td><span class="math inline">\(\theta=-1/\mu\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="a.5-inverse-gaussian-family" class="section level2">
+<h2>A.5 Inverse Gaussian Family</h2>
+<p><span class="math display">\[
+b(\theta)=\sqrt{-2\theta}, \quad
+\mu=\frac{1}{\sqrt{-2\theta}}, \quad
+V(\mu)=\mu^3.
+\]</span></p>
+<table>
+<colgroup>
+<col width="7%" />
+<col width="6%" />
+<col width="18%" />
+<col width="23%" />
+<col width="13%" />
+<col width="17%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Link</th>
+<th><span class="math inline">\(g(\mu)=\eta\)</span></th>
+<th><span class="math inline">\(\mu=g^{-1}(\eta)\)</span></th>
+<th><span class="math inline">\(\theta\)</span></th>
+<th><span class="math inline">\(b(\theta)\)</span></th>
+<th><span class="math inline">\(V(\mu)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Inverse Gaussian</td>
+<td><span class="math inline">\(1/\mu^2\)</span> (canonical)</td>
+<td><span class="math inline">\(\eta=1/\mu^2\)</span></td>
+<td><span class="math inline">\(\mu=1/\sqrt{\eta}\)</span></td>
+<td><span class="math inline">\(\theta=-1/(2\mu^2)\)</span></td>
+<td><span class="math inline">\(\sqrt{-2\theta}\)</span></td>
+<td><span class="math inline">\(\mu^3\)</span></td>
+</tr>
+<tr class="even">
+<td>Inverse Gaussian</td>
+<td>identity</td>
+<td><span class="math inline">\(\eta=\mu\)</span></td>
+<td><span class="math inline">\(\mu=\eta\)</span></td>
+<td><span class="math inline">\(\theta=-1/(2\mu^2)\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr class="odd">
+<td>Inverse Gaussian</td>
+<td>log</td>
+<td><span class="math inline">\(\eta=\log(\mu)\)</span></td>
+<td><span class="math inline">\(\mu=e^\eta\)</span></td>
+<td><span class="math inline">\(\theta=-1/(2\mu^2)\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+<tr class="even">
+<td>Inverse Gaussian</td>
+<td>inverse</td>
+<td><span class="math inline">\(\eta=1/\mu\)</span></td>
+<td><span class="math inline">\(\mu=1/\eta\)</span></td>
+<td><span class="math inline">\(\theta=-1/(2\mu^2)\)</span></td>
+<td>same</td>
+<td>same</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="a.6-quasi-families" class="section level2">
+<h2>A.6 Quasi Families</h2>
+<p>These are not true exponential families, but <code>glm()</code>
+allows them.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Link Functions</th>
+<th>Variance Function</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>quasi</td>
+<td>any link</td>
+<td>user‑specified</td>
+</tr>
+<tr class="even">
+<td>quasibinomial</td>
+<td>same as binomial</td>
+<td><span class="math inline">\(\mu(1-\mu)\)</span> up to scale</td>
+</tr>
+<tr class="odd">
+<td>quasipoisson</td>
+<td>same as poisson</td>
+<td><span class="math inline">\(\mu\)</span> up to scale</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="bibliography" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Hastie1992" class="csl-entry">
+Hastie, T. J., and D. Pregibon. 1992. <span>“<span>Generalized Linear
+Models</span>.”</span> In <em><span class="nocase">Statistical Models in
+S</span></em>, edited by J. M. Chambers and T. J. Hastie. Belmont, CA:
+Wadsworth &amp; Brooks/Cole.
+</div>
+<div id="ref-McCullagh1989" class="csl-entry">
+McCullagh, P., and J. A. Nelder. 1989. <em><span>Generalized Linear
+Models</span></em>. London: Chapman; Hall.
+</div>
+<div id="ref-NelderWedderburn1972" class="csl-entry">
+Nelder, J. A., and R. W. M. Wedderburn. 1972. <span>“Generalized Linear
+Models.”</span> <em>Journal of the Royal Statistical Society. Series A
+(General)</em> 135 (3): 370–84. <a href="https://doi.org/10.2307/2344614">https://doi.org/10.2307/2344614</a>.
+</div>
+<div id="ref-Nygren2006" class="csl-entry">
+Nygren, K. N., and L. M. Nygren. 2006. <span>“<span>Likelihood
+Subgradient Densities</span>.”</span> <em>Journal of the American
+Statistical Association</em> 101 (475): 1144–56. <a href="https://doi.org/10.1198/016214506000000357">https://doi.org/10.1198/016214506000000357</a>.
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
